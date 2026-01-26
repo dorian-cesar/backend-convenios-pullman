@@ -1,17 +1,19 @@
-const AppError = require('../exceptions/AppError');
+const { ValidationError, UniqueConstraintError } = require('sequelize');
+const ValidationAppError = require('../exceptions/ValidationError');
 
 module.exports = (err, req, res, next) => {
-  if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
-      error: err.code,
-      message: err.message
-    });
+
+  if (err instanceof ValidationError || err instanceof UniqueConstraintError) {
+    return next(
+      new ValidationAppError(
+        'Error de validación',
+        err.errors.map(e => ({
+          campo: e.path,
+          mensaje: e.message
+        }))
+      )
+    );
   }
 
-  console.error(err); // log real
-
-  res.status(500).json({
-    error: 'INTERNAL_ERROR',
-    message: 'Error interno del servidor'
-  });
+  next(err);
 };
