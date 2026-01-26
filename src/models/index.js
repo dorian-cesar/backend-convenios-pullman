@@ -1,48 +1,22 @@
+const Sequelize = require('sequelize');
 const sequelize = require('../config/sequelize');
 
-const Usuario = require('./usuario.model');
-const Rol = require('./rol.model');
-const Pasajero = require('./pasajero.model');
-const Empresa = require('./empresa.model');
-const Convenio = require('./convenio.model');
-const CodigoDescuento = require('./codigoDescuento.model');
-const Descuento = require('./descuento.model');
-const Evento = require('./evento.model');
+const Usuario = require('./usuario.model')(sequelize, Sequelize.DataTypes);
+const Rol = require('./rol.model')(sequelize, Sequelize.DataTypes);
 
-/* RELACIONES */
+// RELACIONES
+Rol.hasMany(Usuario, {
+  foreignKey: 'rol_id',
+  as: 'usuarios'
+});
 
-// Usuario - Rol
-Usuario.belongsToMany(Rol, { through: 'usuario_roles' });
-Rol.belongsToMany(Usuario, { through: 'usuario_roles' });
-
-// Empresa - Convenio
-Empresa.hasMany(Convenio);
-Convenio.belongsTo(Empresa);
-
-// Convenio - Descuento
-Convenio.hasMany(Descuento);
-Descuento.belongsTo(Convenio);
-
-// Convenio - Código
-Convenio.hasMany(CodigoDescuento);
-CodigoDescuento.belongsTo(Convenio);
-
-// Empresa - Pasajero
-Empresa.hasMany(Pasajero);
-Pasajero.belongsTo(Empresa);
-
-// Pasajero - Evento
-Pasajero.hasMany(Evento);
-Evento.belongsTo(Pasajero);
+Usuario.belongsTo(Rol, {
+  foreignKey: 'rol_id',
+  as: 'rol'
+});
 
 module.exports = {
   sequelize,
   Usuario,
-  Rol,
-  Pasajero,
-  Empresa,
-  Convenio,
-  CodigoDescuento,
-  Descuento,
-  Evento
+  Rol
 };
