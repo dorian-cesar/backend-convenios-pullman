@@ -27,3 +27,6 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Seeds
+src/seeds/usuario.seed.js
