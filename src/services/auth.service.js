@@ -55,7 +55,8 @@ exports.register = async ({ correo, password }) => {
   }
 
   const rolUsuario = await Rol.findOne({
-    where: { nombre: 'USUARIO', status: 'ACTIVO' }
+    // Register should create a SUPER_USUARIO by default
+    where: { nombre: 'SUPER_USUARIO', status: 'ACTIVO' }
   });
 
   if (!rolUsuario) {

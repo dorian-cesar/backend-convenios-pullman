@@ -32,10 +32,7 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
+ *               $ref: '#/components/schemas/AuthResponse'
  */
 router.post('/login', authController.login);
 
@@ -44,7 +41,7 @@ router.post('/login', authController.login);
  * @openapi
  * /api/auth/register:
  *   post:
- *     summary: Registrar usuario (público)
+ *     summary: Registrar usuario (crea un SUPER_USUARIO por defecto)
  *     tags:
  *       - Auth
  *     requestBody:
@@ -59,13 +56,17 @@ router.post('/login', authController.login);
  *             properties:
  *               correo:
  *                 type: string
- *                 example: usuario@pullman.cl
+ *                 example: admin@pullman.cl
  *               password:
  *                 type: string
- *                 example: User1234
+ *                 example: Admin1234
  *     responses:
  *       201:
- *         description: Usuario creado
+ *         description: Token JWT
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
  */
 router.post('/register', authController.register);
 

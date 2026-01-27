@@ -21,6 +21,9 @@ exports.crearUsuario = async (req, res, next) => {
       rolRecord = await Rol.findOne({ where: { id: rol_id, status: 'ACTIVO' } });
     } else if (rol) {
       rolRecord = await Rol.findOne({ where: { nombre: rol.toUpperCase(), status: 'ACTIVO' } });
+    } else {
+      // By default, admin API creates ordinary users
+      rolRecord = await Rol.findOne({ where: { nombre: 'USUARIO', status: 'ACTIVO' } });
     }
 
     if (!rolRecord) {
@@ -38,7 +41,8 @@ exports.crearUsuario = async (req, res, next) => {
     res.status(201).json({
       id: usuario.id,
       correo: usuario.correo,
-      rol: rolRecord.nombre
+      rol: rolRecord.nombre,
+      message: 'Usuario creado satisfactoriamente'
     });
   } catch (error) {
     next(error);

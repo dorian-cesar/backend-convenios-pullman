@@ -3,7 +3,8 @@ const authService = require('../services/auth.service');
 exports.register = async (req, res, next) => {
   try {
     const result = await authService.register(req.body);
-    res.status(201).json(result);
+    // authService.register returns a token string; return token + message
+    res.status(201).json({ token: result, message: 'Usuario creado satisfactoriamente' });
   } catch (error) {
     next(error);
   }

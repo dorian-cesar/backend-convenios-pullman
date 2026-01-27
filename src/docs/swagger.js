@@ -10,9 +10,14 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3030/api',
-        description: 'Servidor local'
+        url: process.env.SWAGGER_BASE_URL || 'http://localhost:3030',
+        description: 'URL base (puede configurarse con SWAGGER_BASE_URL)'
       }
+    ],
+    tags: [
+      { name: 'Auth', description: 'Operaciones de autenticación (login, register)' },
+      { name: 'Admin', description: 'Administración de usuarios y roles' },
+      { name: 'Eventos', description: 'Gestión de eventos' }
     ],
     components: {
       securitySchemes: {
@@ -21,8 +26,7 @@ const options = {
           scheme: 'bearer',
           bearerFormat: 'JWT'
         }
-      }
-      ,
+      },
       schemas: {
         Usuario: {
           type: 'object',
@@ -43,7 +47,25 @@ const options = {
         AuthResponse: {
           type: 'object',
           properties: {
-            token: { type: 'string', example: 'eyJ...' }
+            token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+            message: { type: 'string', example: 'Usuario creado satisfactoriamente' }
+          }
+        },
+        CreateUser: {
+          type: 'object',
+          required: ['correo','password'],
+          properties: {
+            correo: { type: 'string', example: 'nuevo@pullman.cl' },
+            password: { type: 'string', example: 'Password123' },
+            rol: { type: 'string', example: 'USUARIO' }
+          }
+        },
+        UpdateUser: {
+          type: 'object',
+          properties: {
+            correo: { type: 'string', example: 'actualizado@pullman.cl' },
+            password: { type: 'string', example: 'NewPass123' },
+            rol: { type: 'string', example: 'USUARIO' }
           }
         }
       }
@@ -55,7 +77,7 @@ const options = {
     ]
   },
   apis: [
-    './src/routes/*.js',
+    './src/routes/**/*.js',
     './src/controllers/*.js'
   ]
 };

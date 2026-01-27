@@ -9,7 +9,7 @@ const router = express.Router();
  * @openapi
  * /api/admin/usuarios:
  *   post:
- *     summary: Crear usuario (solo SUPER_USUARIO)
+ *     summary: Crear usuario (solo SUPER_USUARIO) — crea `USUARIO` por defecto
  *     security:
  *       - bearerAuth: []
  *     tags:
@@ -33,7 +33,7 @@ const router = express.Router();
  *               rol:
  *                 type: string
  *                 enum: [USUARIO, SUPER_USUARIO]
- *                 example: SUPER_USUARIO
+ *                 example: USUARIO
  *     responses:
  *       201:
  *         description: Usuario creado
@@ -48,6 +48,9 @@ const router = express.Router();
  *                   type: string
  *                 rol:
  *                   type: string
+ *                 message:
+ *                   type: string
+ *                   example: Usuario creado satisfactoriamente
  */
 router.post(
   '/usuarios',
