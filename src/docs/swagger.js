@@ -68,6 +68,32 @@ const options = {
             rol: { type: 'string', example: 'USUARIO' }
           }
         }
+        ,
+        Empresa: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Mi Empresa' },
+            rut: { type: 'string', example: '12345678-9' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        CreateEmpresa: {
+          type: 'object',
+          required: ['nombre','rut'],
+          properties: {
+            nombre: { type: 'string', example: 'Mi Empresa' },
+            rut: { type: 'string', example: '12345678-9' }
+          }
+        },
+        UpdateEmpresa: {
+          type: 'object',
+          properties: {
+            nombre: { type: 'string', example: 'Mi Empresa S.A.' },
+            rut: { type: 'string', example: '12345678-9' },
+            status: { type: 'string', example: 'INACTIVA' }
+          }
+        }
       }
     },
     security: [

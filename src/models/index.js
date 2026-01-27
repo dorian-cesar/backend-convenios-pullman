@@ -3,6 +3,7 @@ const sequelize = require('../config/sequelize');
 
 const Usuario = require('./usuario.model')(sequelize, Sequelize.DataTypes);
 const Rol = require('./rol.model')(sequelize, Sequelize.DataTypes);
+const Empresa = require('./empresa.model')(sequelize, Sequelize.DataTypes);
 
 // RELACIONES
 Rol.hasMany(Usuario, {
@@ -19,4 +20,5 @@ module.exports = {
   sequelize,
   Usuario,
   Rol
+  , Empresa
 };
