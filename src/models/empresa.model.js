@@ -6,19 +6,19 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     nombre: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(150),
       allowNull: false,
       unique: true
     },
     rut: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.STRING(20),
+      allowNull: true,
       unique: true
     },
-      status: {
-        type: DataTypes.ENUM('ACTIVO', 'INACTIVA'),
-        defaultValue: 'ACTIVO'
-      }
+    status: {
+      type: DataTypes.ENUM('ACTIVO', 'INACTIVO'),
+      defaultValue: 'ACTIVO'
+    }
   }, {
     tableName: 'empresas',
     timestamps: true
