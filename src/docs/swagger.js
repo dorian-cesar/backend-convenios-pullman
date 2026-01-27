@@ -22,6 +22,31 @@ const options = {
           bearerFormat: 'JWT'
         }
       }
+      ,
+      schemas: {
+        Usuario: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            correo: { type: 'string', example: 'usuario@pullman.cl' },
+            rol: { type: 'string', example: 'USUARIO' }
+          }
+        },
+        Rol: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'USUARIO' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        AuthResponse: {
+          type: 'object',
+          properties: {
+            token: { type: 'string', example: 'eyJ...' }
+          }
+        }
+      }
     },
     security: [
       {
