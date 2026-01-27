@@ -26,14 +26,31 @@ Usuario.belongsToMany(Empresa, {
   through: UsuarioEmpresa,
   foreignKey: 'usuario_id',
   otherKey: 'empresa_id',
-  as: 'empresas'
+  as: 'empresas',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
 });
 
 Empresa.belongsToMany(Usuario, {
   through: UsuarioEmpresa,
   foreignKey: 'empresa_id',
   otherKey: 'usuario_id',
-  as: 'usuarios'
+  as: 'usuarios',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
+
+/**
+ * Relaciones 1 → N hacia la tabla pivote
+ */
+Usuario.hasMany(UsuarioEmpresa, {
+  foreignKey: 'usuario_id',
+  as: 'usuarioEmpresas'
+});
+
+Empresa.hasMany(UsuarioEmpresa, {
+  foreignKey: 'empresa_id',
+  as: 'usuarioEmpresas'
 });
 
 /**
