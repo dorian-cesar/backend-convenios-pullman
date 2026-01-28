@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { Usuario, Rol } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
+const UsuarioDTO = require('../dtos/usuario.dto');
 
 exports.crearUsuario = async (req, res, next) => {
   try {
@@ -34,9 +35,10 @@ exports.crearUsuario = async (req, res, next) => {
 
     const usuario = await Usuario.create({
       correo,
-      password: hash,
-      rol_id: rolRecord.id
+      password_hash: hash
     });
+
+    await usuario.addRol(rolRecord, { through: { status: 'ACTIVO' } });
 
     res.status(201).json({
       id: usuario.id,
@@ -52,10 +54,10 @@ exports.crearUsuario = async (req, res, next) => {
 exports.listarUsuarios = async (req, res, next) => {
   try {
     const usuarios = await Usuario.findAll({
-      attributes: ['id', 'correo', 'status'],
-      include: [{ model: Rol, as: 'rol', attributes: ['id', 'nombre'] }]
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status'],
+      include: [{ model: Rol, attributes: ['id', 'nombre'] }]
     });
-    res.json(usuarios);
+    res.json(UsuarioDTO.fromArray(usuarios));
   } catch (error) {
     next(error);
   }
@@ -65,11 +67,11 @@ exports.obtenerUsuario = async (req, res, next) => {
   try {
     const { id } = req.params;
     const usuario = await Usuario.findByPk(id, {
-      attributes: ['id', 'correo', 'status'],
-      include: [{ model: Rol, as: 'rol', attributes: ['id', 'nombre'] }]
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status'],
+      include: [{ model: Rol, attributes: ['id', 'nombre'] }]
     });
     if (!usuario) throw new NotFoundError('Usuario no encontrado');
-    res.json(usuario);
+    res.json(new UsuarioDTO(usuario));
   } catch (error) {
     next(error);
   }
@@ -87,27 +89,27 @@ exports.actualizarUsuario = async (req, res, next) => {
     if (typeof status !== 'undefined') usuario.status = status;
 
     if (password) {
-      usuario.password = await bcrypt.hash(password, 10);
+      usuario.password_hash = await bcrypt.hash(password, 10);
     }
 
     if (rol_id) {
       const rolRecord = await Rol.findOne({ where: { id: rol_id, status: 'ACTIVO' } });
       if (!rolRecord) throw new BusinessError('Rol inválido o inactivo');
-      usuario.rol_id = rolRecord.id;
+      await usuario.setRols([rolRecord], { through: { status: 'ACTIVO' } });
     } else if (rol) {
       const rolRecord = await Rol.findOne({ where: { nombre: rol.toUpperCase(), status: 'ACTIVO' } });
       if (!rolRecord) throw new BusinessError('Rol inválido o inactivo');
-      usuario.rol_id = rolRecord.id;
+      await usuario.setRols([rolRecord], { through: { status: 'ACTIVO' } });
     }
 
     await usuario.save();
 
     const updated = await Usuario.findByPk(id, {
-      attributes: ['id', 'correo', 'status'],
-      include: [{ model: Rol, as: 'rol', attributes: ['id', 'nombre'] }]
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status'],
+      include: [{ model: Rol, attributes: ['id', 'nombre'] }]
     });
 
-    res.json(updated);
+    res.json(new UsuarioDTO(updated));
   } catch (error) {
     next(error);
   }
