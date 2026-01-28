@@ -1,0 +1,500 @@
+const swaggerJSDoc = require('swagger-jsdoc');
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API Convenios Pullman',
+      version: '1.0.0',
+      description: 'Documentación del backend de convenios Pullman'
+    },
+    servers: [
+      {
+        url: process.env.SWAGGER_BASE_URL || 'http://localhost:3030',
+        description: 'URL base (puede configurarse con SWAGGER_BASE_URL)'
+      }
+    ],
+    tags: [
+      { name: 'Auth', description: 'Operaciones de autenticación (login, register)' },
+      { name: 'Admin', description: 'Administración de usuarios y roles' },
+      { name: 'Eventos', description: 'Gestión de eventos' },
+      { name: 'Convenios', description: 'Gestión de convenios empresariales' },
+      { name: 'Pasajeros', description: 'Gestión de pasajeros' },
+      { name: 'Códigos de Descuento', description: 'Gestión de códigos de descuento' },
+      { name: 'Descuentos', description: 'Gestión de reglas de descuento' }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      },
+      schemas: {
+        Usuario: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            correo: { type: 'string', example: 'usuario@pullman.cl' },
+            rol: { type: 'string', example: 'USUARIO' }
+          }
+        },
+        Rol: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'USUARIO' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        AuthResponse: {
+          type: 'object',
+          properties: {
+            token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+            message: { type: 'string', example: 'Usuario creado satisfactoriamente' }
+          }
+        },
+        CreateUser: {
+          type: 'object',
+          required: ['correo', 'password'],
+          properties: {
+            correo: { type: 'string', example: 'nuevo@pullman.cl' },
+            password: { type: 'string', example: 'Password123' },
+            rol: { type: 'string', example: 'USUARIO' }
+          }
+        },
+        UpdateUser: {
+          type: 'object',
+          properties: {
+            correo: { type: 'string', example: 'actualizado@pullman.cl' },
+            password: { type: 'string', example: 'NewPass123' },
+            rol: { type: 'string', example: 'USUARIO' }
+          }
+        }
+        ,
+        Empresa: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Mi Empresa' },
+            rut: { type: 'string', example: '12345678-9' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        CreateEmpresa: {
+          type: 'object',
+          required: ['nombre', 'rut'],
+          properties: {
+            nombre: { type: 'string', example: 'Mi Empresa' },
+            rut: { type: 'string', example: '12345678-9' }
+          }
+        },
+        UpdateEmpresa: {
+          type: 'object',
+          properties: {
+            nombre: { type: 'string', example: 'Mi Empresa S.A.' },
+            rut: { type: 'string', example: '12345678-9' },
+            status: { type: 'string', example: 'INACTIVA' }
+          }
+        },
+        Convenio: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Convenio Verano 2026' },
+            empresa_id: { type: 'integer', example: 1 },
+            status: { type: 'string', example: 'ACTIVO' },
+            empresa: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Empresa Test' },
+                rut: { type: 'string', example: '76.000.000-1' }
+              }
+            }
+          }
+        },
+        Pasajero: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            rut: { type: 'string', example: '12345678-9' },
+            nombres: { type: 'string', example: 'Juan' },
+            apellidos: { type: 'string', example: 'Pérez' },
+            fecha_nacimiento: { type: 'string', format: 'date', example: '1990-05-15' },
+            correo: { type: 'string', example: 'juan.perez@email.com' },
+            telefono: { type: 'string', example: '+56912345678' },
+            tipo_pasajero_id: { type: 'integer', example: 1 },
+            empresa_id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 1 },
+            status: { type: 'string', example: 'ACTIVO' },
+            tipo_pasajero: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'GENERAL' }
+              }
+            },
+            empresa: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Empresa Test' },
+                rut: { type: 'string', example: '76.000.000-1' }
+              }
+            },
+            convenio: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Convenio Verano 2026' }
+              }
+            }
+          }
+        },
+        Evento: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            tipo_evento: { type: 'string', enum: ['COMPRA', 'CAMBIO', 'DEVOLUCION'], example: 'COMPRA' },
+            evento_origen_id: { type: 'integer', example: null, description: 'ID del evento original (para CAMBIO y DEVOLUCION)' },
+            usuario_id: { type: 'integer', example: 1 },
+            pasajero_id: { type: 'integer', example: 1 },
+            empresa_id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 1 },
+            codigo_descuento_id: { type: 'integer', example: null },
+            ciudad_origen: { type: 'string', example: 'Santiago' },
+            ciudad_destino: { type: 'string', example: 'Valparaíso' },
+            fecha_viaje: { type: 'string', format: 'date', example: '2026-02-15' },
+            numero_asiento: { type: 'string', example: 'A12' },
+            tarifa_base: { type: 'integer', example: 50000 },
+            porcentaje_descuento_aplicado: { type: 'integer', example: 10 },
+            monto_pagado: { type: 'integer', example: 45000 },
+            monto_devolucion: { type: 'integer', example: null },
+            is_deleted: { type: 'boolean', example: false },
+            fecha_evento: { type: 'string', format: 'date-time', example: '2026-01-28T17:00:00Z' },
+            usuario: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                correo: { type: 'string', example: 'admin@pullman.cl' }
+              }
+            },
+            pasajero: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                rut: { type: 'string', example: '12345678-9' },
+                nombres: { type: 'string', example: 'Juan' },
+                apellidos: { type: 'string', example: 'Pérez' }
+              }
+            },
+            empresa: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Empresa Test' },
+                rut: { type: 'string', example: '76.000.000-1' }
+              }
+            },
+            convenio: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Convenio Verano 2026' }
+              }
+            },
+            evento_origen: {
+              type: 'object',
+              description: 'Evento original (solo para CAMBIO y DEVOLUCION)',
+              properties: {
+                id: { type: 'integer', example: 100 },
+                tipo_evento: { type: 'string', example: 'COMPRA' },
+                fecha_viaje: { type: 'string', format: 'date', example: '2026-02-10' },
+                ciudad_origen: { type: 'string', example: 'Santiago' },
+                ciudad_destino: { type: 'string', example: 'Valparaíso' }
+              }
+            }
+          }
+        },
+        CodigoDescuento: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 1 },
+            codigo: { type: 'string', example: 'VERANO2026' },
+            fecha_inicio: { type: 'string', format: 'date', example: '2026-01-01' },
+            fecha_termino: { type: 'string', format: 'date', example: '2026-03-31' },
+            max_usos: { type: 'integer', example: 100, description: 'null = ilimitado' },
+            usos_realizados: { type: 'integer', example: 25 },
+            status: { type: 'string', enum: ['ACTIVO', 'INACTIVO'], example: 'ACTIVO' },
+            created_at: { type: 'string', format: 'date-time', example: '2026-01-15T10:00:00Z' },
+            vigente: { type: 'boolean', example: true, description: 'Calculado: activo, dentro de fechas y con usos disponibles' },
+            convenio: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Convenio Verano 2026' }
+              }
+            }
+          }
+        },
+        Descuento: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 1 },
+            codigo_descuento_id: { type: 'integer', example: null },
+            tipo_pasajero_id: { type: 'integer', example: 1 },
+            pasajero_id: { type: 'integer', example: null },
+            porcentaje_descuento: { type: 'integer', example: 15 },
+            status: { type: 'string', enum: ['ACTIVO', 'INACTIVO'], example: 'ACTIVO' },
+            convenio: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'Convenio Verano 2026' }
+              }
+            },
+            tipo_pasajero: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', example: 1 },
+                nombre: { type: 'string', example: 'ESTUDIANTE' }
+              }
+            }
+          }
+        }
+      }
+    },
+    security: [
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT'
+        }
+},
+  schemas: {
+    Usuario: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        correo: { type: 'string', example: 'usuario@pullman.cl' },
+        rol: { type: 'string', example: 'USUARIO' }
+      }
+    },
+    Rol: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        nombre: { type: 'string', example: 'USUARIO' },
+        status: { type: 'string', example: 'ACTIVO' }
+      }
+    },
+    AuthResponse: {
+      type: 'object',
+      properties: {
+        token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        message: { type: 'string', example: 'Usuario creado satisfactoriamente' }
+      }
+    },
+    CreateUser: {
+      type: 'object',
+      required: ['correo', 'password'],
+      properties: {
+        correo: { type: 'string', example: 'nuevo@pullman.cl' },
+        password: { type: 'string', example: 'Password123' },
+        rol: { type: 'string', example: 'USUARIO' }
+      }
+    },
+    UpdateUser: {
+      type: 'object',
+      properties: {
+        correo: { type: 'string', example: 'actualizado@pullman.cl' },
+        password: { type: 'string', example: 'NewPass123' },
+        rol: { type: 'string', example: 'USUARIO' }
+      }
+    }
+    ,
+    Empresa: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        nombre: { type: 'string', example: 'Mi Empresa' },
+        rut: { type: 'string', example: '12345678-9' },
+        status: { type: 'string', example: 'ACTIVO' }
+      }
+    },
+    CreateEmpresa: {
+      type: 'object',
+      required: ['nombre', 'rut'],
+      properties: {
+        nombre: { type: 'string', example: 'Mi Empresa' },
+        rut: { type: 'string', example: '12345678-9' }
+      }
+    },
+    UpdateEmpresa: {
+      type: 'object',
+      properties: {
+        nombre: { type: 'string', example: 'Mi Empresa S.A.' },
+        rut: { type: 'string', example: '12345678-9' },
+        status: { type: 'string', example: 'INACTIVA' }
+      }
+    },
+    Convenio: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        nombre: { type: 'string', example: 'Convenio Verano 2026' },
+        empresa_id: { type: 'integer', example: 1 },
+        status: { type: 'string', example: 'ACTIVO' },
+        empresa: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Empresa Test' },
+            rut: { type: 'string', example: '76.000.000-1' }
+          }
+        }
+      }
+    },
+    Pasajero: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        rut: { type: 'string', example: '12345678-9' },
+        nombres: { type: 'string', example: 'Juan' },
+        apellidos: { type: 'string', example: 'Pérez' },
+        fecha_nacimiento: { type: 'string', format: 'date', example: '1990-05-15' },
+        correo: { type: 'string', example: 'juan.perez@email.com' },
+        telefono: { type: 'string', example: '+56912345678' },
+        tipo_pasajero_id: { type: 'integer', example: 1 },
+        empresa_id: { type: 'integer', example: 1 },
+        convenio_id: { type: 'integer', example: 1 },
+        status: { type: 'string', example: 'ACTIVO' },
+        tipo_pasajero: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'GENERAL' }
+          }
+        },
+        empresa: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Empresa Test' },
+            rut: { type: 'string', example: '76.000.000-1' }
+          }
+        },
+        convenio: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Convenio Verano 2026' }
+          }
+        }
+      }
+    },
+    Evento: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        tipo_evento: { type: 'string', enum: ['COMPRA', 'CAMBIO', 'DEVOLUCION'], example: 'COMPRA' },
+        evento_origen_id: { type: 'integer', example: null, description: 'ID del evento original (para CAMBIO y DEVOLUCION)' },
+        usuario_id: { type: 'integer', example: 1 },
+        pasajero_id: { type: 'integer', example: 1 },
+        empresa_id: { type: 'integer', example: 1 },
+        convenio_id: { type: 'integer', example: 1 },
+        codigo_descuento_id: { type: 'integer', example: null },
+        ciudad_origen: { type: 'string', example: 'Santiago' },
+        ciudad_destino: { type: 'string', example: 'Valparaíso' },
+        fecha_viaje: { type: 'string', format: 'date', example: '2026-02-15' },
+        numero_asiento: { type: 'string', example: 'A12' },
+        tarifa_base: { type: 'integer', example: 50000 },
+        porcentaje_descuento_aplicado: { type: 'integer', example: 10 },
+        monto_pagado: { type: 'integer', example: 45000 },
+        monto_devolucion: { type: 'integer', example: null },
+        is_deleted: { type: 'boolean', example: false },
+        fecha_evento: { type: 'string', format: 'date-time', example: '2026-01-28T17:00:00Z' },
+        usuario: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            correo: { type: 'string', example: 'admin@pullman.cl' }
+          }
+        },
+        pasajero: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            rut: { type: 'string', example: '12345678-9' },
+            nombres: { type: 'string', example: 'Juan' },
+            apellidos: { type: 'string', example: 'Pérez' }
+          }
+        },
+        empresa: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Empresa Test' },
+            rut: { type: 'string', example: '76.000.000-1' }
+          }
+        },
+        convenio: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Convenio Verano 2026' }
+          }
+        },
+        evento_origen: {
+          type: 'object',
+          description: 'Evento original (solo para CAMBIO y DEVOLUCION)',
+          properties: {
+            id: { type: 'integer', example: 100 },
+            tipo_evento: { type: 'string', example: 'COMPRA' },
+            fecha_viaje: { type: 'string', format: 'date', example: '2026-02-10' },
+            ciudad_origen: { type: 'string', example: 'Santiago' },
+            ciudad_destino: { type: 'string', example: 'Valparaíso' }
+          }
+        }
+      }
+    },
+    CodigoDescuento: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        convenio_id: { type: 'integer', example: 1 },
+        codigo: { type: 'string', example: 'VERANO2026' },
+        fecha_inicio: { type: 'string', format: 'date', example: '2026-01-01' },
+        fecha_termino: { type: 'string', format: 'date', example: '2026-03-31' },
+        max_usos: { type: 'integer', example: 100, description: 'null = ilimitado' },
+        usos_realizados: { type: 'integer', example: 25 },
+        status: { type: 'string', enum: ['ACTIVO', 'INACTIVO'], example: 'ACTIVO' },
+        created_at: { type: 'string', format: 'date-time', example: '2026-01-15T10:00:00Z' },
+        vigente: { type: 'boolean', example: true, description: 'Calculado: activo, dentro de fechas y con usos disponibles' },
+        convenio: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Convenio Verano 2026' }
+          }
+        }
+      }
+    }
+  }
+    },
+security: [
+  {
+    bearerAuth: []
+  }
+]
+  },
+apis: [
+  './src/routes/**/*.js',
+  './src/controllers/*.js'
+]
+};
+
+module.exports = swaggerJSDoc(options);
