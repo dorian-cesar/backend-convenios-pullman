@@ -14,25 +14,31 @@ exports.login = async ({ correo, password }) => {
   }
 
   const usuario = await Usuario.findOne({
-    where: { correo, status: 'ACTIVO' }
+    where: { correo, status: 'ACTIVO' },
+    include: [{ model: Rol }]
   });
 
   if (!usuario) {
     throw new AuthError('Credenciales inválidas');
   }
 
-  const passwordValida = await bcrypt.compare(password, usuario.password);
+  const passwordValida = await bcrypt.compare(password, usuario.password_hash);
   if (!passwordValida) {
     throw new AuthError('Credenciales inválidas');
   }
 
-  const rol = await Rol.findByPk(usuario.rol_id);
+  // En M:N el usuario puede tener varios roles, tomamos el primero o verificamos
+  const roles = usuario.Rols;
+  if (!roles || roles.length === 0) {
+    throw new AuthError('Usuario sin rol asignado');
+  }
+  const rolNombre = roles[0].nombre;
 
   const token = jwt.sign(
     {
       id: usuario.id,
       correo: usuario.correo,
-      rol: rol.nombre
+      rol: rolNombre
     },
     JWT_SECRET,
     { expiresIn: '8h' }
@@ -44,7 +50,7 @@ exports.login = async ({ correo, password }) => {
 /**
  * REGISTER
  */
-exports.register = async ({ correo, password }) => {
+exports.register = async ({ correo, password, nombre, rut }) => {
   if (!correo || !password) {
     throw new AuthError('Correo y password son obligatorios');
   }
@@ -67,9 +73,14 @@ exports.register = async ({ correo, password }) => {
 
   const usuario = await Usuario.create({
     correo,
-    password: passwordHash,
-    rol_id: rolUsuario.id
+    nombre,
+    rut,
+    password_hash: passwordHash
   });
+
+  // Asignar rol en tabla intermedia
+  // Nota: addRol es método mágico de Sequelize por belongsToMany
+  await usuario.addRol(rolUsuario, { through: { status: 'ACTIVO' } });
 
   const token = jwt.sign(
     {

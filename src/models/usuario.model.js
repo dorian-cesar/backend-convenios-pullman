@@ -23,7 +23,18 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
 
-    password: {
+    nombre: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+
+    rut: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
+
+    password_hash: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
@@ -32,25 +43,14 @@ module.exports = (sequelize, DataTypes) => {
         },
         notEmpty: {
           msg: 'La contraseña no puede estar vacía'
-        },
-        len: {
-          args: [8, 100],
-          msg: 'La contraseña debe tener al menos 8 caracteres'
         }
       }
     },
 
-    rol_id: {
+    empresa_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notNull: {
-          msg: 'El rol es obligatorio'
-        },
-        isInt: {
-          msg: 'El rol debe ser un valor válido'
-        }
-      }
+      allowNull: true,
+      defaultValue: null
     },
 
     status: {

@@ -60,6 +60,12 @@ router.post('/login', authController.login);
  *               password:
  *                 type: string
  *                 example: Admin1234
+ *               nombre:
+ *                 type: string
+ *                 example: Juan Pérez
+ *               rut:
+ *                 type: string
+ *                 example: 12345678-9
  *     responses:
  *       201:
  *         description: Token JWT
