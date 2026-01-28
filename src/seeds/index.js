@@ -1,6 +1,7 @@
 const { sequelize } = require('../models');
 const seedRoles = require('./rol.seed');
 const seedUsuarios = require('./usuario.seed');
+const seedTipoPasajero = require('./tipoPasajero.seed');
 
 (async () => {
   try {
@@ -9,6 +10,7 @@ const seedUsuarios = require('./usuario.seed');
 
     await seedRoles();
     await seedUsuarios();
+    await seedTipoPasajero();
 
     console.log('🌱 Seeds ejecutados correctamente');
     process.exit(0);
