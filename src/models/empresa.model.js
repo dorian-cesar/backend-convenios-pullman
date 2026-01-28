@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true
     },
-    rut: {
+    rut_empresa: {
       type: DataTypes.STRING(20),
       allowNull: true,
       unique: true

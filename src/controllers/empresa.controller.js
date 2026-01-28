@@ -9,12 +9,13 @@ exports.crear = async (req, res, next) => {
       throw new BusinessError('Nombre y RUT son obligatorios');
     }
 
-    const existe = await Empresa.findOne({ where: { rut } });
+    // Map rut from API to rut_empresa in DB
+    const existe = await Empresa.findOne({ where: { rut_empresa: rut } });
     if (existe) {
       throw new BusinessError('Empresa ya registrada');
     }
 
-    const empresa = await Empresa.create({ nombre, rut });
+    const empresa = await Empresa.create({ nombre, rut_empresa: rut });
 
     res.status(201).json(empresa);
   } catch (error) {
@@ -50,7 +51,13 @@ exports.actualizar = async (req, res, next) => {
       throw new BusinessError('Empresa no encontrada');
     }
 
-    await empresa.update(req.body);
+    const { nombre, rut, status } = req.body;
+    const updateData = {};
+    if (nombre) updateData.nombre = nombre;
+    if (rut) updateData.rut_empresa = rut;
+    if (status) updateData.status = status;
+
+    await empresa.update(updateData);
     res.json(empresa);
   } catch (error) {
     next(error);
