@@ -1,27 +1,256 @@
-const { Pasajero } = require('../models');
+const { Pasajero, TipoPasajero, Empresa, Convenio } = require('../models');
+const { Op } = require('sequelize');
+const BusinessError = require('../exceptions/BusinessError');
+const NotFoundError = require('../exceptions/NotFoundError');
 
-const calcularEdad = (anioNacimiento) => {
-  const anioActual = new Date().getFullYear();
-  return anioActual - anioNacimiento;
+/**
+ * Calcular edad desde fecha de nacimiento
+ */
+const calcularEdad = (fechaNacimiento) => {
+  if (!fechaNacimiento) return 0;
+  const hoy = new Date();
+  const nac = new Date(fechaNacimiento);
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) {
+    edad--;
+  }
+  return edad;
 };
 
-const determinarTipoUsuario = ({ anio_nacimiento, es_estudiante, carnet }) => {
-  const edad = calcularEdad(anio_nacimiento);
+/**
+ * Determinar tipo de pasajero por edad
+ */
+const determinarTipoPasajero = async (fechaNacimiento) => {
+  const edad = calcularEdad(fechaNacimiento);
 
-  if (es_estudiante) {
-    if (!carnet) {
-      throw new Error('Carnet de estudiante requerido');
+  const tipoPorEdad = await TipoPasajero.findOne({
+    where: {
+      edad_min: { [Op.lte]: edad },
+      edad_max: { [Op.gte]: edad },
+      status: 'ACTIVO'
     }
-    return 'ESTUDIANTE';
-  }
+  });
 
-  if (edad >= 60) {
-    return 'ADULTO_MAYOR';
-  }
+  if (tipoPorEdad) return tipoPorEdad.id;
 
-  return 'GENERAL';
+  // Default: GENERAL
+  const defaultTipo = await TipoPasajero.findOne({ where: { nombre: 'GENERAL' } });
+  return defaultTipo ? defaultTipo.id : null;
 };
 
+/**
+ * Crear pasajero
+ */
+exports.crearPasajero = async (data) => {
+  const { rut, nombres, apellidos, fecha_nacimiento, correo, telefono, tipo_pasajero_id, empresa_id, convenio_id } = data;
+
+  if (!rut || !nombres || !apellidos || !fecha_nacimiento) {
+    throw new BusinessError('RUT, nombres, apellidos y fecha de nacimiento son obligatorios');
+  }
+
+  // Verificar si ya existe
+  const existe = await Pasajero.findOne({ where: { rut } });
+  if (existe) {
+    throw new BusinessError('Ya existe un pasajero con ese RUT');
+  }
+
+  // Determinar tipo de pasajero si no se proporciona
+  let tipoId = tipo_pasajero_id;
+  if (!tipoId) {
+    tipoId = await determinarTipoPasajero(fecha_nacimiento);
+  } else {
+    // Validar que el tipo existe
+    const tipo = await TipoPasajero.findByPk(tipoId);
+    if (!tipo) {
+      throw new NotFoundError('Tipo de pasajero no encontrado');
+    }
+  }
+
+  // Validar empresa si se proporciona
+  if (empresa_id) {
+    const empresa = await Empresa.findByPk(empresa_id);
+    if (!empresa) {
+      throw new NotFoundError('Empresa no encontrada');
+    }
+  }
+
+  // Validar convenio si se proporciona
+  if (convenio_id) {
+    const convenio = await Convenio.findByPk(convenio_id);
+    if (!convenio) {
+      throw new NotFoundError('Convenio no encontrado');
+    }
+  }
+
+  const pasajero = await Pasajero.create({
+    rut,
+    nombres,
+    apellidos,
+    fecha_nacimiento,
+    correo,
+    telefono,
+    tipo_pasajero_id: tipoId,
+    empresa_id,
+    convenio_id,
+    status: 'ACTIVO'
+  });
+
+  return await Pasajero.findByPk(pasajero.id, {
+    include: [
+      { model: TipoPasajero, attributes: ['id', 'nombre'] },
+      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, attributes: ['id', 'nombre'] }
+    ]
+  });
+};
+
+/**
+ * Listar pasajeros
+ */
+exports.listarPasajeros = async (filters = {}) => {
+  const where = {};
+
+  if (filters.empresa_id) {
+    where.empresa_id = filters.empresa_id;
+  }
+
+  if (filters.convenio_id) {
+    where.convenio_id = filters.convenio_id;
+  }
+
+  if (filters.tipo_pasajero_id) {
+    where.tipo_pasajero_id = filters.tipo_pasajero_id;
+  }
+
+  if (filters.status) {
+    where.status = filters.status;
+  }
+
+  const pasajeros = await Pasajero.findAll({
+    where,
+    include: [
+      { model: TipoPasajero, attributes: ['id', 'nombre'] },
+      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, attributes: ['id', 'nombre'] }
+    ]
+  });
+
+  return pasajeros;
+};
+
+/**
+ * Obtener pasajero por ID
+ */
+exports.obtenerPasajero = async (id) => {
+  const pasajero = await Pasajero.findByPk(id, {
+    include: [
+      { model: TipoPasajero, attributes: ['id', 'nombre'] },
+      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, attributes: ['id', 'nombre'] }
+    ]
+  });
+
+  if (!pasajero) {
+    throw new NotFoundError('Pasajero no encontrado');
+  }
+
+  return pasajero;
+};
+
+/**
+ * Buscar pasajero por RUT
+ */
+exports.buscarPorRut = async (rut) => {
+  const pasajero = await Pasajero.findOne({
+    where: { rut },
+    include: [
+      { model: TipoPasajero, attributes: ['id', 'nombre'] },
+      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, attributes: ['id', 'nombre'] }
+    ]
+  });
+
+  if (!pasajero) {
+    throw new NotFoundError('Pasajero no encontrado');
+  }
+
+  return pasajero;
+};
+
+/**
+ * Actualizar pasajero
+ */
+exports.actualizarPasajero = async (id, datos) => {
+  const pasajero = await Pasajero.findByPk(id);
+
+  if (!pasajero) {
+    throw new NotFoundError('Pasajero no encontrado');
+  }
+
+  const { nombres, apellidos, fecha_nacimiento, correo, telefono, tipo_pasajero_id, empresa_id, convenio_id, status } = datos;
+
+  if (nombres) pasajero.nombres = nombres;
+  if (apellidos) pasajero.apellidos = apellidos;
+  if (fecha_nacimiento) pasajero.fecha_nacimiento = fecha_nacimiento;
+  if (correo) pasajero.correo = correo;
+  if (telefono) pasajero.telefono = telefono;
+  if (status) pasajero.status = status;
+
+  if (tipo_pasajero_id) {
+    const tipo = await TipoPasajero.findByPk(tipo_pasajero_id);
+    if (!tipo) {
+      throw new NotFoundError('Tipo de pasajero no encontrado');
+    }
+    pasajero.tipo_pasajero_id = tipo_pasajero_id;
+  }
+
+  if (empresa_id) {
+    const empresa = await Empresa.findByPk(empresa_id);
+    if (!empresa) {
+      throw new NotFoundError('Empresa no encontrada');
+    }
+    pasajero.empresa_id = empresa_id;
+  }
+
+  if (convenio_id) {
+    const convenio = await Convenio.findByPk(convenio_id);
+    if (!convenio) {
+      throw new NotFoundError('Convenio no encontrado');
+    }
+    pasajero.convenio_id = convenio_id;
+  }
+
+  await pasajero.save();
+
+  return await Pasajero.findByPk(id, {
+    include: [
+      { model: TipoPasajero, attributes: ['id', 'nombre'] },
+      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, attributes: ['id', 'nombre'] }
+    ]
+  });
+};
+
+/**
+ * Eliminar pasajero (soft delete)
+ */
+exports.eliminarPasajero = async (id) => {
+  const pasajero = await Pasajero.findByPk(id);
+
+  if (!pasajero) {
+    throw new NotFoundError('Pasajero no encontrado');
+  }
+
+  pasajero.status = 'INACTIVO';
+  await pasajero.save();
+
+  return pasajero;
+};
+
+/**
+ * Obtener o crear pasajero (para eventos)
+ */
 exports.obtenerOCrearPasajero = async (data, transaction) => {
   let pasajero = null;
 
@@ -33,11 +262,7 @@ exports.obtenerOCrearPasajero = async (data, transaction) => {
   }
 
   if (!pasajero) {
-    const tipoUsuario = determinarTipoUsuario({
-      anio_nacimiento: data.anio_nacimiento,
-      es_estudiante: data.es_estudiante,
-      carnet: data.carnet_estudiante_url
-    });
+    const tipoPasajeroId = data.tipo_pasajero_id || await determinarTipoPasajero(data.fecha_nacimiento);
 
     pasajero = await Pasajero.create(
       {
@@ -46,11 +271,11 @@ exports.obtenerOCrearPasajero = async (data, transaction) => {
         apellidos: data.apellidos,
         correo: data.correo,
         telefono: data.telefono,
-        anio_nacimiento: data.anio_nacimiento,
-        es_estudiante: data.es_estudiante,
-        carnet_estudiante_url: data.carnet_estudiante_url,
-        tipo_usuario: tipoUsuario,
-        empresa_id: data.empresa_id
+        fecha_nacimiento: data.fecha_nacimiento,
+        tipo_pasajero_id: tipoPasajeroId,
+        empresa_id: data.empresa_id,
+        convenio_id: data.convenio_id,
+        status: 'ACTIVO'
       },
       { transaction }
     );
