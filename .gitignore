@@ -30,3 +30,6 @@ coverage/
 
 # Seeds
 src/seeds/usuario.seed.js
+
+# Context
+contexto.toml

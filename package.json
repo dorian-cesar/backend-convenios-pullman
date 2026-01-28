@@ -7,6 +7,7 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed": "node src/seeds/index.js",
+    "clean:db": "node src/utils/clean-db.js",
     "test": "echo \"No tests yet\""
   },
   "repository": {
