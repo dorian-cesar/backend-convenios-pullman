@@ -1,38 +1,30 @@
 module.exports = (sequelize, DataTypes) => {
-    const Descuento = sequelize.define('Descuento', {
+    const TipoPasajero = sequelize.define('TipoPasajero', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        convenio_id: {
+        nombre: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        edad_min: {
             type: DataTypes.INTEGER,
             allowNull: true
         },
-        codigo_descuento_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        tipo_pasajero_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        pasajero_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        porcentaje_descuento: {
+        edad_max: {
             type: DataTypes.INTEGER,
             allowNull: true
         },
         status: {
             type: DataTypes.STRING,
-            defaultValue: 'ACTIVO'
+            allowNull: true
         }
     }, {
-        tableName: 'DESCUENTOS',
+        tableName: 'TIPOS_PASAJERO',
         timestamps: false
     });
 
-    return Descuento;
+    return TipoPasajero;
 };
