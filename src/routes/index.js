@@ -6,13 +6,19 @@ const pasajerosRoutes = require('./pasajeros.routes');
 const adminRoutes = require('./admin.routes');
 const adminUsuarioEmpresaRoutes = require('./admin.usuarioEmpresa.routes');
 const empresaRoutes = require('./empresa.routes');
+const convenioRoutes = require('./convenio.routes');
+const codigoDescuentoRoutes = require('./codigoDescuento.routes');
+const descuentoRoutes = require('./descuento.routes');
 
 const router = Router();
 
 router.use('/auth', authRoutes);
-// router.use('/eventos', eventosRoutes);
-// router.use('/pasajeros', pasajerosRoutes);
+router.use('/eventos', eventosRoutes);
+router.use('/pasajeros', pasajerosRoutes);
 router.use('/admin', adminRoutes);
 router.use('/admin', adminUsuarioEmpresaRoutes);
 router.use('/empresas', empresaRoutes);
+router.use('/convenios', convenioRoutes);
+router.use('/codigos-descuento', codigoDescuentoRoutes);
+router.use('/descuentos', descuentoRoutes);
 module.exports = router;
