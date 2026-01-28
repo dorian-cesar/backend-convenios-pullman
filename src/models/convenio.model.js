@@ -1,13 +1,26 @@
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../config/sequelize');
+module.exports = (sequelize, DataTypes) => {
+    const Convenio = sequelize.define('Convenio', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        empresa_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
+        nombre: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        status: {
+            type: DataTypes.STRING,
+            defaultValue: 'ACTIVO'
+        }
+    }, {
+        tableName: 'CONVENIOS',
+        timestamps: false
+    });
 
-// const Convenio = sequelize.define('Convenio', {
-//   nombre: DataTypes.STRING,
-//   tipo: DataTypes.ENUM('EMPRESA', 'CODIGO'),
-//   status: { type: DataTypes.ENUM('ACTIVE', 'BLOCKED'), defaultValue: 'ACTIVE' }
-// }, {
-//   tableName: 'convenios',
-//   underscored: true
-// });
-
-// module.exports = Convenio;
+    return Convenio;
+};
