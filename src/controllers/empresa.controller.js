@@ -26,10 +26,20 @@ exports.crear = async (req, res, next) => {
 
 exports.listar = async (req, res, next) => {
   try {
-    const { page, limit } = req.query;
+    const { page, limit, sortBy, order, status } = req.query;
     const { offset, limit: limitVal } = getPagination(page, limit);
 
+    const where = {};
+    if (status) {
+      where.status = status;
+    }
+
+    const sortField = sortBy || 'createdAt';
+    const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+
     const data = await Empresa.findAndCountAll({
+      where,
+      order: [[sortField, sortOrder]],
       limit: limitVal,
       offset
     });

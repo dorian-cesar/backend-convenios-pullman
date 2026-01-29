@@ -110,9 +110,13 @@ exports.crearPasajero = async (data) => {
  * Listar pasajeros
  */
 exports.listarPasajeros = async (filters = {}) => {
-  const { page, limit, ...otherFilters } = filters;
+  const { page, limit, sortBy, order, status, ...otherFilters } = filters;
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
+
+  if (status || otherFilters.status) {
+    where.status = status || otherFilters.status;
+  }
 
   if (otherFilters.empresa_id) {
     where.empresa_id = otherFilters.empresa_id;
@@ -126,9 +130,8 @@ exports.listarPasajeros = async (filters = {}) => {
     where.tipo_pasajero_id = otherFilters.tipo_pasajero_id;
   }
 
-  if (otherFilters.status) {
-    where.status = otherFilters.status;
-  }
+  const sortField = sortBy || 'createdAt';
+  const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
   const data = await Pasajero.findAndCountAll({
     where,
@@ -137,6 +140,7 @@ exports.listarPasajeros = async (filters = {}) => {
       { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
     ],
+    order: [[sortField, sortOrder]],
     limit: limitVal,
     offset
   });

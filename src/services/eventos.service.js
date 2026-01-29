@@ -214,9 +214,13 @@ exports.crearDevolucion = async (data) => {
  * Listar eventos
  */
 exports.listarEventos = async (filters = {}) => {
-  const { page, limit, ...otherFilters } = filters;
+  const { page, limit, sortBy, order, status, ...otherFilters } = filters;
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = { is_deleted: false };
+
+  if (status) {
+    where.status = status;
+  }
 
   if (otherFilters.tipo_evento) {
     where.tipo_evento = otherFilters.tipo_evento;
@@ -234,6 +238,9 @@ exports.listarEventos = async (filters = {}) => {
     where.convenio_id = otherFilters.convenio_id;
   }
 
+  const sortField = sortBy || 'fecha_viaje';
+  const sortOrder = (order && order.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
+
   const data = await Evento.findAndCountAll({
     where,
     include: [
@@ -243,7 +250,7 @@ exports.listarEventos = async (filters = {}) => {
       { model: Convenio, attributes: ['id', 'nombre'] },
       { model: Evento, as: 'EventoOrigen', attributes: ['id', 'tipo_evento', 'fecha_viaje'] }
     ],
-    order: [['fecha_evento', 'DESC']],
+    order: [[sortField, sortOrder]],
     limit: limitVal,
     offset
   });

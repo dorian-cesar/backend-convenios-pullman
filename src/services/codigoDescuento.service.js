@@ -53,16 +53,16 @@ exports.crearCodigoDescuento = async (data) => {
  * Listar códigos de descuento
  */
 exports.listarCodigosDescuento = async (filters = {}) => {
-    const { page, limit, ...otherFilters } = filters;
+    const { page, limit, sortBy, order, status, ...otherFilters } = filters;
     const { offset, limit: limitVal } = getPagination(page, limit);
     const where = {};
 
-    if (otherFilters.convenio_id) {
-        where.convenio_id = otherFilters.convenio_id;
+    if (status || otherFilters.status) {
+        where.status = status || otherFilters.status;
     }
 
-    if (otherFilters.status) {
-        where.status = otherFilters.status;
+    if (otherFilters.convenio_id) {
+        where.convenio_id = otherFilters.convenio_id;
     }
 
     // Filtrar solo vigentes
@@ -73,13 +73,16 @@ exports.listarCodigosDescuento = async (filters = {}) => {
         where.fecha_termino = { [Op.gte]: hoy };
     }
 
+    const sortField = sortBy || 'created_at';
+    const sortOrder = (order && order.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
+
     const data = await CodigoDescuento.findAndCountAll({
         where,
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
             { model: Descuento }
         ],
-        order: [['created_at', 'DESC']],
+        order: [[sortField, sortOrder]],
         limit: limitVal,
         offset
     });

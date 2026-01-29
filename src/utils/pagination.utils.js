@@ -5,6 +5,9 @@
  * @returns {object} { offset, limit }
  */
 const getPagination = (page, limit) => {
+    if (page === undefined && limit === undefined) {
+        return { offset: undefined, limit: undefined };
+    }
     const p = page ? +page : 1;
     const l = limit ? +limit : 10;
     const offset = (p - 1) * l;
@@ -21,8 +24,13 @@ const getPagination = (page, limit) => {
  */
 const getPagingData = (data, page, limit) => {
     const { count: totalItems, rows } = data;
+
+    if (page === undefined && limit === undefined) {
+        return { totalItems, rows };
+    }
+
     const currentPage = page ? +page : 1;
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = limit ? Math.ceil(totalItems / limit) : 1;
 
     return { totalItems, rows, totalPages, currentPage };
 };

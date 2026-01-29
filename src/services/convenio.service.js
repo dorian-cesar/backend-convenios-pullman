@@ -30,17 +30,20 @@ exports.crearConvenio = async ({ nombre, empresa_id }) => {
  * Listar convenios
  */
 exports.listarConvenios = async (filters = {}) => {
-    const { page, limit, ...otherFilters } = filters;
+    const { page, limit, sortBy, order, status, ...otherFilters } = filters;
     const { offset, limit: limitVal } = getPagination(page, limit);
     const where = {};
+
+    if (status || otherFilters.status) {
+        where.status = status || otherFilters.status;
+    }
 
     if (otherFilters.empresa_id) {
         where.empresa_id = otherFilters.empresa_id;
     }
 
-    if (otherFilters.status) {
-        where.status = otherFilters.status;
-    }
+    const sortField = sortBy || 'createdAt';
+    const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
     const data = await Convenio.findAndCountAll({
         where,
@@ -54,6 +57,7 @@ exports.listarConvenios = async (filters = {}) => {
                 model: Descuento
             }
         ],
+        order: [[sortField, sortOrder]],
         limit: limitVal,
         offset
     });

@@ -80,9 +80,13 @@ exports.crearDescuento = async (data) => {
  * Listar descuentos
  */
 exports.listarDescuentos = async (filters = {}) => {
-    const { page, limit, ...otherFilters } = filters;
+    const { page, limit, sortBy, order, status, ...otherFilters } = filters;
     const { offset, limit: limitVal } = getPagination(page, limit);
     const where = {};
+
+    if (status || otherFilters.status) {
+        where.status = status || otherFilters.status;
+    }
 
     if (otherFilters.convenio_id) {
         where.convenio_id = otherFilters.convenio_id;
@@ -96,9 +100,8 @@ exports.listarDescuentos = async (filters = {}) => {
         where.tipo_pasajero_id = otherFilters.tipo_pasajero_id;
     }
 
-    if (otherFilters.status) {
-        where.status = otherFilters.status;
-    }
+    const sortField = sortBy || 'createdAt';
+    const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
     const data = await Descuento.findAndCountAll({
         where,
@@ -108,6 +111,7 @@ exports.listarDescuentos = async (filters = {}) => {
             { model: TipoPasajero, attributes: ['id', 'nombre'] },
             { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
         ],
+        order: [[sortField, sortOrder]],
         limit: limitVal,
         offset
     });
