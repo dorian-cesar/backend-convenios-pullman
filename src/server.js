@@ -10,6 +10,18 @@ async function startServer() {
     console.log('🗄️ Conectado a la base de datos');
 
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+
+    // Lista de tablas sospechosas que podrían estar chocando
+    const tables = [
+      'usuario_roles', 'tipos_pasajero', 'codigos_descuento', 'convenios', 'descuentos', 'eventos', 'pasajeros', 'usuarios', 'roles', 'empresas',
+      'USUARIO_ROLES', 'TIPOS_PASAJERO', 'CODIGOS_DESCUENTO', 'CONVENIOS', 'DESCUENTOS', 'EVENTOS', 'PASAJEROS', 'USUARIOS', 'ROLES', 'EMPRESAS',
+      'documentos_convenio'
+    ];
+
+    for (const table of tables) {
+      await sequelize.query(`DROP TABLE IF EXISTS \`${table}\``);
+    }
+
     await sequelize.sync({ force: true });
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
     console.log('🗄️ Modelos sincronizados');
