@@ -3,6 +3,7 @@ const { sequelize } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const descuentoService = require('./descuento.service');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 /**
  * Calcular monto con descuento
@@ -213,25 +214,27 @@ exports.crearDevolucion = async (data) => {
  * Listar eventos
  */
 exports.listarEventos = async (filters = {}) => {
+  const { page, limit, ...otherFilters } = filters;
+  const { offset, limit: limitVal } = getPagination(page, limit);
   const where = { is_deleted: false };
 
-  if (filters.tipo_evento) {
-    where.tipo_evento = filters.tipo_evento;
+  if (otherFilters.tipo_evento) {
+    where.tipo_evento = otherFilters.tipo_evento;
   }
 
-  if (filters.empresa_id) {
-    where.empresa_id = filters.empresa_id;
+  if (otherFilters.empresa_id) {
+    where.empresa_id = otherFilters.empresa_id;
   }
 
-  if (filters.pasajero_id) {
-    where.pasajero_id = filters.pasajero_id;
+  if (otherFilters.pasajero_id) {
+    where.pasajero_id = otherFilters.pasajero_id;
   }
 
-  if (filters.convenio_id) {
-    where.convenio_id = filters.convenio_id;
+  if (otherFilters.convenio_id) {
+    where.convenio_id = otherFilters.convenio_id;
   }
 
-  const eventos = await Evento.findAll({
+  const data = await Evento.findAndCountAll({
     where,
     include: [
       { model: Usuario, attributes: ['id', 'correo'] },
@@ -240,10 +243,12 @@ exports.listarEventos = async (filters = {}) => {
       { model: Convenio, attributes: ['id', 'nombre'] },
       { model: Evento, as: 'EventoOrigen', attributes: ['id', 'tipo_evento', 'fecha_viaje'] }
     ],
-    order: [['fecha_evento', 'DESC']]
+    order: [['fecha_evento', 'DESC']],
+    limit: limitVal,
+    offset
   });
 
-  return eventos;
+  return getPagingData(data, page, limitVal);
 };
 
 /**

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { Usuario, Rol } = require('../models');
 const AuthError = require('../exceptions/AuthError');
 const BusinessError = require('../exceptions/BusinessError');
+const AuthResponseDto = require('../dtos/auth/auth-response.dto');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -45,13 +46,13 @@ exports.login = async ({ correo, password }) => {
     { expiresIn: '8h' }
   );
 
-  return token;
+  return AuthResponseDto.from(usuario, roles[0], token);
 };
 
 /**
  * REGISTER
  */
-exports.register = async ({ correo, password, nombre, rut }) => {
+exports.register = async ({ correo, password, nombre, rut, telefono }) => {
   if (!correo || !password) {
     throw new AuthError('Correo y password son obligatorios');
   }
@@ -76,6 +77,7 @@ exports.register = async ({ correo, password, nombre, rut }) => {
     correo,
     nombre,
     rut,
+    telefono,
     password_hash: passwordHash
   });
 
@@ -93,5 +95,5 @@ exports.register = async ({ correo, password, nombre, rut }) => {
     { expiresIn: '8h' }
   );
 
-  return token;
+  return AuthResponseDto.from(usuario, rolUsuario, token);
 };

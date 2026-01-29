@@ -37,6 +37,14 @@ const options = {
           type: 'object',
           properties: {
             token: { type: 'string' },
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer' },
+                correo: { type: 'string' },
+                rol: { type: 'string' }
+              }
+            },
             message: { type: 'string' }
           }
         },
@@ -72,6 +80,7 @@ const options = {
             correo: { type: 'string', example: 'admin@pullman.cl' },
             nombre: { type: 'string', example: 'Admin User' },
             rut: { type: 'string', example: '11.111.111-1' },
+            telefono: { type: 'string', example: '+56912345678' },
             status: { type: 'string', example: 'ACTIVO' }
           }
         }

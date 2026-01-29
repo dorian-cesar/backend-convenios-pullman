@@ -2,6 +2,7 @@ const { Descuento, Convenio, CodigoDescuento, TipoPasajero, Pasajero } = require
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { Op } = require('sequelize');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 /**
  * Crear descuento
@@ -79,35 +80,39 @@ exports.crearDescuento = async (data) => {
  * Listar descuentos
  */
 exports.listarDescuentos = async (filters = {}) => {
+    const { page, limit, ...otherFilters } = filters;
+    const { offset, limit: limitVal } = getPagination(page, limit);
     const where = {};
 
-    if (filters.convenio_id) {
-        where.convenio_id = filters.convenio_id;
+    if (otherFilters.convenio_id) {
+        where.convenio_id = otherFilters.convenio_id;
     }
 
-    if (filters.codigo_descuento_id) {
-        where.codigo_descuento_id = filters.codigo_descuento_id;
+    if (otherFilters.codigo_descuento_id) {
+        where.codigo_descuento_id = otherFilters.codigo_descuento_id;
     }
 
-    if (filters.tipo_pasajero_id) {
-        where.tipo_pasajero_id = filters.tipo_pasajero_id;
+    if (otherFilters.tipo_pasajero_id) {
+        where.tipo_pasajero_id = otherFilters.tipo_pasajero_id;
     }
 
-    if (filters.status) {
-        where.status = filters.status;
+    if (otherFilters.status) {
+        where.status = otherFilters.status;
     }
 
-    const descuentos = await Descuento.findAll({
+    const data = await Descuento.findAndCountAll({
         where,
         include: [
             { model: Convenio, attributes: ['id', 'nombre'] },
             { model: CodigoDescuento, attributes: ['id', 'codigo'] },
             { model: TipoPasajero, attributes: ['id', 'nombre'] },
             { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
-        ]
+        ],
+        limit: limitVal,
+        offset
     });
 
-    return descuentos;
+    return getPagingData(data, page, limitVal);
 };
 
 /**

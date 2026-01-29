@@ -1,5 +1,6 @@
 const { Empresa } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 exports.crear = async (req, res, next) => {
   try {
@@ -23,10 +24,17 @@ exports.crear = async (req, res, next) => {
   }
 };
 
-exports.listar = async (_req, res, next) => {
+exports.listar = async (req, res, next) => {
   try {
-    const empresas = await Empresa.findAll();
-    res.json(empresas);
+    const { page, limit } = req.query;
+    const { offset, limit: limitVal } = getPagination(page, limit);
+
+    const data = await Empresa.findAndCountAll({
+      limit: limitVal,
+      offset
+    });
+
+    res.json(getPagingData(data, page, limitVal));
   } catch (error) {
     next(error);
   }

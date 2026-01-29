@@ -2,6 +2,7 @@ const { Pasajero, TipoPasajero, Empresa, Convenio } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 /**
  * Calcular edad desde fecha de nacimiento
@@ -109,34 +110,38 @@ exports.crearPasajero = async (data) => {
  * Listar pasajeros
  */
 exports.listarPasajeros = async (filters = {}) => {
+  const { page, limit, ...otherFilters } = filters;
+  const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
 
-  if (filters.empresa_id) {
-    where.empresa_id = filters.empresa_id;
+  if (otherFilters.empresa_id) {
+    where.empresa_id = otherFilters.empresa_id;
   }
 
-  if (filters.convenio_id) {
-    where.convenio_id = filters.convenio_id;
+  if (otherFilters.convenio_id) {
+    where.convenio_id = otherFilters.convenio_id;
   }
 
-  if (filters.tipo_pasajero_id) {
-    where.tipo_pasajero_id = filters.tipo_pasajero_id;
+  if (otherFilters.tipo_pasajero_id) {
+    where.tipo_pasajero_id = otherFilters.tipo_pasajero_id;
   }
 
-  if (filters.status) {
-    where.status = filters.status;
+  if (otherFilters.status) {
+    where.status = otherFilters.status;
   }
 
-  const pasajeros = await Pasajero.findAll({
+  const data = await Pasajero.findAndCountAll({
     where,
     include: [
       { model: TipoPasajero, as: 'tipoPasajero', attributes: ['id', 'nombre'] },
       { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
-    ]
+    ],
+    limit: limitVal,
+    offset
   });
 
-  return pasajeros;
+  return getPagingData(data, page, limitVal);
 };
 
 /**

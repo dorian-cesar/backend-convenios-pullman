@@ -56,6 +56,11 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.ENUM('ACTIVO', 'INACTIVO'),
       defaultValue: 'ACTIVO'
+    },
+
+    telefono: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
 
   }, {

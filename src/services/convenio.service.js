@@ -1,6 +1,7 @@
 const { Convenio, Empresa, Descuento } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 /**
  * Crear convenio
@@ -29,17 +30,19 @@ exports.crearConvenio = async ({ nombre, empresa_id }) => {
  * Listar convenios
  */
 exports.listarConvenios = async (filters = {}) => {
+    const { page, limit, ...otherFilters } = filters;
+    const { offset, limit: limitVal } = getPagination(page, limit);
     const where = {};
 
-    if (filters.empresa_id) {
-        where.empresa_id = filters.empresa_id;
+    if (otherFilters.empresa_id) {
+        where.empresa_id = otherFilters.empresa_id;
     }
 
-    if (filters.status) {
-        where.status = filters.status;
+    if (otherFilters.status) {
+        where.status = otherFilters.status;
     }
 
-    const convenios = await Convenio.findAll({
+    const data = await Convenio.findAndCountAll({
         where,
         include: [
             {
@@ -50,10 +53,12 @@ exports.listarConvenios = async (filters = {}) => {
             {
                 model: Descuento
             }
-        ]
+        ],
+        limit: limitVal,
+        offset
     });
 
-    return convenios;
+    return getPagingData(data, page, limitVal);
 };
 
 /**

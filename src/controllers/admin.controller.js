@@ -3,6 +3,7 @@ const { Usuario, Rol } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const UsuarioDTO = require('../dtos/usuario.dto');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 exports.crearUsuario = async (req, res, next) => {
   try {
@@ -53,11 +54,20 @@ exports.crearUsuario = async (req, res, next) => {
 
 exports.listarUsuarios = async (req, res, next) => {
   try {
-    const usuarios = await Usuario.findAll({
-      attributes: ['id', 'correo', 'nombre', 'rut', 'status'],
-      include: [{ model: Rol, attributes: ['id', 'nombre'] }]
+    const { page, limit } = req.query;
+    const { offset, limit: limitVal } = getPagination(page, limit);
+
+    const data = await Usuario.findAndCountAll({
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status', 'telefono'],
+      include: [{ model: Rol, attributes: ['id', 'nombre'] }],
+      limit: limitVal,
+      offset
     });
-    res.json(UsuarioDTO.fromArray(usuarios));
+
+    const pagingData = getPagingData(data, page, limitVal);
+    pagingData.rows = UsuarioDTO.fromArray(pagingData.rows);
+
+    res.json(pagingData);
   } catch (error) {
     next(error);
   }

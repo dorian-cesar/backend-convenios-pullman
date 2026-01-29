@@ -3,8 +3,11 @@ const authService = require('../services/auth.service');
 exports.register = async (req, res, next) => {
   try {
     const result = await authService.register(req.body);
-    // authService.register returns a token string; return token + message
-    res.status(201).json({ token: result, message: 'Usuario creado satisfactoriamente' });
+    // authService.register now returns { user, token }
+    res.status(201).json({
+      ...result,
+      message: 'Usuario creado satisfactoriamente'
+    });
   } catch (error) {
     next(error);
   }
@@ -20,8 +23,8 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    const token = await authService.login({ correo, password });
-    res.json({ token });
+    const result = await authService.login({ correo, password });
+    res.json(result);
   } catch (error) {
     next(error);
   }

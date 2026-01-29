@@ -2,6 +2,7 @@ const { CodigoDescuento, Convenio, Descuento } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { Op } = require('sequelize');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 /**
  * Crear código de descuento
@@ -52,34 +53,38 @@ exports.crearCodigoDescuento = async (data) => {
  * Listar códigos de descuento
  */
 exports.listarCodigosDescuento = async (filters = {}) => {
+    const { page, limit, ...otherFilters } = filters;
+    const { offset, limit: limitVal } = getPagination(page, limit);
     const where = {};
 
-    if (filters.convenio_id) {
-        where.convenio_id = filters.convenio_id;
+    if (otherFilters.convenio_id) {
+        where.convenio_id = otherFilters.convenio_id;
     }
 
-    if (filters.status) {
-        where.status = filters.status;
+    if (otherFilters.status) {
+        where.status = otherFilters.status;
     }
 
     // Filtrar solo vigentes
-    if (filters.vigentes === 'true') {
+    if (otherFilters.vigentes === 'true') {
         const hoy = new Date();
         where.status = 'ACTIVO';
         where.fecha_inicio = { [Op.lte]: hoy };
         where.fecha_termino = { [Op.gte]: hoy };
     }
 
-    const codigos = await CodigoDescuento.findAll({
+    const data = await CodigoDescuento.findAndCountAll({
         where,
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
             { model: Descuento }
         ],
-        order: [['created_at', 'DESC']]
+        order: [['created_at', 'DESC']],
+        limit: limitVal,
+        offset
     });
 
-    return codigos;
+    return getPagingData(data, page, limitVal);
 };
 
 /**
