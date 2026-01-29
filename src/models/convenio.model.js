@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'ACTIVO'
         }
     }, {
-        tableName: 'CONVENIOS',
+        tableName: 'convenios',
         timestamps: false
     });
 

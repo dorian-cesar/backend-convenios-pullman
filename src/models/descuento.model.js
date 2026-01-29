@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'ACTIVO'
         }
     }, {
-        tableName: 'DESCUENTOS',
+        tableName: 'descuentos',
         timestamps: false
     });
 

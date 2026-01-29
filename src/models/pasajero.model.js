@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'ACTIVO'
         }
     }, {
-        tableName: 'PASAJEROS',
+        tableName: 'pasajeros',
         timestamps: false
     });
 
