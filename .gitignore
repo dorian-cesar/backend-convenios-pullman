@@ -33,3 +33,11 @@ src/seeds/usuario.seed.js
 
 # Context
 contexto.toml
+
+# Securización
+*.pem
+*.bat
+*.zip
+.env.aws.tmp
+combined.json
+full_spec.json
