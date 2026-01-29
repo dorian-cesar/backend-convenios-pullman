@@ -20,20 +20,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "."
+          source: ".,!node_modules,!.git,!.github,!*.pem,!*.zip,!*.bat,!full_spec.json,!deploy.sh,!.env*"
           target: "~/backend-convenios"
           rm: true
           strip_components: 0
-          exclude: |
-            node_modules
-            .git
-            .github
-            *.pem
-            *.zip
-            *.bat
-            full_spec.json
-            deploy.sh
-            .env*
 
       - name: Post-Deployment Steps
         uses: appleboy/ssh-action@v1.0.3
