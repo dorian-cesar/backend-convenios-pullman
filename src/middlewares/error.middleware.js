@@ -20,8 +20,11 @@ module.exports = (err, req, res, next) => {
     });
   }
 
-  // Fallback: log and return generic 500 JSON (avoid HTML stack pages)
   // eslint-disable-next-line no-console
   console.error(err);
-  res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Error interno del servidor' });
+  res.status(500).json({
+    error: 'INTERNAL_ERROR',
+    message: err.message,
+    stack: err.stack
+  });
 };

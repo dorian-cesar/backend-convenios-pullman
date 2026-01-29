@@ -29,12 +29,18 @@ exports.login = async ({ correo, password }) => {
     throw new AuthError('Credenciales inválidas');
   }
 
-  // En M:N el usuario puede tener varios roles, tomamos el primero o verificamos
-  const roles = usuario.Rols;
+  // En M:N el usuario puede tener varios roles
+  let roles = usuario.Rols || usuario.roles || usuario.Roles || [];
+  if (roles.length === 0) {
+    roles = await usuario.getRoles();
+  }
+
   if (!roles || roles.length === 0) {
     throw new AuthError('Usuario sin rol asignado');
   }
-  const rolNombre = roles[0].nombre;
+
+  const firstRol = roles[0];
+  const rolNombre = firstRol.nombre;
 
   const token = jwt.sign(
     {
@@ -46,7 +52,7 @@ exports.login = async ({ correo, password }) => {
     { expiresIn: '8h' }
   );
 
-  return AuthResponseDto.from(usuario, roles[0], token);
+  return AuthResponseDto.from(usuario, firstRol, token);
 };
 
 /**

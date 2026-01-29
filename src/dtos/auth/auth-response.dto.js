@@ -4,6 +4,8 @@ class AuthResponseDto {
       user: {
         id: usuario.id,
         correo: usuario.correo,
+        nombre: usuario.nombre,
+        telefono: usuario.telefono,
         rol: rol.nombre
       },
       token
