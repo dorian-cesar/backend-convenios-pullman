@@ -35,17 +35,11 @@ const router = Router();
  *                 example: Admin1234
  *     responses:
  *       200:
- *         description: Login exitoso, retorna el token JWT
+ *         description: Login exitoso, retorna el token JWT y datos del usuario
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                 message:
- *                   type: string
- *                   example: Login exitoso
+ *               $ref: '#/components/schemas/AuthResponse'
  */
 router.post('/login', authController.login);
 
@@ -79,19 +73,19 @@ router.post('/login', authController.login);
  *               rut:
  *                 type: string
  *                 example: 12345678-9
+ *               telefono:
+ *                 type: string
+ *                 example: +56912345678
+ *               telefono:
+ *                 type: string
+ *                 example: +56912345678
  *     responses:
  *       201:
- *         description: Registro exitoso, retorna el token JWT
+ *         description: Registro exitoso, retorna el token JWT y datos del usuario
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                 message:
- *                   type: string
- *                   example: Usuario registrado satisfactoriamente
+ *               $ref: '#/components/schemas/AuthResponse'
  */
 router.post('/register', authController.register);
 
