@@ -9,7 +9,9 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('🗄️ Conectado a la base de datos');
 
-    await sequelize.sync();
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    await sequelize.sync({ force: true });
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
     console.log('🗄️ Modelos sincronizados');
 
     app.listen(PORT, () => {
