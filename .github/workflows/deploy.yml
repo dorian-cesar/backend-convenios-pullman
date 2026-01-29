@@ -1,0 +1,55 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy Files to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "."
+          target: "~/backend-convenios"
+          rm: true
+          strip_components: 0
+          exclude: |
+            node_modules
+            .git
+            .github
+            *.pem
+            *.zip
+            *.bat
+            full_spec.json
+            deploy.sh
+            .env*
+
+      - name: Post-Deployment Steps
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/backend-convenios
+            # Crear .env desde Secret de GitHub
+            echo "${{ secrets.DOT_ENV }}" > .env
+            # Configurar Node de Bitnami en el PATH
+            export PATH=/opt/bitnami/node/bin:$PATH
+            # Instalar dependencias
+            npm install --production
+            # Reiniciar PM2
+            pm2 restart convenios-app || pm2 start src/server.js --name "convenios-app"
+            pm2 save
