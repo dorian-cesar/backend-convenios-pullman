@@ -10,16 +10,12 @@ async function startServer() {
     console.log('🗄️ Conectado a la base de datos');
 
     await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-
-    // Lista de tablas sospechosas que podrían estar chocando
-    const tables = [
-      'usuario_roles', 'tipos_pasajero', 'codigos_descuento', 'convenios', 'descuentos', 'eventos', 'pasajeros', 'usuarios', 'roles', 'empresas',
-      'USUARIO_ROLES', 'TIPOS_PASAJERO', 'CODIGOS_DESCUENTO', 'CONVENIOS', 'DESCUENTOS', 'EVENTOS', 'PASAJEROS', 'USUARIOS', 'ROLES', 'EMPRESAS',
-      'documentos_convenio'
-    ];
-
-    for (const table of tables) {
-      await sequelize.query(`DROP TABLE IF EXISTS \`${table}\``);
+    // Obtener todas las tablas existentes y borrarlas una por una
+    const [results] = await sequelize.query("SHOW TABLES");
+    for (const row of results) {
+      const tableName = Object.values(row)[0];
+      console.log(`🗑️ Borrando tabla: ${tableName}`);
+      await sequelize.query(`DROP TABLE IF EXISTS \`${tableName}\``);
     }
 
     await sequelize.sync({ force: true });
