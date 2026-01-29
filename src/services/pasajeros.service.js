@@ -98,9 +98,9 @@ exports.crearPasajero = async (data) => {
 
   return await Pasajero.findByPk(pasajero.id, {
     include: [
-      { model: TipoPasajero, attributes: ['id', 'nombre'] },
-      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
-      { model: Convenio, attributes: ['id', 'nombre'] }
+      { model: TipoPasajero, as: 'tipoPasajero', attributes: ['id', 'nombre'] },
+      { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
     ]
   });
 };
@@ -130,9 +130,9 @@ exports.listarPasajeros = async (filters = {}) => {
   const pasajeros = await Pasajero.findAll({
     where,
     include: [
-      { model: TipoPasajero, attributes: ['id', 'nombre'] },
-      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
-      { model: Convenio, attributes: ['id', 'nombre'] }
+      { model: TipoPasajero, as: 'tipoPasajero', attributes: ['id', 'nombre'] },
+      { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
     ]
   });
 
@@ -145,9 +145,9 @@ exports.listarPasajeros = async (filters = {}) => {
 exports.obtenerPasajero = async (id) => {
   const pasajero = await Pasajero.findByPk(id, {
     include: [
-      { model: TipoPasajero, attributes: ['id', 'nombre'] },
-      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
-      { model: Convenio, attributes: ['id', 'nombre'] }
+      { model: TipoPasajero, as: 'tipoPasajero', attributes: ['id', 'nombre'] },
+      { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
     ]
   });
 
@@ -165,9 +165,9 @@ exports.buscarPorRut = async (rut) => {
   const pasajero = await Pasajero.findOne({
     where: { rut },
     include: [
-      { model: TipoPasajero, attributes: ['id', 'nombre'] },
-      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
-      { model: Convenio, attributes: ['id', 'nombre'] }
+      { model: TipoPasajero, as: 'tipoPasajero', attributes: ['id', 'nombre'] },
+      { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
     ]
   });
 
@@ -225,9 +225,9 @@ exports.actualizarPasajero = async (id, datos) => {
 
   return await Pasajero.findByPk(id, {
     include: [
-      { model: TipoPasajero, attributes: ['id', 'nombre'] },
-      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
-      { model: Convenio, attributes: ['id', 'nombre'] }
+      { model: TipoPasajero, as: 'tipoPasajero', attributes: ['id', 'nombre'] },
+      { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
     ]
   });
 };

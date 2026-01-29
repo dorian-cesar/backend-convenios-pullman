@@ -1,4 +1,4 @@
-const { CodigoDescuento, Convenio } = require('../models');
+const { CodigoDescuento, Convenio, Descuento } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { Op } = require('sequelize');
@@ -41,7 +41,10 @@ exports.crearCodigoDescuento = async (data) => {
     });
 
     return await CodigoDescuento.findByPk(codigoDescuento.id, {
-        include: [{ model: Convenio, attributes: ['id', 'nombre'] }]
+        include: [
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+            { model: Descuento }
+        ]
     });
 };
 
@@ -69,7 +72,10 @@ exports.listarCodigosDescuento = async (filters = {}) => {
 
     const codigos = await CodigoDescuento.findAll({
         where,
-        include: [{ model: Convenio, attributes: ['id', 'nombre'] }],
+        include: [
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+            { model: Descuento }
+        ],
         order: [['created_at', 'DESC']]
     });
 
@@ -81,7 +87,10 @@ exports.listarCodigosDescuento = async (filters = {}) => {
  */
 exports.obtenerCodigoDescuento = async (id) => {
     const codigo = await CodigoDescuento.findByPk(id, {
-        include: [{ model: Convenio, attributes: ['id', 'nombre'] }]
+        include: [
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+            { model: Descuento }
+        ]
     });
 
     if (!codigo) {
@@ -97,7 +106,10 @@ exports.obtenerCodigoDescuento = async (id) => {
 exports.buscarPorCodigo = async (codigo) => {
     const codigoDescuento = await CodigoDescuento.findOne({
         where: { codigo },
-        include: [{ model: Convenio, attributes: ['id', 'nombre'] }]
+        include: [
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+            { model: Descuento }
+        ]
     });
 
     if (!codigoDescuento) {
@@ -147,7 +159,10 @@ exports.validarYUsarCodigo = async (codigo) => {
     await codigoDescuento.save();
 
     return await CodigoDescuento.findByPk(codigoDescuento.id, {
-        include: [{ model: Convenio, attributes: ['id', 'nombre'] }]
+        include: [
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+            { model: Descuento }
+        ]
     });
 };
 
@@ -181,7 +196,10 @@ exports.actualizarCodigoDescuento = async (id, datos) => {
     await codigo.save();
 
     return await CodigoDescuento.findByPk(id, {
-        include: [{ model: Convenio, attributes: ['id', 'nombre'] }]
+        include: [
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+            { model: Descuento }
+        ]
     });
 };
 

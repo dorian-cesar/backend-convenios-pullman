@@ -4,6 +4,13 @@ const authMiddleware = require('../middlewares/auth.middleware');
 
 const router = Router();
 
+/**
+ * @openapi
+ * tags:
+ *   name: Eventos
+ *   description: Gestión de eventos (viajes)
+ */
+
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);
 

@@ -5,6 +5,13 @@ const router = Router();
 
 /**
  * @openapi
+ * tags:
+ *   name: Auth
+ *   description: Operaciones de autenticación (login, register)
+ */
+
+/**
+ * @openapi
  * /api/auth/login:
  *   post:
  *     summary: Login de usuario
@@ -28,11 +35,17 @@ const router = Router();
  *                 example: Admin1234
  *     responses:
  *       200:
- *         description: Token JWT
+ *         description: Login exitoso, retorna el token JWT
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthResponse'
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                   example: Login exitoso
  */
 router.post('/login', authController.login);
 
@@ -68,11 +81,17 @@ router.post('/login', authController.login);
  *                 example: 12345678-9
  *     responses:
  *       201:
- *         description: Token JWT
+ *         description: Registro exitoso, retorna el token JWT
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthResponse'
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                   example: Usuario registrado satisfactoriamente
  */
 router.post('/register', authController.register);
 

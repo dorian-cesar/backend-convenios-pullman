@@ -1,4 +1,4 @@
-const { Convenio, Empresa } = require('../models');
+const { Convenio, Empresa, Descuento } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 
@@ -41,10 +41,16 @@ exports.listarConvenios = async (filters = {}) => {
 
     const convenios = await Convenio.findAll({
         where,
-        include: [{
-            model: Empresa,
-            attributes: ['id', 'nombre', 'rut_empresa']
-        }]
+        include: [
+            {
+                model: Empresa,
+                as: 'empresa',
+                attributes: ['id', 'nombre', 'rut_empresa']
+            },
+            {
+                model: Descuento
+            }
+        ]
     });
 
     return convenios;
@@ -55,10 +61,16 @@ exports.listarConvenios = async (filters = {}) => {
  */
 exports.obtenerConvenio = async (id) => {
     const convenio = await Convenio.findByPk(id, {
-        include: [{
-            model: Empresa,
-            attributes: ['id', 'nombre', 'rut_empresa']
-        }]
+        include: [
+            {
+                model: Empresa,
+                as: 'empresa',
+                attributes: ['id', 'nombre', 'rut_empresa']
+            },
+            {
+                model: Descuento
+            }
+        ]
     });
 
     if (!convenio) {
@@ -95,10 +107,16 @@ exports.actualizarConvenio = async (id, datos) => {
 
     // Recargar con relaciones
     return await Convenio.findByPk(id, {
-        include: [{
-            model: Empresa,
-            attributes: ['id', 'nombre', 'rut_empresa']
-        }]
+        include: [
+            {
+                model: Empresa,
+                as: 'empresa',
+                attributes: ['id', 'nombre', 'rut_empresa']
+            },
+            {
+                model: Descuento
+            }
+        ]
     });
 };
 

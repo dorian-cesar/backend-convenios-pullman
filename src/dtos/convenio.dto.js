@@ -6,12 +6,22 @@ class ConvenioDTO {
         this.status = convenio.status;
 
         // Si incluye la empresa relacionada
-        if (convenio.Empresa) {
+        if (convenio.empresa) {
             this.empresa = {
-                id: convenio.Empresa.id,
-                nombre: convenio.Empresa.nombre,
-                rut: convenio.Empresa.rut_empresa
+                id: convenio.empresa.id,
+                nombre: convenio.empresa.nombre,
+                rut: convenio.empresa.rut_empresa
             };
+        }
+
+        // Si incluye descuentos
+        if (convenio.Descuentos) {
+            this.descuentos = convenio.Descuentos.map(d => ({
+                id: d.id,
+                porcentaje: d.porcentaje_descuento,
+                tipo_pasajero_id: d.tipo_pasajero_id,
+                status: d.status
+            }));
         }
     }
 

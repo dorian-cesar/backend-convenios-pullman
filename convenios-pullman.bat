@@ -1,0 +1,1 @@
+ssh -i mypem.pem bitnami@35.175.124.217

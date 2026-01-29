@@ -2,6 +2,7 @@ const { Evento, Usuario, Pasajero, Empresa, Convenio, CodigoDescuento, Descuento
 const { sequelize } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
+const descuentoService = require('./descuento.service');
 
 /**
  * Calcular monto con descuento
@@ -10,36 +11,6 @@ const calcularMontoConDescuento = (tarifaBase, porcentajeDescuento) => {
   if (!porcentajeDescuento) return tarifaBase;
   const descuento = (tarifaBase * porcentajeDescuento) / 100;
   return tarifaBase - descuento;
-};
-
-/**
- * Obtener descuento aplicable
- */
-const obtenerDescuentoAplicable = async (pasajeroId, convenioId, codigoDescuentoId) => {
-  const pasajero = await Pasajero.findByPk(pasajeroId, {
-    include: [{ model: TipoPasajero }]
-  });
-
-  if (!pasajero || !pasajero.TipoPasajero) {
-    return 0;
-  }
-
-  // Buscar descuento por convenio y tipo de pasajero
-  if (convenioId) {
-    const descuento = await Descuento.findOne({
-      where: {
-        convenio_id: convenioId,
-        tipo_pasajero_id: pasajero.tipo_pasajero_id,
-        status: 'ACTIVO'
-      }
-    });
-
-    if (descuento) {
-      return descuento.porcentaje_descuento || 0;
-    }
-  }
-
-  return 0;
 };
 
 /**
@@ -79,8 +50,14 @@ exports.crearEvento = async (data) => {
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
   }
 
-  // Calcular descuento
-  const porcentajeDescuento = await obtenerDescuentoAplicable(pasajero_id, convenio_id, codigo_descuento_id);
+  // Calcular descuento usando el servicio central
+  const pasajeroObj = await Pasajero.findByPk(pasajero_id);
+  const aplicable = await descuentoService.obtenerDescuentoAplicable({
+    convenioId: convenio_id,
+    codigoDescuentoId: codigo_descuento_id,
+    tipoPasajeroId: pasajeroObj ? pasajeroObj.tipo_pasajero_id : null
+  });
+  const porcentajeDescuento = aplicable ? aplicable.porcentaje_descuento : 0;
   const montoPagado = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
 
   const evento = await Evento.create({
@@ -140,12 +117,14 @@ exports.crearCambio = async (data) => {
     throw new BusinessError('Solo se pueden cambiar eventos de tipo COMPRA');
   }
 
-  // Calcular diferencia de precio
-  const porcentajeDescuento = await obtenerDescuentoAplicable(
-    eventoOrigen.pasajero_id,
-    eventoOrigen.convenio_id,
-    eventoOrigen.codigo_descuento_id
-  );
+  // Calcular diferencia de precio usando el servicio central
+  const pasajeroObj = await Pasajero.findByPk(eventoOrigen.pasajero_id);
+  const aplicable = await descuentoService.obtenerDescuentoAplicable({
+    convenioId: eventoOrigen.convenio_id,
+    codigoDescuentoId: eventoOrigen.codigo_descuento_id,
+    tipoPasajeroId: pasajeroObj ? pasajeroObj.tipo_pasajero_id : null
+  });
+  const porcentajeDescuento = aplicable ? aplicable.porcentaje_descuento : 0;
 
   const nuevoMonto = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
   const montoPagado = nuevoMonto - eventoOrigen.monto_pagado;

@@ -17,11 +17,12 @@ const options = {
     tags: [
       { name: 'Auth', description: 'Operaciones de autenticación (login, register)' },
       { name: 'Admin', description: 'Administración de usuarios y roles' },
-      { name: 'Eventos', description: 'Gestión de eventos' },
+      { name: 'Empresas', description: 'Gestión de empresas' },
       { name: 'Convenios', description: 'Gestión de convenios empresariales' },
       { name: 'Pasajeros', description: 'Gestión de pasajeros' },
       { name: 'Códigos de Descuento', description: 'Gestión de códigos de descuento' },
-      { name: 'Descuentos', description: 'Gestión de reglas de descuento' }
+      { name: 'Descuentos', description: 'Gestión de reglas de descuento' },
+      { name: 'Eventos', description: 'Gestión de eventos (viajes)' }
     ],
     components: {
       securitySchemes: {
@@ -32,30 +33,46 @@ const options = {
         }
       },
       schemas: {
-        Descuento: {
+        AuthResponse: {
+          type: 'object',
+          properties: {
+            token: { type: 'string' },
+            message: { type: 'string' }
+          }
+        },
+        Empresa: {
           type: 'object',
           properties: {
             id: { type: 'integer', example: 1 },
-            convenio_id: { type: 'integer', example: 1 },
-            codigo_descuento_id: { type: 'integer', example: null },
-            tipo_pasajero_id: { type: 'integer', example: 1 },
-            pasajero_id: { type: 'integer', example: null },
-            porcentaje_descuento: { type: 'integer', example: 15 },
-            status: { type: 'string', enum: ['ACTIVO', 'INACTIVO'], example: 'ACTIVO' },
-            convenio: {
-              type: 'object',
-              properties: {
-                id: { type: 'integer', example: 1 },
-                nombre: { type: 'string', example: 'Convenio Verano 2026' }
-              }
-            },
-            tipo_pasajero: {
-              type: 'object',
-              properties: {
-                id: { type: 'integer', example: 1 },
-                nombre: { type: 'string', example: 'ESTUDIANTE' }
-              }
-            }
+            nombre: { type: 'string', example: 'Empresa Test S.A.' },
+            rut_empresa: { type: 'string', example: '76.000.000-1' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        CreateEmpresa: {
+          type: 'object',
+          required: ['nombre', 'rut'],
+          properties: {
+            nombre: { type: 'string', example: 'Empresa Nueva S.A.' },
+            rut: { type: 'string', example: '12.345.678-9' }
+          }
+        },
+        UpdateEmpresa: {
+          type: 'object',
+          properties: {
+            nombre: { type: 'string' },
+            rut: { type: 'string' },
+            status: { type: 'string', enum: ['ACTIVO', 'INACTIVO'] }
+          }
+        },
+        Usuario: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            correo: { type: 'string', example: 'admin@pullman.cl' },
+            nombre: { type: 'string', example: 'Admin User' },
+            rut: { type: 'string', example: '11.111.111-1' },
+            status: { type: 'string', example: 'ACTIVO' }
           }
         }
       }

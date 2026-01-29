@@ -18,6 +18,15 @@ class CodigoDescuentoDTO {
             };
         }
 
+        // Incluir descuentos si existen
+        if (codigoDescuento.Descuentos) {
+            this.descuentos = codigoDescuento.Descuentos.map(d => ({
+                id: d.id,
+                porcentaje: d.porcentaje_descuento,
+                status: d.status
+            }));
+        }
+
         // Calcular si está vigente
         const hoy = new Date();
         const inicio = new Date(codigoDescuento.fecha_inicio);

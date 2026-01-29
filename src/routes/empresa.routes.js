@@ -9,11 +9,9 @@ const router = Router();
  * @openapi
  * /api/empresas:
  *   get:
- *     summary: Listar empresas
- *     security:
- *       - bearerAuth: []
+ *     summary: Listar todas las empresas
  *     tags:
- *       - Admin
+ *       - Empresas
  *     responses:
  *       200:
  *         description: Lista de empresas
@@ -22,7 +20,16 @@ const router = Router();
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Empresa'
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   nombre:
+ *                     type: string
+ *                   rut_empresa:
+ *                     type: string
+ *                   status:
+ *                     type: string
  */
 router.get('/', auth, controller.listar);
 
@@ -34,7 +41,7 @@ router.get('/', auth, controller.listar);
  *     security:
  *       - bearerAuth: []
  *     tags:
- *       - Admin
+ *       - Empresas
  *     parameters:
  *       - in: path
  *         name: id
@@ -64,20 +71,39 @@ router.get('/:id', auth, controller.obtener);
  *     security:
  *       - bearerAuth: []
  *     tags:
- *       - Admin
+ *       - Empresas
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateEmpresa'
+ *             type: object
+ *             required:
+ *               - nombre
+ *               - rut
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: Empresa Corporativa S.A.
+ *               rut:
+ *                 type: string
+ *                 example: 76.000.123-4
  *     responses:
  *       201:
- *         description: Empresa creada
+ *         description: Empresa creada correctamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Empresa'
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 nombre:
+ *                   type: string
+ *                 rut_empresa:
+ *                   type: string
+ *                 status:
+ *                   type: string
  */
 router.post('/', auth, roles(['SUPER_USUARIO']), controller.crear);
 
@@ -89,7 +115,7 @@ router.post('/', auth, roles(['SUPER_USUARIO']), controller.crear);
  *     security:
  *       - bearerAuth: []
  *     tags:
- *       - Admin
+ *       - Empresas
  *     parameters:
  *       - in: path
  *         name: id
@@ -101,14 +127,31 @@ router.post('/', auth, roles(['SUPER_USUARIO']), controller.crear);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateEmpresa'
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               rut:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVO, INACTIVO]
  *     responses:
  *       200:
  *         description: Empresa actualizada
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Empresa'
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 nombre:
+ *                   type: string
+ *                 rut_empresa:
+ *                   type: string
+ *                 status:
+ *                   type: string
  */
 router.put('/:id', auth, roles(['SUPER_USUARIO']), controller.actualizar);
 
@@ -120,7 +163,7 @@ router.put('/:id', auth, roles(['SUPER_USUARIO']), controller.actualizar);
  *     security:
  *       - bearerAuth: []
  *     tags:
- *       - Admin
+ *       - Empresas
  *     parameters:
  *       - in: path
  *         name: id

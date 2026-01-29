@@ -187,14 +187,19 @@ exports.eliminarDescuento = async (id) => {
 exports.obtenerDescuentoAplicable = async ({
     convenioId,
     codigo,
+    codigoDescuentoId,
     tipoPasajeroId,
     pasajeroId
 }) => {
     // 1. Código de descuento (prioridad máxima)
-    if (codigo) {
+    if (codigo || codigoDescuentoId) {
+        const whereCodigo = {};
+        if (codigo) whereCodigo.codigo = codigo;
+        if (codigoDescuentoId) whereCodigo.id = codigoDescuentoId;
+
         const codigoValido = await CodigoDescuento.findOne({
             where: {
-                codigo,
+                ...whereCodigo,
                 status: 'ACTIVO',
                 fecha_inicio: { [Op.lte]: new Date() },
                 fecha_termino: { [Op.gte]: new Date() }

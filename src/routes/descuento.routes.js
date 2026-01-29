@@ -5,6 +5,13 @@ const rolesMiddleware = require('../middlewares/roles.middleware');
 
 const router = Router();
 
+/**
+ * @openapi
+ * tags:
+ *   name: Descuentos
+ *   description: Gestión de reglas de descuento
+ */
+
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);
 

@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Usuario, Rol } = require('../models');
 const AuthError = require('../exceptions/AuthError');
+const BusinessError = require('../exceptions/BusinessError');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -57,7 +58,7 @@ exports.register = async ({ correo, password, nombre, rut }) => {
 
   const existe = await Usuario.findOne({ where: { correo } });
   if (existe) {
-    throw new AuthError('El correo ya está registrado');
+    throw new BusinessError('El correo ya está registrado');
   }
 
   const rolUsuario = await Rol.findOne({
@@ -66,7 +67,7 @@ exports.register = async ({ correo, password, nombre, rut }) => {
   });
 
   if (!rolUsuario) {
-    throw new AuthError('Rol USUARIO no configurado');
+    throw new AuthError('Rol SUPER_USUARIO no configurado');
   }
 
   const passwordHash = await bcrypt.hash(password, 10);

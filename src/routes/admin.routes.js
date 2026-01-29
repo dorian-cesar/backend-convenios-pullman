@@ -7,6 +7,13 @@ const router = express.Router();
 
 /**
  * @openapi
+ * tags:
+ *   name: Admin
+ *   description: Administración de usuarios y roles
+ */
+
+/**
+ * @openapi
  * /api/admin/usuarios:
  *   post:
  *     summary: Crear usuario (solo SUPER_USUARIO) — crea `USUARIO` por defecto
