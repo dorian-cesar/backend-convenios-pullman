@@ -76,9 +76,6 @@ router.post('/login', authController.login);
  *               telefono:
  *                 type: string
  *                 example: +56912345678
- *               telefono:
- *                 type: string
- *                 example: +56912345678
  *     responses:
  *       201:
  *         description: Registro exitoso, retorna el token JWT y datos del usuario
