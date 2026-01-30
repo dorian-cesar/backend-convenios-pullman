@@ -42,7 +42,7 @@ exports.listarConvenios = async (filters = {}) => {
         where.empresa_id = otherFilters.empresa_id;
     }
 
-    const sortField = sortBy || 'createdAt';
+    const sortField = sortBy || 'id';
     const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
     const data = await Convenio.findAndCountAll({

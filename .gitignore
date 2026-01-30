@@ -44,3 +44,9 @@ full_spec.json
 
 #tomls
 *.toml
+
+#pem
+*.pem
+
+#bat
+*.bat

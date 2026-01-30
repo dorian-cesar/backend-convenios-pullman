@@ -56,23 +56,27 @@ describe('Eventos API', () => {
         await sequelize.close();
     });
 
-    describe('POST /api/eventos/viaje', () => {
-        it('debería registrar un viaje (evento)', async () => {
+    describe('POST /api/eventos/compra', () => {
+        it('debería registrar una compra (evento)', async () => {
             const res = await request(app)
-                .post('/api/eventos/viaje')
+                .post('/api/eventos/compra')
                 .set('Authorization', `Bearer ${token}`)
                 .send({
+                    usuario_id: usuarioId,
                     pasajero_id: pasajeroId,
                     empresa_id: empresaId,
                     convenio_id: convenioId,
-                    monto_total: 10000,
-                    monto_descuento: 2000,
-                    tipo_evento: 'VIAJE'
+                    ciudad_origen: 'Santiago',
+                    ciudad_destino: 'Valparaíso',
+                    fecha_viaje: '2026-02-15',
+                    tarifa_base: 10000,
+                    numero_asiento: 'A1'
                 });
 
+            if (res.statusCode !== 201) console.log('DEBUG EVENTO:', res.body);
             expect(res.statusCode).toBe(201);
-            expect(res.body.monto_total).toBe(10000);
-            expect(res.body.tipo_evento).toBe('VIAJE');
+            expect(res.body.tarifa_base).toBe(10000);
+            expect(res.body.tipo_evento).toBe('COMPRA');
         });
     });
 

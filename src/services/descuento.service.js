@@ -100,7 +100,7 @@ exports.listarDescuentos = async (filters = {}) => {
         where.tipo_pasajero_id = otherFilters.tipo_pasajero_id;
     }
 
-    const sortField = sortBy || 'createdAt';
+    const sortField = sortBy || 'id';
     const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
     const data = await Descuento.findAndCountAll({

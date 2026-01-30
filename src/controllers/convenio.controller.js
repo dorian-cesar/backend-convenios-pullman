@@ -18,8 +18,12 @@ exports.crear = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
     try {
-        const convenios = await convenioService.listarConvenios(req.query);
-        res.json(ConvenioDTO.fromArray(convenios));
+        const result = await convenioService.listarConvenios(req.query);
+        const response = {
+            ...result,
+            rows: ConvenioDTO.fromArray(result.rows)
+        };
+        res.json(response);
     } catch (error) {
         next(error);
     }

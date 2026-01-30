@@ -18,8 +18,12 @@ exports.crear = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
     try {
-        const codigos = await codigoDescuentoService.listarCodigosDescuento(req.query);
-        res.json(CodigoDescuentoDTO.fromArray(codigos));
+        const result = await codigoDescuentoService.listarCodigosDescuento(req.query);
+        const response = {
+            ...result,
+            rows: CodigoDescuentoDTO.fromArray(result.rows)
+        };
+        res.json(response);
     } catch (error) {
         next(error);
     }

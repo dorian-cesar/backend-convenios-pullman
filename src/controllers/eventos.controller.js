@@ -42,8 +42,12 @@ exports.crearDevolucion = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
   try {
-    const eventos = await eventosService.listarEventos(req.query);
-    res.json(EventoDTO.fromArray(eventos));
+    const result = await eventosService.listarEventos(req.query);
+    const response = {
+      ...result,
+      rows: EventoDTO.fromArray(result.rows)
+    };
+    res.json(response);
   } catch (error) {
     next(error);
   }

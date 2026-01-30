@@ -93,7 +93,7 @@ describe('Descuentos API', () => {
 
             expect(res.statusCode).toBe(200);
             expect(Array.isArray(res.body.rows)).toBe(true);
-            expect(res.body.length).toBeGreaterThan(0);
+            expect(res.body.rows.length).toBeGreaterThan(0);
         });
     });
 });
