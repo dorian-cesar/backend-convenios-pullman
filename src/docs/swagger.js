@@ -83,6 +83,72 @@ const options = {
             telefono: { type: 'string', example: '+56912345678' },
             status: { type: 'string', example: 'ACTIVO' }
           }
+        },
+        Convenio: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Convenio ABC' },
+            empresa_id: { type: 'integer', example: 1 },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        Pasajero: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            rut: { type: 'string', example: '11.111.111-1' },
+            nombres: { type: 'string', example: 'Juan' },
+            apellidos: { type: 'string', example: 'Pérez' },
+            fecha_nacimiento: { type: 'string', format: 'date', example: '1990-01-01' },
+            correo: { type: 'string', example: 'juan@email.com' },
+            telefono: { type: 'string', example: '+56912345678' },
+            tipo_pasajero_id: { type: 'integer', example: 1 },
+            empresa_id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 1 },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        CodigoDescuento: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            codigo: { type: 'string', example: 'VERANO2026' },
+            convenio_id: { type: 'integer', example: 1 },
+            fecha_inicio: { type: 'string', format: 'date', example: '2026-01-01' },
+            fecha_termino: { type: 'string', format: 'date', example: '2026-03-01' },
+            max_usos: { type: 'integer', example: 100 },
+            usos_realizados: { type: 'integer', example: 10 },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        Descuento: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 1 },
+            codigo_descuento_id: { type: 'integer', example: null },
+            tipo_pasajero_id: { type: 'integer', example: 1 },
+            pasajero_id: { type: 'integer', example: null },
+            porcentaje_descuento: { type: 'integer', example: 15 },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        Evento: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            tipo_evento: { type: 'string', enum: ['COMPRA', 'CAMBIO', 'DEVOLUCION'] },
+            ciudad_origen: { type: 'string', example: 'Santiago' },
+            ciudad_destino: { type: 'string', example: 'Valparaíso' },
+            fecha_viaje: { type: 'string', format: 'date', example: '2026-02-15' },
+            tarifa_base: { type: 'integer', example: 10000 },
+            monto_pagado: { type: 'integer', example: 8000 },
+            porcentaje_descuento_aplicado: { type: 'integer', example: 20 },
+            usuario_id: { type: 'integer', example: 1 },
+            pasajero_id: { type: 'integer', example: 1 },
+            empresa_id: { type: 'integer', example: 1 }
+          }
         }
       }
     },
