@@ -42,6 +42,11 @@ const router = Router();
  *           type: string
  *           enum: [ACTIVO, INACTIVO]
  *         description: Filtrar por estado
+ *       - in: query
+ *         name: nombre
+ *         schema:
+ *           type: string
+ *         description: Buscar por nombre (parcial)
  *     responses:
  *       200:
  *         description: Lista de empresas

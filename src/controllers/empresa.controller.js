@@ -1,4 +1,5 @@
 const { Empresa } = require('../models');
+const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
@@ -26,12 +27,15 @@ exports.crear = async (req, res, next) => {
 
 exports.listar = async (req, res, next) => {
   try {
-    const { page, limit, sortBy, order, status } = req.query;
+    const { page, limit, sortBy, order, status, nombre } = req.query;
     const { offset, limit: limitVal } = getPagination(page, limit);
 
     const where = {};
     if (status) {
       where.status = status;
+    }
+    if (nombre) {
+      where.nombre = { [Op.like]: `%${nombre}%` };
     }
 
     const sortField = sortBy || 'createdAt';
