@@ -17,6 +17,73 @@ router.use(authMiddleware);
 /**
  * @openapi
  * /api/pasajeros:
+ *   get:
+ *     summary: Listar pasajeros
+ *     tags:
+ *       - Pasajeros
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: empresa_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por empresa
+ *       - in: query
+ *         name: convenio_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por convenio
+ *       - in: query
+ *         name: tipo_pasajero_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por tipo de pasajero
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVO, INACTIVO]
+ *         description: Filtrar por estado
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Cantidad de elementos por página
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Campo por el cual ordenar
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Orden de la clasificación
+ *     responses:
+ *       200:
+ *         description: Lista de pasajeros
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalItems:
+ *                   type: integer
+ *                 rows:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Pasajero'
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
  *   post:
  *     summary: Crear un nuevo pasajero
  *     tags:
@@ -74,68 +141,7 @@ router.use(authMiddleware);
  */
 router.post('/', pasajerosController.crear);
 
-/**
- * @openapi
- * /api/pasajeros:
- *   get:
- *     summary: Listar pasajeros
- *     tags:
- *       - Pasajeros
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: empresa_id
- *         schema:
- *           type: integer
- *         description: Filtrar por empresa
- *       - in: query
- *         name: convenio_id
- *         schema:
- *           type: integer
- *         description: Filtrar por convenio
- *       - in: query
- *         name: tipo_pasajero_id
- *         schema:
- *           type: integer
- *         description: Filtrar por tipo de pasajero
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [ACTIVO, INACTIVO]
- *         description: Filtrar por estado
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Número de página
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Cantidad de elementos por página
- *     responses:
- *       200:
- *         description: Lista de pasajeros
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 totalItems:
- *                   type: integer
- *                 rows:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Pasajero'
- *                 totalPages:
- *                   type: integer
- *                 currentPage:
- *                   type: integer
- */
+// Swagger definitions moved to a consolidated block
 router.get('/', pasajerosController.listar);
 
 /**

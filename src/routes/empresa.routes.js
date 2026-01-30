@@ -12,6 +12,36 @@ const router = Router();
  *     summary: Listar todas las empresas
  *     tags:
  *       - Empresas
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Cantidad de registros por página
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Campo por el cual ordenar
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Orden de la clasificación
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVO, INACTIVO]
+ *         description: Filtrar por estado
  *     responses:
  *       200:
  *         description: Lista de empresas
@@ -30,42 +60,6 @@ const router = Router();
  *                     type: string
  *                   status:
  *                     type: string
- */
-router.get('/', auth, controller.listar);
-
-/**
- * @openapi
- * /api/empresas/{id}:
- *   get:
- *     summary: Obtener empresa por id
- *     security:
- *       - bearerAuth: []
- *     tags:
- *       - Empresas
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Empresa
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Empresa'
- *       404:
- *         description: Empresa no encontrada
- */
-router.get('/:id', auth, controller.obtener);
-
-/**
- * CRUD → solo SUPER_USUARIO (rol_id = 1)
- */
-/**
- * @openapi
- * /api/empresas:
  *   post:
  *     summary: Crear empresa (solo SUPER_USUARIO)
  *     security:
@@ -105,6 +99,39 @@ router.get('/:id', auth, controller.obtener);
  *                 status:
  *                   type: string
  */
+router.get('/', auth, controller.listar);
+
+/**
+ * @openapi
+ * /api/empresas/{id}:
+ *   get:
+ *     summary: Obtener empresa por id
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Empresas
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Empresa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Empresa'
+ *       404:
+ *         description: Empresa no encontrada
+ */
+router.get('/:id', auth, controller.obtener);
+
+/**
+ * CRUD → solo SUPER_USUARIO (rol_id = 1)
+ */
+// La definición Swagger de POST ya se movió al bloque de arriba para evitar colisiones
 router.post('/', auth, roles(['SUPER_USUARIO']), controller.crear);
 
 /**

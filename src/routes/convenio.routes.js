@@ -17,6 +17,54 @@ router.use(authMiddleware);
 /**
  * @openapi
  * /api/convenios:
+ *   get:
+ *     summary: Listar convenios
+ *     tags:
+ *       - Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: empresa_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por empresa
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVO, INACTIVO]
+ *         description: Filtrar por estado
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Cantidad de elementos por página
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Campo por el cual ordenar
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Orden de la clasificación
+ *     responses:
+ *       200:
+ *         description: Lista de convenios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Convenio'
  *   post:
  *     summary: Crear un nuevo convenio
  *     tags:
@@ -49,37 +97,7 @@ router.use(authMiddleware);
  */
 router.post('/', convenioController.crear);
 
-/**
- * @openapi
- * /api/convenios:
- *   get:
- *     summary: Listar convenios
- *     tags:
- *       - Convenios
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: empresa_id
- *         schema:
- *           type: integer
- *         description: Filtrar por empresa
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [ACTIVO, INACTIVO]
- *         description: Filtrar por estado
- *     responses:
- *       200:
- *         description: Lista de convenios
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Convenio'
- */
+// Consolidated block above
 router.get('/', convenioController.listar);
 
 /**

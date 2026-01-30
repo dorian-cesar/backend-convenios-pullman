@@ -18,13 +18,7 @@ exports.crear = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
     try {
-        const { convenio_id, codigo_descuento_id, tipo_pasajero_id, status } = req.query;
-        const descuentos = await descuentoService.listarDescuentos({
-            convenio_id,
-            codigo_descuento_id,
-            tipo_pasajero_id,
-            status
-        });
+        const descuentos = await descuentoService.listarDescuentos(req.query);
         res.json(DescuentoDTO.fromArray(descuentos));
     } catch (error) {
         next(error);

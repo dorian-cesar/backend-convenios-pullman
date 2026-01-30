@@ -54,12 +54,22 @@ exports.crearUsuario = async (req, res, next) => {
 
 exports.listarUsuarios = async (req, res, next) => {
   try {
-    const { page, limit } = req.query;
+    const { page, limit, sortBy, order, status } = req.query;
     const { offset, limit: limitVal } = getPagination(page, limit);
 
+    const where = {};
+    if (status) {
+      where.status = status;
+    }
+
+    const sortField = sortBy || 'createdAt';
+    const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
+
     const data = await Usuario.findAndCountAll({
-      attributes: ['id', 'correo', 'nombre', 'rut', 'status', 'telefono'],
+      where,
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status', 'telefono', 'createdAt'],
       include: [{ model: Rol, attributes: ['id', 'nombre'] }],
+      order: [[sortField, sortOrder]],
       limit: limitVal,
       offset
     });

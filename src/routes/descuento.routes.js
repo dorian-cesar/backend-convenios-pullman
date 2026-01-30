@@ -18,6 +18,64 @@ router.use(authMiddleware);
 /**
  * @openapi
  * /api/descuentos:
+ *   get:
+ *     summary: Listar descuentos
+ *     tags:
+ *       - Descuentos
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: convenio_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por convenio
+ *       - in: query
+ *         name: codigo_descuento_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por código de descuento
+ *       - in: query
+ *         name: tipo_pasajero_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por tipo de pasajero
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVO, INACTIVO]
+ *         description: Filtrar por estado
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Cantidad de elementos por página
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Campo por el cual ordenar
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Orden de la clasificación
+ *     responses:
+ *       200:
+ *         description: Lista de descuentos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Descuento'
  *   post:
  *     summary: Crear descuento (solo SUPER_USUARIO)
  *     description: Crea una regla de descuento para Convenio + TipoPasajero o CodigoDescuento
@@ -61,49 +119,6 @@ router.use(authMiddleware);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Descuento'
- */
-router.post('/', rolesMiddleware(['SUPER_USUARIO']), descuentoController.crear);
-
-/**
- * @openapi
- * /api/descuentos:
- *   get:
- *     summary: Listar descuentos
- *     tags:
- *       - Descuentos
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: convenio_id
- *         schema:
- *           type: integer
- *         description: Filtrar por convenio
- *       - in: query
- *         name: codigo_descuento_id
- *         schema:
- *           type: integer
- *         description: Filtrar por código de descuento
- *       - in: query
- *         name: tipo_pasajero_id
- *         schema:
- *           type: integer
- *         description: Filtrar por tipo de pasajero
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [ACTIVO, INACTIVO]
- *         description: Filtrar por estado
- *     responses:
- *       200:
- *         description: Lista de descuentos
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Descuento'
  */
 router.get('/', descuentoController.listar);
 

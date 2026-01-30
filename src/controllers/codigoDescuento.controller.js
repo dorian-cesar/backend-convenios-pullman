@@ -18,12 +18,7 @@ exports.crear = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
     try {
-        const { convenio_id, status, vigentes } = req.query;
-        const codigos = await codigoDescuentoService.listarCodigosDescuento({
-            convenio_id,
-            status,
-            vigentes
-        });
+        const codigos = await codigoDescuentoService.listarCodigosDescuento(req.query);
         res.json(CodigoDescuentoDTO.fromArray(codigos));
     } catch (error) {
         next(error);

@@ -18,6 +18,60 @@ router.use(authMiddleware);
 /**
  * @openapi
  * /api/codigos-descuento:
+ *   get:
+ *     summary: Listar códigos de descuento
+ *     tags:
+ *       - Códigos de Descuento
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: convenio_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por convenio
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVO, INACTIVO]
+ *         description: Filtrar por estado
+ *       - in: query
+ *         name: vigentes
+ *         schema:
+ *           type: string
+ *           enum: [true, false]
+ *         description: Filtrar solo códigos vigentes (activos y dentro del rango de fechas)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Cantidad de elementos por página
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Campo por el cual ordenar
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Orden de la clasificación
+ *     responses:
+ *       200:
+ *         description: Lista de códigos de descuento
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CodigoDescuento'
  *   post:
  *     summary: Crear código de descuento (solo SUPER_USUARIO)
  *     tags:
@@ -61,45 +115,6 @@ router.use(authMiddleware);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CodigoDescuento'
- */
-router.post('/', rolesMiddleware(['SUPER_USUARIO']), codigoDescuentoController.crear);
-
-/**
- * @openapi
- * /api/codigos-descuento:
- *   get:
- *     summary: Listar códigos de descuento
- *     tags:
- *       - Códigos de Descuento
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: convenio_id
- *         schema:
- *           type: integer
- *         description: Filtrar por convenio
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [ACTIVO, INACTIVO]
- *         description: Filtrar por estado
- *       - in: query
- *         name: vigentes
- *         schema:
- *           type: string
- *           enum: [true, false]
- *         description: Filtrar solo códigos vigentes (activos y dentro del rango de fechas)
- *     responses:
- *       200:
- *         description: Lista de códigos de descuento
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/CodigoDescuento'
  */
 router.get('/', codigoDescuentoController.listar);
 

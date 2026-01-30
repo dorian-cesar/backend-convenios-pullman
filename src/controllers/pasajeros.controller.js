@@ -18,13 +18,7 @@ exports.crear = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
     try {
-        const { empresa_id, convenio_id, tipo_pasajero_id, status } = req.query;
-        const pasajeros = await pasajerosService.listarPasajeros({
-            empresa_id,
-            convenio_id,
-            tipo_pasajero_id,
-            status
-        });
+        const pasajeros = await pasajerosService.listarPasajeros(req.query);
         res.json(PasajeroDTO.fromArray(pasajeros));
     } catch (error) {
         next(error);

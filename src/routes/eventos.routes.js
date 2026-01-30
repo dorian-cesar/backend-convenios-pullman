@@ -210,14 +210,29 @@ router.post('/devolucion', eventosController.crearDevolucion);
  *         name: page
  *         schema:
  *           type: integer
- *           default: 1
  *         description: Número de página
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *           default: 10
  *         description: Cantidad de elementos por página
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *         description: Campo por el cual ordenar
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *         description: Orden de la clasificación
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVO, INACTIVO]
+ *         description: Filtrar por estado
  *     responses:
  *       200:
  *         description: Lista de eventos

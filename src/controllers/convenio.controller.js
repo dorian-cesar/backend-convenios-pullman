@@ -18,8 +18,7 @@ exports.crear = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
     try {
-        const { empresa_id, status } = req.query;
-        const convenios = await convenioService.listarConvenios({ empresa_id, status });
+        const convenios = await convenioService.listarConvenios(req.query);
         res.json(ConvenioDTO.fromArray(convenios));
     } catch (error) {
         next(error);
