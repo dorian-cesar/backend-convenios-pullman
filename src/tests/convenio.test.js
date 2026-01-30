@@ -20,9 +20,12 @@ describe('Convenios API', () => {
             });
         token = authRes.body.token;
 
+        // Limpiar datos previos
+        await Empresa.destroy({ where: { nombre: 'Empresa Para Convenio' } });
+
         // Crear empresa para el convenio
         const [empresa] = await Empresa.findOrCreate({
-            where: { rut_empresa: '88.888.888-8' },
+            where: { rut_empresa: '88888888-8' },
             defaults: { nombre: 'Empresa Para Convenio', status: 'ACTIVO' }
         });
         empresaId = empresa.id;
@@ -43,7 +46,7 @@ describe('Convenios API', () => {
 
             if (res.statusCode !== 200) console.log('DEBUG CONVENIO GET ERROR:', res.body);
             expect(res.statusCode).toBe(200);
-            expect(Array.isArray(res.body)).toBe(true);
+            expect(Array.isArray(res.body.rows)).toBe(true);
         });
     });
 

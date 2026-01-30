@@ -41,3 +41,6 @@ contexto.toml
 .env.aws.tmp
 combined.json
 full_spec.json
+
+#tomls
+*.toml

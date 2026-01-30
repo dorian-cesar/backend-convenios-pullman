@@ -19,8 +19,11 @@ describe('Códigos de Descuento API', () => {
             });
         token = authRes.body.token;
 
+        // Limpiar datos previos
+        await Empresa.destroy({ where: { nombre: 'Empresa Para Codigos' } });
+
         const [empresa] = await Empresa.findOrCreate({
-            where: { rut_empresa: '66.666.666-6' },
+            where: { rut_empresa: '66666666-6' },
             defaults: { nombre: 'Empresa Para Codigos', status: 'ACTIVO' }
         });
 
@@ -77,7 +80,7 @@ describe('Códigos de Descuento API', () => {
                 .set('Authorization', `Bearer ${token}`);
 
             expect(res.statusCode).toBe(200);
-            expect(Array.isArray(res.body)).toBe(true);
+            expect(Array.isArray(res.body.rows)).toBe(true);
         });
     });
 });

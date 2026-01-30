@@ -20,9 +20,12 @@ describe('Descuentos API', () => {
             });
         token = authRes.body.token;
 
+        // Limpiar datos previos
+        await Empresa.destroy({ where: { nombre: 'Empresa Para Descuento' } });
+
         // Necesitamos una empresa y un convenio
         const [empresa] = await Empresa.findOrCreate({
-            where: { rut_empresa: '77.777.777-7' },
+            where: { rut_empresa: '77777777-7' },
             defaults: { nombre: 'Empresa Para Descuento', status: 'ACTIVO' }
         });
 
@@ -89,7 +92,7 @@ describe('Descuentos API', () => {
                 .set('Authorization', `Bearer ${token}`);
 
             expect(res.statusCode).toBe(200);
-            expect(Array.isArray(res.body)).toBe(true);
+            expect(Array.isArray(res.body.rows)).toBe(true);
             expect(res.body.length).toBeGreaterThan(0);
         });
     });

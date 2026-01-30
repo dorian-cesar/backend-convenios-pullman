@@ -34,8 +34,8 @@ describe('Admin API', () => {
                 .set('Authorization', `Bearer ${token}`);
 
             expect(res.statusCode).toBe(200);
-            expect(Array.isArray(res.body)).toBe(true);
-            expect(res.body.length).toBeGreaterThan(0);
+            expect(Array.isArray(res.body.rows)).toBe(true);
+            expect(res.body.rows.length).toBeGreaterThan(0);
         });
 
         it('debería fallar sin token', async () => {

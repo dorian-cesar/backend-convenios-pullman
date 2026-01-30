@@ -25,8 +25,11 @@ describe('Eventos API', () => {
         const adminUser = await Usuario.findOne({ where: { correo: 'admin@pullman.cl' } });
         usuarioId = adminUser.id;
 
+        // Limpiar datos previos
+        await Empresa.destroy({ where: { nombre: 'Empresa Para Eventos' } });
+
         const [empresa] = await Empresa.findOrCreate({
-            where: { rut_empresa: '44.444.444-4' },
+            where: { rut_empresa: '44444444-4' },
             defaults: { nombre: 'Empresa Para Eventos', status: 'ACTIVO' }
         });
         empresaId = empresa.id;
@@ -38,7 +41,7 @@ describe('Eventos API', () => {
         convenioId = convenio.id;
 
         const [pasajero] = await Pasajero.findOrCreate({
-            where: { rut: '22.222.222-2' },
+            where: { rut: '22222222-2' },
             defaults: {
                 nombres: 'Pasajero Evento',
                 apellidos: 'Test',
@@ -80,7 +83,7 @@ describe('Eventos API', () => {
                 .set('Authorization', `Bearer ${token}`);
 
             expect(res.statusCode).toBe(200);
-            expect(Array.isArray(res.body)).toBe(true);
+            expect(Array.isArray(res.body.rows)).toBe(true);
         });
     });
 });

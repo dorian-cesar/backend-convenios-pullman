@@ -53,9 +53,7 @@ exports.listarConvenios = async (filters = {}) => {
                 as: 'empresa',
                 attributes: ['id', 'nombre', 'rut_empresa']
             },
-            {
-                model: Descuento
-            }
+
         ],
         order: [[sortField, sortOrder]],
         limit: limitVal,

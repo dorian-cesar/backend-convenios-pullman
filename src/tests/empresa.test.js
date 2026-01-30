@@ -11,7 +11,15 @@ describe('Empresas API', () => {
         // Asegurar esquema
         await sequelize.sync();
         // Limpiar datos de prueba
-        await Empresa.destroy({ where: { rut_empresa: '11.111.111-1' } });
+        await Empresa.destroy({
+            where: {
+                [require('sequelize').Op.or]: [
+                    { rut_empresa: '11111111-1' },
+                    { nombre: 'Nueva Empresa S.A.' },
+                    { nombre: 'Empresa Test' }
+                ]
+            }
+        });
 
         // Login as admin to get token
         const res = await request(app)
@@ -24,7 +32,7 @@ describe('Empresas API', () => {
 
         // Crear empresa base
         await Empresa.findOrCreate({
-            where: { rut_empresa: '99.999.999-9' },
+            where: { rut_empresa: '99999999-9' },
             defaults: { nombre: 'Empresa Test', status: 'ACTIVO' }
         });
     });
@@ -40,7 +48,7 @@ describe('Empresas API', () => {
                 .set('Authorization', `Bearer ${token}`);
 
             expect(res.statusCode).toBe(200);
-            expect(Array.isArray(res.body)).toBe(true);
+            expect(Array.isArray(res.body.rows)).toBe(true);
         });
     });
 
@@ -51,7 +59,7 @@ describe('Empresas API', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     nombre: 'Nueva Empresa S.A.',
-                    rut: '11.111.111-1'
+                    rut: '11111111-1'
                 });
 
             if (res.statusCode !== 201) console.log('DEBUG EMPRESA CREATE ERROR:', res.body);
