@@ -18,8 +18,12 @@ exports.crear = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
     try {
-        const pasajeros = await pasajerosService.listarPasajeros(req.query);
-        res.json(PasajeroDTO.fromArray(pasajeros));
+        const result = await pasajerosService.listarPasajeros(req.query);
+        const response = {
+            ...result,
+            rows: PasajeroDTO.fromArray(result.rows)
+        };
+        res.json(response);
     } catch (error) {
         next(error);
     }

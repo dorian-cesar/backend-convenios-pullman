@@ -116,6 +116,7 @@ router.use(authMiddleware);
  *             schema:
  *               $ref: '#/components/schemas/CodigoDescuento'
  */
+router.post('/', rolesMiddleware(['SUPER_USUARIO']), codigoDescuentoController.crear);
 router.get('/', codigoDescuentoController.listar);
 
 /**
