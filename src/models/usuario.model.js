@@ -31,7 +31,13 @@ module.exports = (sequelize, DataTypes) => {
     rut: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: true
+      unique: true,
+      validate: {
+        is: {
+          args: /^[0-9]+-[0-9kK]$/,
+          msg: 'El RUT debe tener el formato xxxxxxxx-x (números y guion)'
+        }
+      }
     },
 
     password_hash: {

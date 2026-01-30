@@ -7,7 +7,13 @@ module.exports = (sequelize, DataTypes) => {
         },
         rut: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: true,
+            validate: {
+                is: {
+                    args: /^[0-9]+-[0-9kK]$/,
+                    msg: 'El RUT debe tener el formato xxxxxxxx-x (números y guion)'
+                }
+            }
         },
         nombres: {
             type: DataTypes.STRING,
