@@ -1,0 +1,127 @@
+# =========================================================
+# ANÁLISIS DE COMPATIBILIDAD: MODELOS ACTUALES VS NUEVOS REQUISITOS (KPIs)
+# =========================================================
+
+[compatibility_summary]
+overall_status = "COMPATIBLE"
+message = "Los modelos actuales cumplen con la mayoría de los requisitos definidos en 'nuevoskpis'. No se requieren cambios estructurales mayores en la base de datos."
+
+# =========================================================
+# DETALLE POR MODELO
+# =========================================================
+
+# ---------------------------------------------------------
+# 1. USUARIOS
+# ---------------------------------------------------------
+[models.USUARIOS]
+status = "COMPATIBLE"
+current_fields = ["id", "correo", "password_hash", "status", "createdAt (created_at equivalent)", "updatedAt", "empresa_id"]
+required_fields = ["id", "correo", "password_hash", "status", "created_at"]
+notes = "El modelo actual incluye `empresa_id` directamente, lo cual simplifica la relación Empresa-Usuario. Sequelize maneja `createdAt` automáticamente."
+
+# ---------------------------------------------------------
+# 2. ROLES
+# ---------------------------------------------------------
+[models.ROLES]
+status = "COMPATIBLE"
+current_fields = ["id", "nombre", "status", "createdAt", "updatedAt"]
+required_fields = ["id", "nombre", "status"]
+notes = "El modelo actual usa ENUM para nombre ('USUARIO', 'SUPER_USUARIO'), lo cual es una buena práctica."
+
+# ---------------------------------------------------------
+# 3. USUARIO_ROLES
+# ---------------------------------------------------------
+[models.USUARIO_ROLES]
+status = "COMPATIBLE"
+current_fields = ["id", "usuario_id", "rol_id", "status"]
+required_fields = ["id", "usuario_id", "rol_id", "status"]
+notes = "Coincide exactamente."
+
+# ---------------------------------------------------------
+# 4. EMPRESAS
+# ---------------------------------------------------------
+[models.EMPRESAS]
+status = "COMPATIBLE"
+current_fields = ["id", "nombre", "rut_empresa", "status", "createdAt", "updatedAt"]
+required_fields = ["id", "nombre", "rut_empresa", "status"]
+notes = "Coincide con los requisitos."
+
+# ---------------------------------------------------------
+# 5. CONVENIOS
+# ---------------------------------------------------------
+[models.CONVENIOS]
+status = "COMPATIBLE"
+current_fields = ["id", "empresa_id", "nombre", "status"]
+required_fields = ["id", "empresa_id", "nombre", "status"]
+notes = "Coincide perfectamente."
+
+# ---------------------------------------------------------
+# 6. CODIGOS_DESCUENTO
+# ---------------------------------------------------------
+[models.CODIGOS_DESCUENTO]
+status = "COMPATIBLE"
+current_fields = ["id", "convenio_id", "codigo", "fecha_inicio", "fecha_termino", "max_usos", "usos_realizados", "status", "created_at"]
+required_fields = ["id", "convenio_id", "codigo", "fecha_inicio", "fecha_termino", "max_usos", "usos_realizados", "status", "created_at"]
+notes = "Coincide perfectamente."
+
+# ---------------------------------------------------------
+# 7. TIPOS_PASAJERO
+# ---------------------------------------------------------
+[models.TIPOS_PASAJERO]
+status = "COMPATIBLE"
+current_fields = ["id", "nombre", "edad_min", "edad_max", "status"]
+required_fields = ["id", "nombre", "edad_min", "edad_max", "status"]
+notes = "Coincide perfectamente."
+
+# ---------------------------------------------------------
+# 8. PASAJEROS
+# ---------------------------------------------------------
+[models.PASAJEROS]
+status = "COMPATIBLE"
+current_fields = ["id", "rut", "nombres", "apellidos", "fecha_nacimiento", "correo", "telefono", "tipo_pasajero_id", "empresa_id", "convenio_id", "status"]
+required_fields = ["id", "rut", "nombres", "apellidos", "fecha_nacimiento", "correo", "telefono", "tipo_pasajero_id", "empresa_id", "convenio_id", "status"]
+notes = "Coincide perfectamente."
+
+# ---------------------------------------------------------
+# 9. EVENTOS (CRÍTICO PARA KPIs)
+# ---------------------------------------------------------
+[models.EVENTOS]
+status = "COMPATIBLE"
+current_fields = [
+  "id", "tipo_evento (ENUM)", "evento_origen_id", "usuario_id", "pasajero_id",
+  "empresa_id", "convenio_id", "codigo_descuento_id", "ciudad_origen", "ciudad_destino",
+  "fecha_viaje", "numero_asiento", "tarifa_base", "porcentaje_descuento_aplicado",
+  "monto_pagado", "monto_devolucion", "is_deleted", "fecha_evento"
+]
+required_fields = [
+  "id", "tipo_evento", "usuario_id", "pasajero_id", "empresa_id", "convenio_id",
+  "codigo_descuento_id", "ciudad_origen", "ciudad_destino", "fecha_viaje",
+  "numero_asiento", "tarifa_base", "porcentaje_descuento_aplicado",
+  "monto_pagado", "monto_devolucion", "is_deleted", "fecha_evento"
+]
+notes = "El modelo actual tiene `evento_origen_id` para trazabilidad (útil para cambios/devoluciones), lo cual enriquece el modelo base requerido. Todos los campos necesarios para los KPIs existen."
+
+# =========================================================
+# CONCLUSIONES SOBRE REGLAS DE NEGOCIO
+# =========================================================
+
+[rules_verification]
+
+usuarios_no_son_pasajeros = "CUMPLE. Son tablas separadas (Usuarios vs Pasajeros)."
+
+empresa_usuario_relacion = "CUMPLE. Usuario tiene `empresa_id` (N:1)."
+
+eventos_representan_tickets = "CUMPLE. Tabla `eventos` centraliza la lógica de transacciones."
+
+no_crear_tablas_extra_para_kpis = "CUMPLE. Los KPIs se calculan agregando data de `eventos`, sin tablas intermedias innecesarias."
+
+# =========================================================
+# RECOMENDACIÓN
+# =========================================================
+
+[recommendation]
+action = "PROCEDER"
+details = """
+Los modelos actuales soportan completamente la implementación de los nuevos KPIs descritos en 'nuevoskpis'.
+La estructura `EVENTOS` es robusta y contiene todas las claves foráneas y campos de valores necesarios (monto_pagado, tarifa_base, fechas) para realizar las agrupaciones y cálculos solicitados.
+"""

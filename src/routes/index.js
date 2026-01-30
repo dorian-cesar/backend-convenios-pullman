@@ -9,6 +9,7 @@ const empresaRoutes = require('./empresa.routes');
 const convenioRoutes = require('./convenio.routes');
 const codigoDescuentoRoutes = require('./codigoDescuento.routes');
 const descuentoRoutes = require('./descuento.routes');
+const kpiRoutes = require('./kpi.routes');
 
 const router = Router();
 
@@ -21,4 +22,5 @@ router.use('/empresas', empresaRoutes);
 router.use('/convenios', convenioRoutes);
 router.use('/codigos-descuento', codigoDescuentoRoutes);
 router.use('/descuentos', descuentoRoutes);
+router.use('/kpis', kpiRoutes);
 module.exports = router;

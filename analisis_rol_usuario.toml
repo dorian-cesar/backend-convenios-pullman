@@ -1,0 +1,56 @@
+# =========================================================
+# ANÁLISIS DEL ROL: USUARIO (Usuario Ordinario)
+# =========================================================
+
+[rol_info]
+nombre = "USUARIO"
+tipo = "Operativo / Solo Lectura"
+scope_principal = "Empresa (Restringido a su empresa_id)"
+
+# =========================================================
+# QUÉ HACE (CAPACIDADES PERMITIDAS)
+# =========================================================
+
+[capacidades]
+consultar_eventos = "Puede listar y ver detalles de eventos (compras, devoluciones) asociados a SU empresa."
+consultar_pasajeros = "Puede ver pasajeros que han realizado viajes con SU empresa."
+ver_kpis_empresa = "Puede visualizar indicadores de gestión, pero estrictamente filtrados para SU empresa."
+consultar_convenios = "Puede ver los convenios activos que tiene SU empresa."
+consultar_codigos = "Puede ver los códigos de descuento pertenecientes a SU empresa."
+
+# =========================================================
+# RESTRICCIONES (LO QUE NO PUEDE HACER)
+# =========================================================
+
+[restricciones]
+
+no_crear_datos_maestros = "NO puede crear nuevas Empresas, Convenios, ni Usuarios."
+no_modificar_configuracion = "NO puede alterar configuraciones globales ni de otros usuarios."
+no_ver_otras_empresas = "Estrictamente prohibido acceder a datos de una empresa diferente a la asignada en su token."
+
+# ---------------------------------------------------------
+# Acciones Críticas Reservadas a SUPER_USUARIO
+# ---------------------------------------------------------
+exclusivo_super_usuario = [
+  "Crear/Eliminar Empresas",
+  "Gestionar Usuarios del sistema (altas/bajas)",
+  "Crear nuevos Convenios Globales",
+  "Procesar Devoluciones (si la regla de negocio lo restringe)",
+  "Ver KPIs Consolidados (Globales de todas las empresas)"
+]
+
+# =========================================================
+# IMPLEMENTACIÓN TÉCNICA
+# =========================================================
+
+[tecnica]
+middleware_auth = "Requiere Token JWT válido."
+middleware_rol = "roles(['USUARIO']) permite acceso a rutas de consulta."
+filtro_obligatorio = "En cada consulta (Controller/Service), se inyecta `where: { empresa_id: req.user.empresa_id }`."
+
+[ejemplo_flujo]
+paso_1 = "Usuario se loguea y recibe Token con rol: 'USUARIO' y empresa_id: 5."
+paso_2 = "Solicita GET /api/kpis/ventas."
+paso_3 = "Backend verifica Rol -> OK."
+paso_4 = "Backend fuerza filtro -> WHERE empresa_id = 5."
+paso_5 = "Retorna solo las ventas de la empresa 5."

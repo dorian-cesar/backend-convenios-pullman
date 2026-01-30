@@ -1,0 +1,257 @@
+# =========================================================
+# CONTEXTO GENERAL – BACKEND CONVENIOS PULLMAN
+# =========================================================
+
+[app]
+name = "backend-convenios-pullman"
+stack = ["Node.js", "Express", "Sequelize", "MySQL"]
+auth = "JWT"
+environments = ["local", "production"]
+
+# =========================================================
+# ROLES DEL SISTEMA
+# =========================================================
+
+[roles]
+
+[roles.SUPER_USUARIO]
+description = "Administrador total del sistema"
+permissions = [
+  "crear_empresas",
+  "crear_usuarios",
+  "asignar_roles",
+  "asignar_usuarios_a_empresa",
+  "crear_convenios",
+  "modificar_convenios",
+  "crear_eventos",
+  "modificar_eventos",
+  "procesar_devoluciones",
+  "ver_kpis_globales",
+  "ver_kpis_por_empresa",
+  "consultar_eventos",
+  "consultar_pasajeros"
+]
+
+[roles.USUARIO]
+description = "Usuario ordinario de empresa (solo lectura)"
+permissions = [
+  "ver_kpis_empresa",
+  "consultar_eventos",
+  "consultar_pasajeros"
+]
+
+# =========================================================
+# REGLAS DE NEGOCIO CLAVE
+# =========================================================
+
+[rules]
+
+usuarios_no_son_pasajeros = true
+
+empresa_usuario_relacion = "Una empresa puede tener muchos usuarios; un usuario pertenece a una sola empresa"
+
+usuario_ordinario_es_read_only = true
+
+usuario_ordinario_scope = "Todas las consultas deben filtrarse por empresa_id del JWT"
+
+solo_super_usuario_crea_datos = true
+
+eventos_representan_tickets = true
+eventos_pueden_ser_compra_cambio_o_devolucion = true
+
+no_crear_tablas_extra_para_kpis = true
+eventos_son_fuente_de_verdad = true
+
+# =========================================================
+# MODELO DE DATOS (SEGÚN DIAGRAMA ORIGINAL)
+# =========================================================
+
+[models.USUARIOS]
+table = "USUARIOS"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "correo", type = "string" },
+  { name = "password_hash", type = "string" },
+  { name = "status", type = "string" },
+  { name = "created_at", type = "datetime" }
+]
+
+[models.ROLES]
+table = "ROLES"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "nombre", type = "string" },
+  { name = "status", type = "string" }
+]
+
+[models.USUARIO_ROLES]
+table = "USUARIO_ROLES"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "usuario_id", type = "int", fk = "USUARIOS.id" },
+  { name = "rol_id", type = "int", fk = "ROLES.id" },
+  { name = "status", type = "string" }
+]
+
+[models.EMPRESAS]
+table = "EMPRESAS"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "nombre", type = "string" },
+  { name = "rut_empresa", type = "string" },
+  { name = "status", type = "string" }
+]
+
+[models.CONVENIOS]
+table = "CONVENIOS"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "empresa_id", type = "int", fk = "EMPRESAS.id" },
+  { name = "nombre", type = "string" },
+  { name = "status", type = "string" }
+]
+
+[models.CODIGOS_DESCUENTO]
+table = "CODIGOS_DESCUENTO"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "convenio_id", type = "int", fk = "CONVENIOS.id" },
+  { name = "codigo", type = "string" },
+  { name = "fecha_inicio", type = "date" },
+  { name = "fecha_termino", type = "date" },
+  { name = "max_usos", type = "int" },
+  { name = "usos_realizados", type = "int" },
+  { name = "status", type = "string" },
+  { name = "created_at", type = "datetime" }
+]
+
+[models.TIPOS_PASAJERO]
+table = "TIPOS_PASAJERO"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "nombre", type = "string" },
+  { name = "edad_min", type = "int" },
+  { name = "edad_max", type = "int" },
+  { name = "status", type = "string" }
+]
+
+[models.PASAJEROS]
+table = "PASAJEROS"
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "rut", type = "string" },
+  { name = "nombres", type = "string" },
+  { name = "apellidos", type = "string" },
+  { name = "fecha_nacimiento", type = "date" },
+  { name = "correo", type = "string" },
+  { name = "telefono", type = "string" },
+  { name = "tipo_pasajero_id", type = "int", fk = "TIPOS_PASAJERO.id" },
+  { name = "empresa_id", type = "int", fk = "EMPRESAS.id" },
+  { name = "convenio_id", type = "int", fk = "CONVENIOS.id" },
+  { name = "status", type = "string" }
+]
+
+# =========================================================
+# MODELO CENTRAL PARA KPIs Y TRAZABILIDAD
+# =========================================================
+
+[models.EVENTOS]
+table = "EVENTOS"
+description = "Ledger de tickets/pasajes: compra, cambio y devolución"
+
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "tipo_evento", type = "string", values = ["COMPRA", "CAMBIO", "DEVOLUCION"] },
+  { name = "usuario_id", type = "int", fk = "USUARIOS.id" },
+  { name = "pasajero_id", type = "int", fk = "PASAJEROS.id" },
+  { name = "empresa_id", type = "int", fk = "EMPRESAS.id" },
+  { name = "convenio_id", type = "int", fk = "CONVENIOS.id" },
+  { name = "codigo_descuento_id", type = "int", fk = "CODIGOS_DESCUENTO.id" },
+  { name = "ciudad_origen", type = "string" },
+  { name = "ciudad_destino", type = "string" },
+  { name = "fecha_viaje", type = "date" },
+  { name = "numero_asiento", type = "string" },
+  { name = "tarifa_base", type = "int" },
+  { name = "porcentaje_descuento_aplicado", type = "int" },
+  { name = "monto_pagado", type = "int" },
+  { name = "monto_devolucion", type = "int" },
+  { name = "is_deleted", type = "boolean" },
+  { name = "fecha_evento", type = "datetime" }
+]
+
+# =========================================================
+# DEFINICIÓN COMPLETA DE KPIs
+# =========================================================
+
+[kpis]
+
+[kpis.total_ventas]
+sql = "SUM(monto_pagado)"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+group_by = ["empresa_id", "YEAR(fecha_evento)", "MONTH(fecha_evento)"]
+
+[kpis.total_devoluciones]
+sql = "SUM(monto_devolucion)"
+filter = "tipo_evento = 'DEVOLUCION' AND is_deleted = false"
+group_by = ["empresa_id", "YEAR(fecha_evento)", "MONTH(fecha_evento)"]
+
+[kpis.total_descuento]
+sql = "SUM(tarifa_base * (porcentaje_descuento_aplicado / 100))"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+group_by = ["empresa_id", "YEAR(fecha_evento)", "MONTH(fecha_evento)"]
+
+[kpis.total_pasajeros]
+sql = "COUNT(DISTINCT pasajero_id)"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+group_by = ["empresa_id", "YEAR(fecha_evento)", "MONTH(fecha_evento)"]
+
+[kpis.pasajes_por_convenio]
+sql = "COUNT(id)"
+filter = "tipo_evento = 'COMPRA'"
+group_by = ["empresa_id", "convenio_id"]
+
+[kpis.pasajes_por_codigo_descuento]
+sql = "COUNT(id)"
+filter = "tipo_evento = 'COMPRA' AND codigo_descuento_id IS NOT NULL"
+group_by = ["empresa_id", "codigo_descuento_id"]
+
+[kpis.pasajes_por_tipo_pasajero]
+sql = "COUNT(EVENTOS.id)"
+join = "PASAJEROS"
+group_by = ["empresa_id", "PASAJEROS.tipo_pasajero_id"]
+
+# =========================================================
+# ENDPOINTS DE CONSULTA
+# =========================================================
+
+[api]
+
+[api.kpis]
+base_path = "/api/kpis"
+auth = "JWT"
+
+[api.kpis.super_usuario]
+scope = "global"
+
+[api.kpis.usuario]
+scope = "empresa"
+restriccion = "empresa_id == token.empresa_id"
+
+[api.consultas]
+permitidas_usuario = [
+  "consultar_eventos_por_rut",
+  "consultar_eventos_por_convenio",
+  "consultar_pasajeros_por_rut"
+]
+
+# =========================================================
+# NOTAS FINALES PARA COPILOT
+# =========================================================
+
+[notes]
+no_inventar_tablas = true
+no_agregar_auditoria = true
+no_agregar_contacto = true
+no_agregar_sucursal = true
+todo_sale_de_eventos = true
+usuario_ordinario_nunca_es_admin = true

@@ -1,0 +1,166 @@
+# =========================================================
+# CONTEXTO GENERAL DEL PROYECTO – BACKEND CONVENIOS PULLMAN
+# =========================================================
+
+[app]
+name = "backend-convenios-pullman"
+stack = ["Node.js", "Express", "Sequelize", "MySQL"]
+auth = "JWT"
+roles = ["SUPER_USUARIO", "USUARIO"]
+environment = ["local", "production"]
+
+# =========================================================
+# REGLAS DE NEGOCIO CLAVE
+# =========================================================
+
+[rules]
+super_usuario_permissions = [
+  "crear_empresas",
+  "crear_usuarios",
+  "asignar_usuarios_a_empresa",
+  "crear_convenios",
+  "modificar_convenios",
+  "ver_kpis",
+  "modificar_eventos",
+  "procesar_devoluciones"
+]
+
+usuario_permissions = [
+  "operar_eventos",
+  "consultar_eventos"
+]
+
+empresa_usuario_relacion = "Una empresa tiene muchos usuarios, un usuario pertenece a una sola empresa"
+usuarios_no_son_pasajeros = true
+
+# =========================================================
+# MODELO CENTRAL PARA KPIS: EVENTOS
+# =========================================================
+
+[eventos_model]
+table = "EVENTOS"
+
+fields = [
+  { name = "id", type = "int", pk = true },
+  { name = "tipo_evento", type = "string", description = "COMPRA | CAMBIO | DEVOLUCION" },
+  { name = "usuario_id", type = "int", fk = "USUARIOS.id" },
+  { name = "pasajero_id", type = "int", fk = "PASAJEROS.id" },
+  { name = "empresa_id", type = "int", fk = "EMPRESAS.id" },
+  { name = "convenio_id", type = "int", fk = "CONVENIOS.id" },
+  { name = "codigo_descuento_id", type = "int", fk = "CODIGOS_DESCUENTO.id" },
+  { name = "tarifa_base", type = "int" },
+  { name = "porcentaje_descuento_aplicado", type = "int" },
+  { name = "monto_pagado", type = "int" },
+  { name = "monto_devolucion", type = "int" },
+  { name = "fecha_evento", type = "datetime" },
+  { name = "is_deleted", type = "boolean" }
+]
+
+eventos_es_fuente_de_verdad = true
+no_se_crean_tablas_extra_para_kpis = true
+
+# =========================================================
+# DEFINICIÓN DE KPIs
+# =========================================================
+
+[kpis]
+
+# ---------------------------------------------------------
+# KPI 1 – TOTAL DE VENTAS
+# ---------------------------------------------------------
+[kpis.total_ventas]
+description = "Suma total del dinero efectivamente pagado"
+source = "EVENTOS"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+formula_sql = "SUM(monto_pagado)"
+grouping = ["empresa_id", "mes"]
+permissions = ["SUPER_USUARIO"]
+
+# ---------------------------------------------------------
+# KPI 2 – TOTAL DEVOLUCIONES
+# ---------------------------------------------------------
+[kpis.total_devoluciones]
+description = "Monto total devuelto a pasajeros"
+source = "EVENTOS"
+filter = "tipo_evento = 'DEVOLUCION' AND is_deleted = false"
+formula_sql = "SUM(monto_devolucion)"
+grouping = ["empresa_id", "mes"]
+permissions = ["SUPER_USUARIO"]
+
+# ---------------------------------------------------------
+# KPI 3 – TOTAL DESCUENTO APLICADO
+# ---------------------------------------------------------
+[kpis.total_descuento]
+description = "Monto total descontado respecto a tarifa base"
+source = "EVENTOS"
+calculation_logic = """
+descuento = tarifa_base * (porcentaje_descuento_aplicado / 100)
+"""
+formula_sql = "SUM(tarifa_base * (porcentaje_descuento_aplicado / 100))"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+grouping = ["empresa_id", "mes"]
+permissions = ["SUPER_USUARIO"]
+
+# ---------------------------------------------------------
+# KPI 4 – TOTAL PASAJEROS MENSUAL
+# ---------------------------------------------------------
+[kpis.total_pasajeros_mensual]
+description = "Cantidad de pasajeros únicos que viajaron en el mes"
+source = "EVENTOS"
+formula_sql = "COUNT(DISTINCT pasajero_id)"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+grouping = ["empresa_id", "mes"]
+permissions = ["SUPER_USUARIO"]
+
+# =========================================================
+# ENDPOINTS A IMPLEMENTAR
+# =========================================================
+
+[api.kpis]
+
+base_path = "/api/kpis"
+auth = "JWT"
+role_required = "SUPER_USUARIO"
+
+endpoints = [
+  { method = "GET", path = "/resumen", description = "Devuelve todos los KPIs agregados" },
+  { method = "GET", path = "/ventas", description = "Total de ventas por mes" },
+  { method = "GET", path = "/devoluciones", description = "Total de devoluciones por mes" },
+  { method = "GET", path = "/descuentos", description = "Total descuento aplicado por mes" },
+  { method = "GET", path = "/pasajeros", description = "Total pasajeros únicos por mes" }
+]
+
+query_params = [
+  { name = "empresa_id", required = false },
+  { name = "from", format = "YYYY-MM" },
+  { name = "to", format = "YYYY-MM" }
+]
+
+# =========================================================
+# RESPUESTA ESTÁNDAR DE KPIs
+# =========================================================
+
+[api.response]
+format = "json"
+
+example = '''
+{
+  "empresa_id": 1,
+  "periodo": "2026-01",
+  "total_ventas": 12500000,
+  "total_devoluciones": 850000,
+  "total_descuento": 2300000,
+  "total_pasajeros": 1842
+}
+'''
+
+# =========================================================
+# NOTAS IMPORTANTES PARA COPILOT
+# =========================================================
+
+[notes]
+usar_sequelize_fn = true
+no_hardcodear_fechas = true
+agrupar_por_mes = "YEAR(fecha_evento), MONTH(fecha_evento)"
+eventos_representan_tickets = true
+devoluciones_y_cambios_ya_estan_modelados = true

@@ -1,0 +1,180 @@
+# =========================================================
+# CONTEXTO GENERAL DEL PROYECTO – BACKEND CONVENIOS PULLMAN
+# ENHANCED KPI DEFINITION (Soporte extendido de granularidad)
+# =========================================================
+
+[app]
+name = "backend-convenios-pullman"
+stack = ["Node.js", "Express", "Sequelize", "MySQL"]
+environment = ["local", "production"]
+
+# =========================================================
+# MODELO CENTRAL PARA KPIS: EVENTOS
+# =========================================================
+
+[eventos_model]
+table = "EVENTOS"
+# Se confirma que fecha_evento existe y es la fecha de transacción (DATE)
+timestamp_field = "fecha_evento"
+
+# =========================================================
+# DEFINICIÓN DE KPIs
+# =========================================================
+
+[kpis]
+
+# ---------------------------------------------------------
+# KPI 1 – TOTAL DE VENTAS
+# ---------------------------------------------------------
+[kpis.total_ventas]
+description = "Suma total del dinero efectivamente pagado"
+source = "EVENTOS"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+formula_sql = "SUM(monto_pagado)"
+permissions = ["SUPER_USUARIO"]
+
+# ---------------------------------------------------------
+# KPI 2 – TOTAL DEVOLUCIONES
+# ---------------------------------------------------------
+[kpis.total_devoluciones]
+description = "Monto total devuelto a pasajeros"
+source = "EVENTOS"
+filter = "tipo_evento = 'DEVOLUCION' AND is_deleted = false"
+formula_sql = "SUM(monto_devolucion)"
+permissions = ["SUPER_USUARIO"]
+
+# ---------------------------------------------------------
+# KPI 3 – TOTAL DESCUENTO APLICADO
+# ---------------------------------------------------------
+[kpis.total_descuento]
+description = "Monto total descontado respecto a tarifa base"
+source = "EVENTOS"
+formula_sql = "SUM(tarifa_base * (porcentaje_descuento_aplicado / 100))"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+permissions = ["SUPER_USUARIO"]
+
+# ---------------------------------------------------------
+# KPI 4 – TOTAL PASAJEROS (Unicos)
+# ---------------------------------------------------------
+[kpis.total_pasajeros]
+description = "Cantidad de pasajeros únicos en el periodo"
+source = "EVENTOS"
+formula_sql = "COUNT(DISTINCT pasajero_id)"
+filter = "tipo_evento = 'COMPRA' AND is_deleted = false"
+permissions = ["SUPER_USUARIO"]
+
+# =========================================================
+# ENDPOINTS A IMPLEMENTAR
+# =========================================================
+
+[api.kpis]
+
+base_path = "/api/kpis"
+auth = "JWT"
+role_required = "SUPER_USUARIO"
+
+endpoints = [
+  { method = "GET", path = "/resumen", description = "Devuelve KPIs agregados según granularidad" },
+  # Endpoints especificos pueden ser deprecados en favor de /resumen con parametros, 
+  # pero se mantienen por compatibilidad si se desea.
+  { method = "GET", path = "/ventas", description = "Total de ventas" },
+  { method = "GET", path = "/devoluciones", description = "Total de devoluciones" },
+  { method = "GET", path = "/descuentos", description = "Total descuentos" },
+  { method = "GET", path = "/pasajeros", description = "Total pasajeros" }
+]
+
+# ---------------------------------------------------------
+# PARÁMETROS DE CONSULTA (QUERY PARAMS)
+# ---------------------------------------------------------
+# Se soportan en todos los endpoints de KPIs
+query_params = [
+  # 1. Filtros Básicos
+  { name = "empresa_id", type = "int", required = false },
+  
+  # 2. Rango de Fechas (UTC o Local)
+  { name = "fecha_inicio", type = "date", format = "YYYY-MM-DD", description = "Inicio del periodo de análisis" },
+  { name = "fecha_fin", type = "date", format = "YYYY-MM-DD", description = "Fin del periodo de análisis" },
+  
+  # 3. Granularidad (Agrupación Temporal)
+  { 
+    name = "granularidad", 
+    type = "string", 
+    options = ["diario", "semanal", "mensual", "trimestral", "semestral", "anual", "quinquenal"],
+    default = "mensual",
+    description = "Nivel de agrupación de los datos"
+  },
+  
+  # 4. Ordenamiento y Paginación (para la lista de resultados agrupados)
+  # Nota: Paginación aplica sobre los periodos resultantes (ej. página 1 de meses)
+  { name = "page", type = "int", default = 1 },
+  { name = "limit", type = "int", default = 12 },
+  { name = "sortBy", type = "string", default = "periodo", options = ["periodo", "total"] },
+  { name = "order", type = "string", default = "ASC", options = ["ASC", "DESC"] }
+]
+
+# =========================================================
+# LÓGICA DE GRANULARIDAD (MySQL Dialect)
+# =========================================================
+
+[granularities]
+
+[granularities.diario]
+sql_group = "DATE(fecha_evento)"
+sql_select = "DATE(fecha_evento) as periodo"
+format_js = "YYYY-MM-DD"
+
+[granularities.semanal]
+# Año-Semana (ej. 2026-05)
+sql_group = "YEAR(fecha_evento), WEEK(fecha_evento, 1)"
+sql_select = "CONCAT(YEAR(fecha_evento), '-W', LPAD(WEEK(fecha_evento, 1), 2, '0')) as periodo"
+
+[granularities.mensual]
+sql_group = "YEAR(fecha_evento), MONTH(fecha_evento)"
+sql_select = "DATE_FORMAT(fecha_evento, '%Y-%m') as periodo"
+
+[granularities.trimestral]
+# 1, 2, 3, 4
+sql_group = "YEAR(fecha_evento), QUARTER(fecha_evento)"
+sql_select = "CONCAT(YEAR(fecha_evento), '-Q', QUARTER(fecha_evento)) as periodo"
+
+[granularities.semestral]
+# Lógica custom: IF(MONTH <= 6, 1, 2)
+sql_group = "YEAR(fecha_evento), IF(MONTH(fecha_evento) <= 6, 1, 2)"
+sql_select = "CONCAT(YEAR(fecha_evento), '-S', IF(MONTH(fecha_evento) <= 6, 1, 2)) as periodo"
+
+[granularities.anual]
+sql_group = "YEAR(fecha_evento)"
+sql_select = "CAST(YEAR(fecha_evento) AS CHAR) as periodo"
+
+[granularities.quinquenal]
+# Agrupa cada 5 años (ej. 2020-2024, 2025-2029)
+# Formula: FLOOR(YEAR / 5) * 5
+sql_group = "FLOOR(YEAR(fecha_evento) / 5)"
+sql_select = "CONCAT(FLOOR(YEAR(fecha_evento) / 5) * 5, '-', (FLOOR(YEAR(fecha_evento) / 5) * 5) + 4) as periodo"
+
+# =========================================================
+# EXAMPLE RESPONSE
+# =========================================================
+
+[api.response]
+example = '''
+{
+  "totalItems": 12,
+  "totalPages": 1,
+  "currentPage": 1,
+  "rows": [
+    {
+      "periodo": "2026-01",
+      "total_ventas": 15000000,
+      "total_devoluciones": 20000,
+      "total_neto": 14980000
+    },
+    {
+      "periodo": "2026-02",
+      "total_ventas": 18000000,
+      "total_devoluciones": 50000,
+      "total_neto": 17950000
+    }
+  ]
+}
+'''
