@@ -68,7 +68,7 @@ exports.crearDescuento = async (data) => {
 
     return await Descuento.findByPk(descuento.id, {
         include: [
-            { model: Convenio, attributes: ['id', 'nombre'] },
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
             { model: CodigoDescuento, attributes: ['id', 'codigo'] },
             { model: TipoPasajero, attributes: ['id', 'nombre'] },
             { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
@@ -106,7 +106,7 @@ exports.listarDescuentos = async (filters = {}) => {
     const data = await Descuento.findAndCountAll({
         where,
         include: [
-            { model: Convenio, attributes: ['id', 'nombre'] },
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
             { model: CodigoDescuento, attributes: ['id', 'codigo'] },
             { model: TipoPasajero, attributes: ['id', 'nombre'] },
             { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
@@ -125,7 +125,7 @@ exports.listarDescuentos = async (filters = {}) => {
 exports.obtenerDescuento = async (id) => {
     const descuento = await Descuento.findByPk(id, {
         include: [
-            { model: Convenio, attributes: ['id', 'nombre'] },
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
             { model: CodigoDescuento, attributes: ['id', 'codigo'] },
             { model: TipoPasajero, attributes: ['id', 'nombre'] },
             { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
@@ -166,7 +166,7 @@ exports.actualizarDescuento = async (id, datos) => {
 
     return await Descuento.findByPk(id, {
         include: [
-            { model: Convenio, attributes: ['id', 'nombre'] },
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
             { model: CodigoDescuento, attributes: ['id', 'codigo'] },
             { model: TipoPasajero, attributes: ['id', 'nombre'] },
             { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }

@@ -7,35 +7,41 @@ exports.listarConDescuentos = async (req, res, next) => {
   try {
     const empresas = await Empresa.findAll({
       where: { status: 'ACTIVO' },
+      attributes: ['nombre'], // Only fetch name
       include: [{
         model: Convenio,
         as: 'convenios',
-        where: { status: 'ACTIVO' },
-        required: false,
+        where: {
+          status: 'ACTIVO',
+          fecha_inicio: { [Op.lte]: new Date() },
+          fecha_termino: { [Op.gte]: new Date() }
+        },
+        // attributes: [], // Removed to fix Sequelize join issue
+        required: false, // Left join (show companies even if no discounts, or maybe true if only with discounts? stick to false for now)
         include: [
           {
             model: Descuento,
-            as: 'descuentos', // Descuentos directos del convenio
+            as: 'descuentos',
             where: { status: 'ACTIVO' },
-            required: false
-          },
-          {
-            model: CodigoDescuento,
-            as: 'codigos',
-            where: { status: 'ACTIVO' },
-            required: false,
-            include: [{
-              model: Descuento,
-              as: 'descuentos', // Descuentos del código
-              where: { status: 'ACTIVO' },
-              required: false
-            }]
+            attributes: ['porcentaje_descuento'],
+            required: false // Only direct discounts
           }
         ]
       }],
       order: [['nombre', 'ASC']]
     });
-    res.json(empresas);
+
+    // Transform response to flat structure
+    const response = empresas.map(empresa => {
+      // Flatten discounts from all convenios
+      const allDiscounts = empresa.convenios.flatMap(c => c.descuentos || []);
+      return {
+        nombre: empresa.nombre,
+        descuentos: allDiscounts
+      };
+    });
+
+    res.json(response);
   } catch (error) {
     next(error);
   }

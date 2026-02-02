@@ -13,6 +13,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+        fecha_inicio: {
+            type: DataTypes.DATEONLY,
+            allowNull: true
+        },
+        fecha_termino: {
+            type: DataTypes.DATEONLY,
+            allowNull: true
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'

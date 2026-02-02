@@ -9,47 +9,33 @@ const router = Router();
  * @openapi
  * /api/empresas/reportes/descuentos:
  *   get:
- *     summary: Listar empresas con sus convenios y descuentos
+ *     summary: Listar empresas con sus descuentos (Público)
+ *     description: Retorna nombre de empresa y sus porcentajes de descuento.
  *     tags:
  *       - Empresas
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de empresas con convenios y descuentos
+ *         description: Lista simplificada de empresas y descuentos
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 allOf:
- *                   - $ref: '#/components/schemas/Empresa'
- *                   - type: object
- *                     properties:
- *                       convenios:
- *                         type: array
- *                         items:
- *                           allOf:
- *                             - $ref: '#/components/schemas/Convenio'
- *                             - type: object
- *                               properties:
- *                                 descuentos:
- *                                   type: array
- *                                   items:
- *                                     $ref: '#/components/schemas/Descuento'
- *                                 codigos:
- *                                   type: array
- *                                   items:
- *                                     allOf:
- *                                       - $ref: '#/components/schemas/CodigoDescuento'
- *                                       - type: object
- *                                         properties:
- *                                           descuentos:
- *                                             type: array
- *                                             items:
- *                                               $ref: '#/components/schemas/Descuento'
+ *                 type: object
+ *                 properties:
+ *                   nombre:
+ *                     type: string
+ *                     example: "Empresa Demo"
+ *                   descuentos:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         porcentaje_descuento:
+ *                           type: integer
+ *                           example: 10
  */
-router.get('/reportes/descuentos', auth, controller.listarConDescuentos);
+router.get('/reportes/descuentos', controller.listarConDescuentos);
 
 /**
  * @openapi
