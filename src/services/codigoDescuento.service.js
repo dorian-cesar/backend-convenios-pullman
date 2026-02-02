@@ -1,4 +1,4 @@
-const { CodigoDescuento, Convenio, Descuento } = require('../models');
+const { CodigoDescuento, Convenio, Descuento, Empresa } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { Op } = require('sequelize');
@@ -115,8 +115,15 @@ exports.buscarPorCodigo = async (codigo) => {
     const codigoDescuento = await CodigoDescuento.findOne({
         where: { codigo },
         include: [
-            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: Descuento }
+            {
+                model: Convenio,
+                as: 'convenio',
+                attributes: ['id', 'nombre', 'empresa_id'],
+                include: [
+                    { model: Empresa, as: 'empresa', attributes: ['id', 'nombre', 'rut_empresa'] }
+                ]
+            },
+            { model: Descuento, as: 'descuentos' }
         ]
     });
 

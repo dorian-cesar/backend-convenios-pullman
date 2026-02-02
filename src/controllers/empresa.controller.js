@@ -1,7 +1,45 @@
-const { Empresa } = require('../models');
+const { Empresa, Convenio, Descuento, CodigoDescuento } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
+
+exports.listarConDescuentos = async (req, res, next) => {
+  try {
+    const empresas = await Empresa.findAll({
+      where: { status: 'ACTIVO' },
+      include: [{
+        model: Convenio,
+        as: 'convenios',
+        where: { status: 'ACTIVO' },
+        required: false,
+        include: [
+          {
+            model: Descuento,
+            as: 'descuentos', // Descuentos directos del convenio
+            where: { status: 'ACTIVO' },
+            required: false
+          },
+          {
+            model: CodigoDescuento,
+            as: 'codigos',
+            where: { status: 'ACTIVO' },
+            required: false,
+            include: [{
+              model: Descuento,
+              as: 'descuentos', // Descuentos del código
+              where: { status: 'ACTIVO' },
+              required: false
+            }]
+          }
+        ]
+      }],
+      order: [['nombre', 'ASC']]
+    });
+    res.json(empresas);
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.crear = async (req, res, next) => {
   try {
@@ -35,7 +73,7 @@ exports.listar = async (req, res, next) => {
       where.status = status;
     }
     if (nombre) {
-      where.nombre = { [Op.like]: `%${nombre}%` };
+      where.nombre = nombre;
     }
 
     const sortField = sortBy || 'createdAt';

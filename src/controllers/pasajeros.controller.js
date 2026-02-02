@@ -80,3 +80,14 @@ exports.eliminar = async (req, res, next) => {
         next(error);
     }
 };
+/**
+ * Asociar pasajero a eventos (crear si no existe)
+ */
+exports.asociar = async (req, res, next) => {
+    try {
+        const pasajero = await pasajerosService.asociarPasajeroAEventos(req.body);
+        res.status(200).json(new PasajeroDTO(pasajero));
+    } catch (error) {
+        next(error);
+    }
+};

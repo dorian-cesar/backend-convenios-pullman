@@ -7,6 +7,52 @@ const router = Router();
 
 /**
  * @openapi
+ * /api/empresas/reportes/descuentos:
+ *   get:
+ *     summary: Listar empresas con sus convenios y descuentos
+ *     tags:
+ *       - Empresas
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de empresas con convenios y descuentos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 allOf:
+ *                   - $ref: '#/components/schemas/Empresa'
+ *                   - type: object
+ *                     properties:
+ *                       convenios:
+ *                         type: array
+ *                         items:
+ *                           allOf:
+ *                             - $ref: '#/components/schemas/Convenio'
+ *                             - type: object
+ *                               properties:
+ *                                 descuentos:
+ *                                   type: array
+ *                                   items:
+ *                                     $ref: '#/components/schemas/Descuento'
+ *                                 codigos:
+ *                                   type: array
+ *                                   items:
+ *                                     allOf:
+ *                                       - $ref: '#/components/schemas/CodigoDescuento'
+ *                                       - type: object
+ *                                         properties:
+ *                                           descuentos:
+ *                                             type: array
+ *                                             items:
+ *                                               $ref: '#/components/schemas/Descuento'
+ */
+router.get('/reportes/descuentos', auth, controller.listarConDescuentos);
+
+/**
+ * @openapi
  * /api/empresas:
  *   get:
  *     summary: Listar todas las empresas
@@ -46,7 +92,7 @@ const router = Router();
  *         name: nombre
  *         schema:
  *           type: string
- *         description: Buscar por nombre (parcial)
+ *         description: Buscar por nombre (exacto)
  *     responses:
  *       200:
  *         description: Lista de empresas

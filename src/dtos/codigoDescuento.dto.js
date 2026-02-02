@@ -11,16 +11,25 @@ class CodigoDescuentoDTO {
         this.created_at = codigoDescuento.created_at;
 
         // Incluir convenio si existe
-        if (codigoDescuento.Convenio) {
+        // Incluir convenio si existe
+        const convenio = codigoDescuento.convenio || codigoDescuento.Convenio;
+        if (convenio) {
             this.convenio = {
-                id: codigoDescuento.Convenio.id,
-                nombre: codigoDescuento.Convenio.nombre
+                id: convenio.id,
+                nombre: convenio.nombre,
+                empresa: convenio.empresa ? {
+                    id: convenio.empresa.id,
+                    nombre: convenio.empresa.nombre,
+                    rut: convenio.empresa.rut_empresa
+                } : null
             };
         }
 
         // Incluir descuentos si existen
-        if (codigoDescuento.Descuentos) {
-            this.descuentos = codigoDescuento.Descuentos.map(d => ({
+        // Incluir descuentos si existen
+        const descuentos = codigoDescuento.descuentos || codigoDescuento.Descuentos;
+        if (descuentos) {
+            this.descuentos = descuentos.map(d => ({
                 id: d.id,
                 porcentaje: d.porcentaje_descuento,
                 status: d.status

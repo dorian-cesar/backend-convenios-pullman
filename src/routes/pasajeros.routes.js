@@ -141,6 +141,58 @@ router.use(authMiddleware);
  */
 router.post('/', pasajerosController.crear);
 
+/**
+ * @openapi
+ * /api/pasajeros/asociar:
+ *   post:
+ *     summary: Asociar pasajero a eventos
+ *     description: Busca un pasajero por RUT, si no existe lo crea, y asocia los eventos indicados.
+ *     tags:
+ *       - Pasajeros
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *               - eventos_ids
+ *             properties:
+ *               rut:
+ *                 type: string
+ *               nombres:
+ *                 type: string
+ *               apellidos:
+ *                 type: string
+ *               fecha_nacimiento:
+ *                 type: string
+ *                 format: date
+ *               correo:
+ *                 type: string
+ *               telefono:
+ *                 type: string
+ *               empresa_id:
+ *                 type: integer
+ *               convenio_id:
+ *                 type: integer
+ *               eventos_ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: IDs de los eventos a asociar
+ *     responses:
+ *       200:
+ *         description: Pasajero asociado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Pasajero'
+ */
+router.post('/asociar', pasajerosController.asociar);
+
 // Swagger definitions moved to a consolidated block
 router.get('/', pasajerosController.listar);
 

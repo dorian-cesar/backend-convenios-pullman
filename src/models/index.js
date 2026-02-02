@@ -78,10 +78,11 @@ Evento.hasMany(Evento, { as: 'EventosRelacionados', foreignKey: 'evento_origen_i
 
 
 // RELACIONES DE DESCUENTOS
-Convenio.hasMany(Descuento, { foreignKey: 'convenio_id' });
-Descuento.belongsTo(Convenio, { foreignKey: 'convenio_id' });
+// RELACIONES DE DESCUENTOS
+Convenio.hasMany(Descuento, { foreignKey: 'convenio_id', as: 'descuentos' });
+Descuento.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
-CodigoDescuento.hasMany(Descuento, { foreignKey: 'codigo_descuento_id' });
+CodigoDescuento.hasMany(Descuento, { foreignKey: 'codigo_descuento_id', as: 'descuentos' });
 Descuento.belongsTo(CodigoDescuento, { foreignKey: 'codigo_descuento_id' });
 
 TipoPasajero.hasMany(Descuento, { foreignKey: 'tipo_pasajero_id' });

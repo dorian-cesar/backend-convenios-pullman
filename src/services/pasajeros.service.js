@@ -1,4 +1,4 @@
-const { Pasajero, TipoPasajero, Empresa, Convenio } = require('../models');
+const { Pasajero, TipoPasajero, Empresa, Convenio, Evento } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
@@ -291,4 +291,64 @@ exports.obtenerOCrearPasajero = async (data, transaction) => {
   }
 
   return pasajero;
+};
+/**
+ * Asociar pasajero a eventos (crear si no existe)
+ */
+exports.asociarPasajeroAEventos = async (data) => {
+  const { rut, nombres, apellidos, correo, telefono, fecha_nacimiento, empresa_id, convenio_id, eventos_ids } = data;
+
+  if (!rut) {
+    throw new BusinessError('El RUT es obligatorio');
+  }
+
+  // 1. Buscar o Crear Pasajero
+  let pasajero = await Pasajero.findOne({ where: { rut } });
+
+  if (!pasajero) {
+    // Validaciones mínimas para crear
+    if (!nombres || !apellidos || !fecha_nacimiento) {
+      throw new BusinessError('Para crear un nuevo pasajero se requieren nombres, apellidos y fecha de nacimiento');
+    }
+
+    const tipoPasajeroId = await determinarTipoPasajero(fecha_nacimiento);
+
+    pasajero = await Pasajero.create({
+      rut,
+      nombres,
+      apellidos,
+      fecha_nacimiento,
+      correo,
+      telefono,
+      tipo_pasajero_id: tipoPasajeroId,
+      empresa_id: empresa_id || null,
+      convenio_id: convenio_id || null,
+      status: 'ACTIVO'
+    });
+  }
+
+  // 2. Asociar Eventos
+  if (eventos_ids && eventos_ids.length > 0) {
+    // Verificar que los eventos existan (opcional, pero buena práctica)
+    // Actualizar masivamente
+    await Evento.update(
+      { pasajero_id: pasajero.id },
+      {
+        where: {
+          id: { [Op.in]: eventos_ids }
+        }
+      }
+    );
+  }
+
+  // 3. Retornar pasajero con los eventos actualizados (o solo el pasajero)
+  // El usuario pidió "asociandole el eventos o eventos", retorno el pasajero y tal vez los eventos asociados.
+  return await Pasajero.findByPk(pasajero.id, {
+    include: [
+      { model: TipoPasajero, as: 'tipoPasajero', attributes: ['id', 'nombre'] },
+      { model: Empresa, as: 'empresa', attributes: ['id', 'nombre'] },
+      { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+      { model: Evento, attributes: ['id', 'tipo_evento', 'fecha_viaje', 'ciudad_origen', 'ciudad_destino'] } // Incluir eventos asociados
+    ]
+  });
 };

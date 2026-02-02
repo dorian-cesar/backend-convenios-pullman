@@ -170,7 +170,30 @@ router.get('/:id', codigoDescuentoController.obtener);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/CodigoDescuento'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/CodigoDescuento'
+ *                 - type: object
+ *                   properties:
+ *                     descuentos:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Descuento'
+ *                     convenio:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         nombre:
+ *                           type: string
+ *                         empresa:
+ *                           type: object
+ *                           properties:
+ *                             id:
+ *                               type: integer
+ *                             nombre:
+ *                               type: string
+ *                             rut:
+ *                               type: string
  *       404:
  *         description: Código de descuento no encontrado
  */

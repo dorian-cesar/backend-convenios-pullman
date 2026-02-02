@@ -294,3 +294,40 @@ exports.eliminarEvento = async (id) => {
 
   return evento;
 };
+/**
+ * Obtener eventos por RUT de pasajero
+ */
+exports.obtenerEventosPorRut = async (rut, filters = {}) => {
+  const { page, limit, sortBy, order } = filters;
+  const { offset, limit: limitVal } = getPagination(page, limit);
+
+  // 1. Buscar pasajero por RUT
+  const pasajero = await Pasajero.findOne({ where: { rut } });
+
+  if (!pasajero) {
+    throw new NotFoundError('Pasajero no encontrado');
+  }
+
+  const sortField = sortBy || 'fecha_viaje';
+  const sortOrder = (order && order.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
+
+  // 2. Buscar eventos usando el ID del pasajero
+  const data = await Evento.findAndCountAll({
+    where: {
+      pasajero_id: pasajero.id,
+      is_deleted: false
+    },
+    include: [
+      { model: Usuario, attributes: ['id', 'correo'] },
+      { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
+      { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
+      { model: Convenio, attributes: ['id', 'nombre'] },
+      { model: Evento, as: 'EventoOrigen', attributes: ['id', 'tipo_evento', 'fecha_viaje'] }
+    ],
+    order: [[sortField, sortOrder]],
+    limit: limitVal,
+    offset
+  });
+
+  return getPagingData(data, page, limitVal);
+};

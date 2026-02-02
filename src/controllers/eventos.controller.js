@@ -78,3 +78,19 @@ exports.eliminar = async (req, res, next) => {
     next(error);
   }
 };
+/**
+ * Listar eventos por RUT de pasajero
+ */
+exports.listarPorRut = async (req, res, next) => {
+  try {
+    const { rut } = req.params;
+    const result = await eventosService.obtenerEventosPorRut(rut, req.query);
+    const response = {
+      ...result,
+      rows: EventoDTO.fromArray(result.rows)
+    };
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -304,4 +304,53 @@ router.get('/:id', eventosController.obtener);
  */
 router.delete('/:id', eventosController.eliminar);
 
+/**
+ * @openapi
+ * /api/eventos/pasajero/{rut}:
+ *   get:
+ *     summary: Listar eventos por RUT de pasajero
+ *     tags:
+ *       - Eventos
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: rut
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: RUT del pasajero
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Cantidad de elementos por página
+ *     responses:
+ *       200:
+ *         description: Lista de eventos del pasajero
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalItems:
+ *                   type: integer
+ *                 rows:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Evento'
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *       404:
+ *         description: Pasajero no encontrado
+ */
+router.get('/pasajero/:rut', eventosController.listarPorRut);
+
 module.exports = router;
