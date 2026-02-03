@@ -10,6 +10,7 @@ const convenioRoutes = require('./convenio.routes');
 const codigoDescuentoRoutes = require('./codigoDescuento.routes');
 const descuentoRoutes = require('./descuento.routes');
 const kpiRoutes = require('./kpi.routes');
+const araucanaRoutes = require('./araucana.routes');
 
 const router = Router();
 
@@ -23,4 +24,5 @@ router.use('/convenios', convenioRoutes);
 router.use('/codigos-descuento', codigoDescuentoRoutes);
 router.use('/descuentos', descuentoRoutes);
 router.use('/kpis', kpiRoutes);
+router.use('/integraciones', araucanaRoutes);
 module.exports = router;

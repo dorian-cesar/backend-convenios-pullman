@@ -21,6 +21,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: true
         },
+        tipo: {
+            type: DataTypes.ENUM('API_EXTERNA', 'CODIGO_DESCUENTO'),
+            allowNull: true,
+            defaultValue: 'CODIGO_DESCUENTO'
+        },
+        endpoint: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'
