@@ -1,0 +1,26 @@
+module.exports = (sequelize, DataTypes) => {
+    const ApiConsulta = sequelize.define('ApiConsulta', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        nombre: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        endpoint: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        status: {
+            type: DataTypes.STRING,
+            defaultValue: 'ACTIVO'
+        }
+    }, {
+        tableName: 'apis_consulta',
+        timestamps: false
+    });
+
+    return ApiConsulta;
+};

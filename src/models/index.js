@@ -11,7 +11,8 @@ const TipoPasajero = require('./tipoPasajero.model')(sequelize, Sequelize.DataTy
 const Pasajero = require('./pasajero.model')(sequelize, Sequelize.DataTypes);     // Nuevo/Fixed
 const Descuento = require('./descuento.model')(sequelize, Sequelize.DataTypes);
 const Evento = require('./evento.model')(sequelize, Sequelize.DataTypes);
-const UsuarioRoles = require('./usuarioRoles.model')(sequelize, Sequelize.DataTypes); // Nuevo
+const UsuarioRoles = require('./usuarioRoles.model')(sequelize, Sequelize.DataTypes);
+const ApiConsulta = require('./apiConsulta.model')(sequelize, Sequelize.DataTypes); // Nuevo // Nuevo
 
 /**
  * -----------------------------------------
@@ -55,6 +56,10 @@ Pasajero.belongsTo(TipoPasajero, { foreignKey: 'tipo_pasajero_id', as: 'tipoPasa
 // CONVENIO -> PASAJERO (1:N)
 Convenio.hasMany(Pasajero, { foreignKey: 'convenio_id', as: 'pasajeros' });
 Pasajero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
+
+// API_CONSULTA -> CONVENIO (1:N)
+ApiConsulta.hasMany(Convenio, { foreignKey: 'api_consulta_id', as: 'convenios' });
+Convenio.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsulta' });
 
 // RELACIONES DE EVENTOS (Registro de viajes)
 Usuario.hasMany(Evento, { foreignKey: 'usuario_id' });
@@ -103,5 +108,6 @@ module.exports = {
   Pasajero,
   Descuento,
   Evento,
-  UsuarioRoles
+  UsuarioRoles,
+  ApiConsulta
 };
