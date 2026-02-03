@@ -1,4 +1,4 @@
-const { Convenio, Empresa, Descuento, ApiConsulta } = require('../models');
+const { Convenio, Empresa, Descuento, ApiConsulta, Evento, sequelize } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
@@ -97,7 +97,8 @@ exports.obtenerConvenio = async (id) => {
                 attributes: ['id', 'nombre', 'endpoint']
             },
             {
-                model: Descuento
+                model: Descuento,
+                as: 'descuentos'
             }
         ]
     });
@@ -168,4 +169,88 @@ exports.eliminarConvenio = async (id) => {
     await convenio.save();
 
     return convenio;
+};
+
+/**
+ * Verificar si una nueva venta excede los límites del convenio
+ */
+exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
+    const convenio = await Convenio.findByPk(convenioId);
+    if (!convenio) {
+        throw new NotFoundError('Convenio no encontrado');
+    }
+
+    // Si no tienes topes definidos, pase
+    if (!convenio.tope_monto_ventas && !convenio.tope_cantidad_tickets) {
+        return true;
+    }
+
+    // 1. Calcular Monto Acumulado Neto (Ventas + Cambios - Devoluciones)
+    // Sumar montos pagados (COMPRA + CAMBIO)
+    const totalVentasData = await Evento.findAll({
+        attributes: [
+            [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total']
+        ],
+        where: {
+            convenio_id: convenioId,
+            tipo_evento: ['COMPRA', 'CAMBIO'],
+            is_deleted: false
+        },
+        raw: true
+    });
+
+    // Sumar devoluciones
+    const totalDevolucionesData = await Evento.findAll({
+        attributes: [
+            [sequelize.fn('SUM', sequelize.col('monto_devolucion')), 'total']
+        ],
+        where: {
+            convenio_id: convenioId,
+            tipo_evento: 'DEVOLUCION',
+            is_deleted: false
+        },
+        raw: true
+    });
+
+    const totalVentas = parseInt(totalVentasData[0].total || 0, 10);
+    const totalDevoluciones = parseInt(totalDevolucionesData[0].total || 0, 10);
+    const montoAcumuladoActual = totalVentas - totalDevoluciones;
+
+    // 2. Calcular Cantidad de Tickets Neto (Compras - Devoluciones)
+    const cantidadCompras = await Evento.count({
+        where: {
+            convenio_id: convenioId,
+            tipo_evento: 'COMPRA',
+            is_deleted: false
+        }
+    });
+
+    const cantidadDevoluciones = await Evento.count({
+        where: {
+            convenio_id: convenioId,
+            tipo_evento: 'DEVOLUCION',
+            is_deleted: false
+        }
+    });
+
+    const cantidadTicketsActual = cantidadCompras - cantidadDevoluciones;
+
+    console.log(`[Convenio Check] ID: ${convenioId} | Monto: ${montoAcumuladoActual} + ${montoNuevo} vs Tope: ${convenio.tope_monto_ventas}`);
+    console.log(`[Convenio Check] ID: ${convenioId} | Cantidad: ${cantidadTicketsActual} + 1 vs Tope: ${convenio.tope_cantidad_tickets}`);
+
+    // 3. Verificaciones
+    if (convenio.tope_monto_ventas) {
+        if ((montoAcumuladoActual + montoNuevo) > convenio.tope_monto_ventas) {
+            throw new BusinessError(`El convenio ha alcanzado su límite de monto de ventas. Tope: $${convenio.tope_monto_ventas}, Actual: $${montoAcumuladoActual}, Intento: $${montoNuevo}`);
+        }
+    }
+
+    if (convenio.tope_cantidad_tickets) {
+        // Asumimos que esta llamada es para agregar 1 ticket (una compra)
+        if ((cantidadTicketsActual + 1) > convenio.tope_cantidad_tickets) {
+            throw new BusinessError(`El convenio ha alcanzado su límite de cantidad de tickets. Tope: ${convenio.tope_cantidad_tickets}, Actual: ${cantidadTicketsActual}`);
+        }
+    }
+
+    return true;
 };

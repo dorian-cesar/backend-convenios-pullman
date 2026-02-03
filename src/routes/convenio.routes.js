@@ -98,8 +98,7 @@ router.use(authMiddleware);
  */
 router.post('/', convenioController.crear);
 
-// Consolidated block above
-router.get('/', convenioController.listar);
+
 
 /**
  * @openapi

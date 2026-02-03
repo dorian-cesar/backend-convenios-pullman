@@ -3,6 +3,7 @@ const { sequelize } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const descuentoService = require('./descuento.service');
+const convenioService = require('./convenio.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 /**
@@ -60,6 +61,11 @@ exports.crearEvento = async (data) => {
   });
   const porcentajeDescuento = aplicable ? aplicable.porcentaje_descuento : 0;
   const montoPagado = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
+
+  // Verificar topes de convenio antes de crear
+  if (convenio_id) {
+    await convenioService.verificarLimites(convenio_id, montoPagado);
+  }
 
   const evento = await Evento.create({
     tipo_evento: 'COMPRA',
