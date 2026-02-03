@@ -44,7 +44,7 @@ exports.crearCodigoDescuento = async (data) => {
     return await CodigoDescuento.findByPk(codigoDescuento.id, {
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: Descuento }
+            { model: Descuento, as: 'descuentos' }
         ]
     });
 };
@@ -80,7 +80,7 @@ exports.listarCodigosDescuento = async (filters = {}) => {
         where,
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: Descuento }
+            { model: Descuento, as: 'descuentos' }
         ],
         order: [[sortField, sortOrder]],
         limit: limitVal,
@@ -97,7 +97,7 @@ exports.obtenerCodigoDescuento = async (id) => {
     const codigo = await CodigoDescuento.findByPk(id, {
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: Descuento }
+            { model: Descuento, as: 'descuentos' }
         ]
     });
 
@@ -176,7 +176,7 @@ exports.validarYUsarCodigo = async (codigo) => {
     return await CodigoDescuento.findByPk(codigoDescuento.id, {
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: Descuento }
+            { model: Descuento, as: 'descuentos' }
         ]
     });
 };
@@ -213,7 +213,7 @@ exports.actualizarCodigoDescuento = async (id, datos) => {
     return await CodigoDescuento.findByPk(id, {
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: Descuento }
+            { model: Descuento, as: 'descuentos' }
         ]
     });
 };

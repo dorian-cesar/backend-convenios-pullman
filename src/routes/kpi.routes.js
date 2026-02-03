@@ -79,6 +79,26 @@ router.get('/pasajeros', controller.getPasajeros);
  *     responses:
  *       200:
  *         description: Lista de convenios con métricas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   convenio_id:
+ *                     type: integer
+ *                   convenio_nombre:
+ *                     type: string
+ *                   cantidad_pasajes:
+ *                     type: integer
+ *                     description: Cantidad Neta (Compras - Devoluciones)
+ *                   total_sin_descuento:
+ *                     type: integer
+ *                     description: Monto Neto sin descuento (Tarifa Base Compras - Tarifa Base Devoluciones)
+ *                   total_ventas_reales:
+ *                     type: integer
+ *                     description: Monto real pagado (Neto)
  */
 router.get('/por-convenio', controller.getPorConvenio);
 

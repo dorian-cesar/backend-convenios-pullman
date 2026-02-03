@@ -33,8 +33,14 @@ exports.listarConDescuentos = async (req, res, next) => {
 
     // Transform response to flat structure
     const response = empresas.map(empresa => {
-      // Flatten discounts from all convenios
-      const allDiscounts = empresa.convenios.flatMap(c => c.descuentos || []);
+      // Map 1:1 Convention -> Discount (Take the first active one)
+      const allDiscounts = empresa.convenios.map(c => {
+        if (c.descuentos && c.descuentos.length > 0) {
+          return c.descuentos[0]; // Take the first one (DB order or arbitrary)
+        }
+        return null;
+      }).filter(d => d !== null);
+
       return {
         nombre: empresa.nombre,
         descuentos: allDiscounts

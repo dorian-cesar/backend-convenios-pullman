@@ -138,19 +138,28 @@ exports.getResumenKpis = async (params) => {
  */
 exports.getPorConvenio = async (params) => {
     const where = buildBaseWhere(params);
-    where.tipo_evento = 'COMPRA'; // Solo compras cuentan para volumen de convenios
+    // Allow both COMPRA and DEVOLUCION to calculate net values
+    where.tipo_evento = { [Op.in]: ['COMPRA', 'DEVOLUCION'] };
 
     const rows = await Evento.findAll({
         attributes: [
             'convenio_id',
             [sequelize.col('Convenio.nombre'), 'convenio_nombre'],
-            [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'cantidad_pasajes'],
-            [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total_monto']
+            // Net Quantity: Compras - Devoluciones
+            [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN 1 WHEN tipo_evento = 'DEVOLUCION' THEN -1 ELSE 0 END)`), 'cantidad_pasajes'],
+            // Net Total Without Discount: Sum(tarifa_base of Compras) - Sum(tarifa_base of Devoluciones)
+            [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN tarifa_base WHEN tipo_evento = 'DEVOLUCION' THEN -tarifa_base ELSE 0 END)`), 'total_sin_descuento'],
+            // Net Total Paid (Real Money): Sum(monto_pagado of Compras) - Sum(monto_devolucion? No, logic says refund uses monto_devolucion)
+            // But usually we just want Sale Amount.
+            // Let's stick to user request: "monto total sin el descuento... y cantidad de pasajes"
+            // I'll keep total_monto as executed money for reference if needed, but user asked specifically for 'sin descuento'.
+            [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN monto_pagado WHEN tipo_evento = 'DEVOLUCION' THEN -monto_devolucion ELSE 0 END)`), 'total_ventas_reales']
         ],
         include: [{
             model: Convenio,
             attributes: [],
-            required: false
+            required: false // Left join to include events without convenio? No, this is grouped by convenio.
+            // If convenio_id is null, it will be grouping key null.
         }],
         where: where,
         group: ['convenio_id', 'Convenio.nombre'],
@@ -210,6 +219,7 @@ exports.getPorTipoPasajero = async (params) => {
             required: true,
             include: [{
                 model: TipoPasajero,
+                as: 'tipoPasajero',
                 attributes: [],
                 required: false
             }]

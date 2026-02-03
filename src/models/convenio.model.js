@@ -14,11 +14,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         fecha_inicio: {
-            type: DataTypes.DATEONLY,
+            type: DataTypes.DATE,
             allowNull: true
         },
         fecha_termino: {
-            type: DataTypes.DATEONLY,
+            type: DataTypes.DATE,
             allowNull: true
         },
         status: {
