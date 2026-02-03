@@ -26,9 +26,20 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             defaultValue: 'CODIGO_DESCUENTO'
         },
-        endpoint: {
-            type: DataTypes.STRING,
+        // Relación con tabla externa de configuración de APIs
+        api_consulta_id: {
+            type: DataTypes.INTEGER,
             allowNull: true
+        },
+        tope_monto_ventas: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            comment: 'Monto máximo acumulado de ventas permitido'
+        },
+        tope_cantidad_tickets: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            comment: 'Cantidad máxima de tickets permitida'
         },
         status: {
             type: DataTypes.STRING,
