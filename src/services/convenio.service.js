@@ -1,4 +1,4 @@
-const { Convenio, Empresa, Descuento } = require('../models');
+const { Convenio, Empresa, Descuento, ApiConsulta } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
@@ -6,7 +6,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -17,9 +17,21 @@ exports.crearConvenio = async ({ nombre, empresa_id }) => {
         throw new NotFoundError('Empresa no encontrada');
     }
 
+    // Si es API_EXTERNA, verificar que api_consulta_id exista
+    if (tipo === 'API_EXTERNA' && api_consulta_id) {
+        const api = await ApiConsulta.findByPk(api_consulta_id);
+        if (!api) {
+            throw new NotFoundError('API de consulta no encontrada');
+        }
+    }
+
     const convenio = await Convenio.create({
         nombre,
         empresa_id,
+        tipo: tipo || 'CODIGO_DESCUENTO', // Default
+        api_consulta_id: tipo === 'API_EXTERNA' ? api_consulta_id : null,
+        tope_monto_ventas,
+        tope_cantidad_tickets,
         status: 'ACTIVO'
     });
 
@@ -53,6 +65,11 @@ exports.listarConvenios = async (filters = {}) => {
                 as: 'empresa',
                 attributes: ['id', 'nombre', 'rut_empresa']
             },
+            {
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
+            },
 
         ],
         order: [[sortField, sortOrder]],
@@ -73,6 +90,11 @@ exports.obtenerConvenio = async (id) => {
                 model: Empresa,
                 as: 'empresa',
                 attributes: ['id', 'nombre', 'rut_empresa']
+            },
+            {
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
             },
             {
                 model: Descuento
@@ -119,6 +141,11 @@ exports.actualizarConvenio = async (id, datos) => {
                 model: Empresa,
                 as: 'empresa',
                 attributes: ['id', 'nombre', 'rut_empresa']
+            },
+            {
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
             },
             {
                 model: Descuento

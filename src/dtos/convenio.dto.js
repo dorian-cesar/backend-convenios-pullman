@@ -5,6 +5,19 @@ class ConvenioDTO {
         this.empresa_id = convenio.empresa_id;
         this.status = convenio.status;
 
+        // Transformar tipo a array com pide el user -> ERROR: User corrected, single value.
+        this.tipo_consulta = convenio.tipo;
+
+        // Obtener endpoint de la relación ApiConsulta si existe
+        // Se concatena con BASE_URL para entregar la rutal absoluta
+        const baseUrl = process.env.BASE_URL || '';
+        this.endpoint = convenio.apiConsulta ? `${baseUrl}${convenio.apiConsulta.endpoint}` : null;
+
+        this.fecha_inicio = convenio.fecha_inicio;
+        this.fecha_termino = convenio.fecha_termino;
+        this.tope_monto_ventas = convenio.tope_monto_ventas;
+        this.tope_cantidad_tickets = convenio.tope_cantidad_tickets;
+
         // Si incluye la empresa relacionada
         if (convenio.empresa) {
             this.empresa = {

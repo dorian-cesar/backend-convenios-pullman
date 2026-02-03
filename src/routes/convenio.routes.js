@@ -11,18 +11,19 @@ const router = Router();
  *   description: Gestión de convenios empresariales
  */
 
-// Todas las rutas requieren autenticación
+// Endpoint público para listar convenios
+router.get('/', convenioController.listar);
+
+// Rutas protegidas
 router.use(authMiddleware);
 
 /**
  * @openapi
  * /api/convenios:
  *   get:
- *     summary: Listar convenios
+ *     description: Retorna lista de convenios con detalles de configuración.
  *     tags:
  *       - Convenios
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: empresa_id
