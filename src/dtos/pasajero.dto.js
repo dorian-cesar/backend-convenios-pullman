@@ -34,6 +34,10 @@ class PasajeroDTO {
                 nombre: pasajero.Convenio.nombre
             };
         }
+
+        if (pasajero.Eventos) {
+            this.eventos = pasajero.Eventos;
+        }
     }
 
     static fromArray(pasajeros) {
