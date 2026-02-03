@@ -50,3 +50,6 @@ full_spec.json
 
 #bat
 *.bat
+
+# Internal Scripts
+scripts/
