@@ -13,7 +13,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "96f3fd68-a626-4568-b443-5595cde7b7b4",
+                                    "id": "1273c803-3cf3-4b46-83cf-c40de76f0044",
                                     "name": "Crear usuario (solo SUPER_USUARIO) — crea `USUARIO` por defecto",
                                     "request": {
                                         "name": "Crear usuario (solo SUPER_USUARIO) — crea `USUARIO` por defecto",
@@ -63,7 +63,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "803509e6-d4e2-4a21-8e82-8cc80f309504",
+                                            "id": "33fa0898-2bf3-449e-b3c0-edcb7f6395f9",
                                             "name": "Usuario creado",
                                             "originalRequest": {
                                                 "url": {
@@ -127,7 +127,7 @@
                                     }
                                 },
                                 {
-                                    "id": "ffcb344a-0225-44b2-88f6-fe8e9f1f064c",
+                                    "id": "4ca877e7-1e52-44fa-a4a8-796278e3a60f",
                                     "name": "Listar usuarios",
                                     "request": {
                                         "name": "Listar usuarios",
@@ -176,7 +176,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "order",
-                                                    "value": "ASC"
+                                                    "value": "DESC"
                                                 },
                                                 {
                                                     "disabled": false,
@@ -210,7 +210,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "cb9c39eb-d239-46f3-bfd9-bb9bb5e25c41",
+                                            "id": "0b41cec9-9a38-4dfa-ba7a-18576c89c01b",
                                             "name": "Lista de usuarios",
                                             "originalRequest": {
                                                 "url": {
@@ -257,7 +257,7 @@
                                                                 "type": "text/plain"
                                                             },
                                                             "key": "order",
-                                                            "value": "ASC"
+                                                            "value": "DESC"
                                                         },
                                                         {
                                                             "disabled": false,
@@ -311,7 +311,7 @@
                                     "description": "",
                                     "item": [
                                         {
-                                            "id": "fa373e7d-4494-4ead-9757-685f9808f91f",
+                                            "id": "6c798ca2-319d-41dc-aa84-0e20b23cbf87",
                                             "name": "Obtener usuario por id",
                                             "request": {
                                                 "name": "Obtener usuario por id",
@@ -360,7 +360,7 @@
                                             },
                                             "response": [
                                                 {
-                                                    "id": "22a5fa60-037d-4f11-ade0-fb50e2863ebc",
+                                                    "id": "5daf0cba-85c0-4872-82bd-7018df2ae5aa",
                                                     "name": "Usuario",
                                                     "originalRequest": {
                                                         "url": {
@@ -417,7 +417,7 @@
                                                     "_postman_previewlanguage": "json"
                                                 },
                                                 {
-                                                    "id": "cb7d92c0-3920-42bd-99fa-40217a93b6c8",
+                                                    "id": "ca8fbb06-3b97-4df6-888a-7a9e4b2c2b22",
                                                     "name": "Usuario no encontrado",
                                                     "originalRequest": {
                                                         "url": {
@@ -470,7 +470,7 @@
                                             }
                                         },
                                         {
-                                            "id": "8a939973-0f4b-4f77-be94-74378b274966",
+                                            "id": "195c6af8-30b7-454a-bc55-bf43ca24f86e",
                                             "name": "Actualizar usuario",
                                             "request": {
                                                 "name": "Actualizar usuario",
@@ -512,7 +512,7 @@
                                                 "method": "PUT",
                                                 "body": {
                                                     "mode": "raw",
-                                                    "raw": "{\n  \"correo\": \"<string>\",\n  \"password\": \"<string>\",\n  \"rol\": \"SUPER_USUARIO\",\n  \"status\": \"INACTIVO\"\n}",
+                                                    "raw": "{\n  \"correo\": \"<string>\",\n  \"password\": \"<string>\",\n  \"rol\": \"USUARIO\",\n  \"status\": \"ACTIVO\"\n}",
                                                     "options": {
                                                         "raw": {
                                                             "headerFamily": "json",
@@ -532,7 +532,7 @@
                                             },
                                             "response": [
                                                 {
-                                                    "id": "24acca7c-5a40-49c0-94de-a841e7f97e34",
+                                                    "id": "2e17bca3-d58f-405b-af21-974fc4d2a2b8",
                                                     "name": "Usuario actualizado",
                                                     "originalRequest": {
                                                         "url": {
@@ -580,7 +580,7 @@
                                                         "method": "PUT",
                                                         "body": {
                                                             "mode": "raw",
-                                                            "raw": "{\n  \"correo\": \"<string>\",\n  \"password\": \"<string>\",\n  \"rol\": \"SUPER_USUARIO\",\n  \"status\": \"INACTIVO\"\n}",
+                                                            "raw": "{\n  \"correo\": \"<string>\",\n  \"password\": \"<string>\",\n  \"rol\": \"USUARIO\",\n  \"status\": \"ACTIVO\"\n}",
                                                             "options": {
                                                                 "raw": {
                                                                     "headerFamily": "json",
@@ -608,7 +608,7 @@
                                             }
                                         },
                                         {
-                                            "id": "ae233885-4272-4c12-9d88-a4e82ec23302",
+                                            "id": "20894598-81f9-41e4-87ec-9df07347747b",
                                             "name": "Eliminar (soft) usuario",
                                             "request": {
                                                 "name": "Eliminar (soft) usuario",
@@ -651,7 +651,7 @@
                                             },
                                             "response": [
                                                 {
-                                                    "id": "8da6e222-7cda-4293-a9c4-e128f295c286",
+                                                    "id": "c518b008-eb57-4641-ba66-eaa13aee035d",
                                                     "name": "Usuario marcado como INACTIVO",
                                                     "originalRequest": {
                                                         "url": {
@@ -712,7 +712,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "e9c403d4-d861-4b26-bce1-1a0154f63cd8",
+                                    "id": "f710d4fc-ec2a-495f-a835-f24dad0a03ee",
                                     "name": "Asignar un usuario a una empresa",
                                     "request": {
                                         "name": "Asignar un usuario a una empresa",
@@ -765,7 +765,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "d7d67fc0-c724-49a6-b352-48e6049a6883",
+                                            "id": "61e7685b-7164-4464-8e03-eb06b202092b",
                                             "name": "Usuario asignado correctamente a la empresa",
                                             "originalRequest": {
                                                 "url": {
@@ -823,7 +823,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "8ae6c483-4895-42bf-a31a-6533cb96061b",
+                                            "id": "403f9b80-bfd0-4270-94eb-a5c556589a8c",
                                             "name": "Error de negocio (datos inválidos o relación existente)",
                                             "originalRequest": {
                                                 "url": {
@@ -871,7 +871,7 @@
                                             "_postman_previewlanguage": "text"
                                         },
                                         {
-                                            "id": "15a9d273-d535-447f-a60f-018f1dd832f5",
+                                            "id": "df08a1e2-9b23-4113-94e6-b5ed08526262",
                                             "name": "Token inválido o no enviado",
                                             "originalRequest": {
                                                 "url": {
@@ -919,7 +919,7 @@
                                             "_postman_previewlanguage": "text"
                                         },
                                         {
-                                            "id": "e06802d0-c188-452a-87ce-c1d7228a9202",
+                                            "id": "a473563d-55c2-4e34-bb6a-851091e4a6e3",
                                             "name": "Acceso denegado (rol insuficiente)",
                                             "originalRequest": {
                                                 "url": {
@@ -989,7 +989,7 @@
                                     "description": "",
                                     "item": [
                                         {
-                                            "id": "b3c26cfb-34ed-439d-9424-692d755be7b9",
+                                            "id": "6ff57b9e-fe4b-4d61-8580-c66881920ffa",
                                             "name": "Validar afiliación La Araucana",
                                             "request": {
                                                 "name": "Validar afiliación La Araucana",
@@ -1035,7 +1035,7 @@
                                             },
                                             "response": [
                                                 {
-                                                    "id": "9ae25c0c-b9a3-47fd-9b5a-ed0362123567",
+                                                    "id": "4ed42d29-97d0-44ee-83fd-8b6eb1afa066",
                                                     "name": "Consulta exitosa",
                                                     "originalRequest": {
                                                         "url": {
@@ -1114,7 +1114,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "6ad2021f-45ce-4808-8ade-36fab81a16c7",
+                                    "id": "2f739196-c572-4f44-b3d6-925280f2b320",
                                     "name": "Login de usuario",
                                     "request": {
                                         "name": "Login de usuario",
@@ -1156,7 +1156,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "7a437bcb-f700-49f2-ac99-abae643ac3a5",
+                                            "id": "2c1d73d1-94f6-4e32-886a-ae94dc92bc35",
                                             "name": "Login exitoso, retorna el token JWT y datos del usuario",
                                             "originalRequest": {
                                                 "url": {
@@ -1226,7 +1226,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "11d00719-8bca-4dd7-8108-32fe9e5026fe",
+                                    "id": "04fa7351-9630-463b-91b8-953d3397d77a",
                                     "name": "Registrar usuario (crea un SUPER_USUARIO por defecto)",
                                     "request": {
                                         "name": "Registrar usuario (crea un SUPER_USUARIO por defecto)",
@@ -1268,7 +1268,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "7505b0f7-45d2-42fd-9b07-78c2dcc2d949",
+                                            "id": "a22e8dd4-0f2e-4198-a40c-63c8fb69d7b2",
                                             "name": "Registro exitoso, retorna el token JWT y datos del usuario",
                                             "originalRequest": {
                                                 "url": {
@@ -1340,7 +1340,7 @@
                     "description": "",
                     "item": [
                         {
-                            "id": "cbaae4e3-28f3-42ba-9fde-4e8173304382",
+                            "id": "b5cafcd2-e886-4bc3-99aa-44751883167f",
                             "name": "Listar códigos de descuento",
                             "request": {
                                 "name": "Listar códigos de descuento",
@@ -1379,7 +1379,7 @@
                                                 "type": "text/plain"
                                             },
                                             "key": "vigentes",
-                                            "value": "true"
+                                            "value": "false"
                                         },
                                         {
                                             "disabled": false,
@@ -1415,7 +1415,7 @@
                                                 "type": "text/plain"
                                             },
                                             "key": "order",
-                                            "value": "ASC"
+                                            "value": "DESC"
                                         }
                                     ],
                                     "variable": []
@@ -1440,7 +1440,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "cf7d9f8d-fff8-4252-b051-27dc7c450ba1",
+                                    "id": "e63f762c-7440-4f6c-bfea-ac3cdf4896e5",
                                     "name": "Lista de códigos de descuento",
                                     "originalRequest": {
                                         "url": {
@@ -1477,7 +1477,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "vigentes",
-                                                    "value": "true"
+                                                    "value": "false"
                                                 },
                                                 {
                                                     "disabled": false,
@@ -1513,7 +1513,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "order",
-                                                    "value": "ASC"
+                                                    "value": "DESC"
                                                 }
                                             ],
                                             "variable": []
@@ -1554,7 +1554,7 @@
                             }
                         },
                         {
-                            "id": "b5e379a9-03d9-4bde-8d94-2444eac6fc43",
+                            "id": "1851b624-cc43-4f01-9cd7-c4229cb746a4",
                             "name": "Crear código de descuento (solo SUPER_USUARIO)",
                             "request": {
                                 "name": "Crear código de descuento (solo SUPER_USUARIO)",
@@ -1603,7 +1603,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "66cca140-06dc-4cec-988e-551b15a76cab",
+                                    "id": "047c8e99-d6ae-44e6-b4d1-c8e4af807432",
                                     "name": "Código de descuento creado",
                                     "originalRequest": {
                                         "url": {
@@ -1670,7 +1670,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "69c101b3-2ae0-43e6-a43b-ad5b5b6af800",
+                                    "id": "a661c9cb-8827-44eb-bc10-20b2c1633460",
                                     "name": "Obtener código de descuento por ID",
                                     "request": {
                                         "name": "Obtener código de descuento por ID",
@@ -1718,7 +1718,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "f213c6c2-eb4a-48a1-b66e-a287455f2bf3",
+                                            "id": "fa01c9ca-3c34-42d4-8ba2-c0fe0fef740b",
                                             "name": "Código de descuento encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -1774,7 +1774,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "da6f30c5-d98c-4fe8-a52d-f00ca853adf1",
+                                            "id": "ddb5ecaf-e913-4ee2-a72a-c1ac12012c82",
                                             "name": "Código de descuento no encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -1826,7 +1826,7 @@
                                     }
                                 },
                                 {
-                                    "id": "d94bbe6c-cbfa-4e53-94e1-4214322f6eff",
+                                    "id": "87a676f5-9e32-4c21-b9c6-b466c7e3bfed",
                                     "name": "Actualizar código de descuento (solo SUPER_USUARIO)",
                                     "request": {
                                         "name": "Actualizar código de descuento (solo SUPER_USUARIO)",
@@ -1867,7 +1867,7 @@
                                         "method": "PUT",
                                         "body": {
                                             "mode": "raw",
-                                            "raw": "{\n  \"fecha_inicio\": \"<date>\",\n  \"fecha_termino\": \"<date>\",\n  \"max_usos\": \"<integer>\",\n  \"status\": \"INACTIVO\"\n}",
+                                            "raw": "{\n  \"fecha_inicio\": \"<date>\",\n  \"fecha_termino\": \"<date>\",\n  \"max_usos\": \"<integer>\",\n  \"status\": \"ACTIVO\"\n}",
                                             "options": {
                                                 "raw": {
                                                     "headerFamily": "json",
@@ -1887,7 +1887,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "2af62f80-22fb-49e1-a9e7-4ee8f96635a4",
+                                            "id": "f191090f-1b0c-436f-a353-048f6e72d81f",
                                             "name": "Código de descuento actualizado",
                                             "originalRequest": {
                                                 "url": {
@@ -1934,7 +1934,7 @@
                                                 "method": "PUT",
                                                 "body": {
                                                     "mode": "raw",
-                                                    "raw": "{\n  \"fecha_inicio\": \"<date>\",\n  \"fecha_termino\": \"<date>\",\n  \"max_usos\": \"<integer>\",\n  \"status\": \"INACTIVO\"\n}",
+                                                    "raw": "{\n  \"fecha_inicio\": \"<date>\",\n  \"fecha_termino\": \"<date>\",\n  \"max_usos\": \"<integer>\",\n  \"status\": \"ACTIVO\"\n}",
                                                     "options": {
                                                         "raw": {
                                                             "headerFamily": "json",
@@ -1962,7 +1962,7 @@
                                     }
                                 },
                                 {
-                                    "id": "a582b940-3d6b-4f12-bfb4-a2a90dad1a72",
+                                    "id": "873df6d0-f24a-4e6c-9cff-4e628f5314f2",
                                     "name": "Eliminar código de descuento (soft delete, solo SUPER_USUARIO)",
                                     "request": {
                                         "name": "Eliminar código de descuento (soft delete, solo SUPER_USUARIO)",
@@ -2004,7 +2004,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "5ec1f78d-99dd-40d1-abad-0fc0a992c594",
+                                            "id": "1e45790f-77b9-441a-8097-2a215682fb48",
                                             "name": "Código de descuento eliminado exitosamente",
                                             "originalRequest": {
                                                 "url": {
@@ -2066,7 +2066,7 @@
                                     "description": "",
                                     "item": [
                                         {
-                                            "id": "ad5e9359-f0b7-4bff-abec-96b54eb6ab29",
+                                            "id": "a6dc41b3-3af1-417a-9a09-64de38148c2e",
                                             "name": "Buscar código de descuento por código",
                                             "request": {
                                                 "name": "Buscar código de descuento por código",
@@ -2103,19 +2103,11 @@
                                                 ],
                                                 "method": "GET",
                                                 "body": {},
-                                                "auth": {
-                                                    "type": "bearer",
-                                                    "bearer": [
-                                                        {
-                                                            "key": "token",
-                                                            "value": "{{bearerToken}}"
-                                                        }
-                                                    ]
-                                                }
+                                                "auth": null
                                             },
                                             "response": [
                                                 {
-                                                    "id": "9b67a14c-3337-4903-af21-9defd3d7aacb",
+                                                    "id": "346ffe1a-8909-4250-a262-256c83d72218",
                                                     "name": "Código de descuento encontrado",
                                                     "originalRequest": {
                                                         "url": {
@@ -2172,7 +2164,7 @@
                                                     "_postman_previewlanguage": "json"
                                                 },
                                                 {
-                                                    "id": "b55ac749-cb28-4190-a800-1a65bede0672",
+                                                    "id": "25c24ea1-d627-4fc4-9a4c-27f25fb3ed2a",
                                                     "name": "Código de descuento no encontrado",
                                                     "originalRequest": {
                                                         "url": {
@@ -2233,7 +2225,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "4babc16c-409f-4d9c-835e-5c354285c8d9",
+                                    "id": "6b52de4d-b0cf-4f6d-8f95-3792a98bc726",
                                     "name": "Validar y usar código de descuento",
                                     "request": {
                                         "name": "Validar y usar código de descuento",
@@ -2286,7 +2278,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "729593d7-dad3-4c51-a93b-a3f6adfba7a3",
+                                            "id": "4e7b39cd-0be2-43cd-b449-df51001278d2",
                                             "name": "Código válido y uso registrado",
                                             "originalRequest": {
                                                 "url": {
@@ -2344,7 +2336,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "7f88b341-d4f9-4be1-a1a0-45bc2cab752a",
+                                            "id": "d59ae568-a224-4cb1-b321-5ab365535d66",
                                             "name": "Código inválido, expirado o sin usos disponibles",
                                             "originalRequest": {
                                                 "url": {
@@ -2406,7 +2398,7 @@
                     "description": "",
                     "item": [
                         {
-                            "id": "a7397d9e-55d6-4085-9b08-f7cedfe0f42e",
+                            "id": "4a0e4683-e074-45c3-891f-993bc3bae7bb",
                             "name": "Retorna lista de convenios con detalles de configuración.",
                             "request": {
                                 "name": "Retorna lista de convenios con detalles de configuración.",
@@ -2475,7 +2467,7 @@
                                                 "type": "text/plain"
                                             },
                                             "key": "order",
-                                            "value": "ASC"
+                                            "value": "DESC"
                                         }
                                     ],
                                     "variable": []
@@ -2492,7 +2484,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "9aec75ce-8f87-410e-b33a-9235f924ef44",
+                                    "id": "f57502d6-54f3-4fb4-ad6c-f641f044053a",
                                     "name": "Lista de convenios",
                                     "originalRequest": {
                                         "url": {
@@ -2556,7 +2548,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "order",
-                                                    "value": "ASC"
+                                                    "value": "DESC"
                                                 }
                                             ],
                                             "variable": []
@@ -2597,7 +2589,7 @@
                             }
                         },
                         {
-                            "id": "c2f9c2f7-632e-4a66-995e-f0e5352c535b",
+                            "id": "f3234ffe-4b12-4fa3-9c02-8fe8f36a2bbd",
                             "name": "Crear un nuevo convenio",
                             "request": {
                                 "name": "Crear un nuevo convenio",
@@ -2646,7 +2638,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "ed075b5f-c5fb-4e58-a518-8a608ff6ad94",
+                                    "id": "b7286e04-a167-4915-90c3-a29de31e57a0",
                                     "name": "Convenio creado exitosamente",
                                     "originalRequest": {
                                         "url": {
@@ -2713,7 +2705,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "e3d5f89b-573b-4807-b7f7-9b2f9addbe15",
+                                    "id": "47adec23-6df9-470a-942f-052142a567fb",
                                     "name": "Obtener convenio por ID",
                                     "request": {
                                         "name": "Obtener convenio por ID",
@@ -2761,7 +2753,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "b80680e7-e5d8-4045-ba55-68416ffc9156",
+                                            "id": "4c0605a6-0234-4ca6-856f-5c952a7cf5fa",
                                             "name": "Convenio encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -2817,7 +2809,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "9805edf1-14ab-4ab4-bbbb-d9ae6b3e25e9",
+                                            "id": "02513bc0-a981-4d7a-a76e-72dca7d59da6",
                                             "name": "Convenio no encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -2869,7 +2861,7 @@
                                     }
                                 },
                                 {
-                                    "id": "7b340e05-c982-4e85-8055-5a40e21bc838",
+                                    "id": "5979bf80-311a-4997-b60a-01a46fb49155",
                                     "name": "Actualizar convenio",
                                     "request": {
                                         "name": "Actualizar convenio",
@@ -2930,7 +2922,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "1811bdd3-01b6-477b-bc10-90c4c150fea9",
+                                            "id": "a61213d2-c685-43ff-9011-ca483c48674e",
                                             "name": "Convenio actualizado",
                                             "originalRequest": {
                                                 "url": {
@@ -3005,7 +2997,7 @@
                                     }
                                 },
                                 {
-                                    "id": "fc45c836-34c9-4ccd-ab21-91cd0938f4e2",
+                                    "id": "d7eaab45-41d6-49a4-960a-27274a2c3007",
                                     "name": "Eliminar convenio (soft delete)",
                                     "request": {
                                         "name": "Eliminar convenio (soft delete)",
@@ -3047,7 +3039,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "46cc4107-d09c-4179-b64a-9e8a4cf053bb",
+                                            "id": "dcc7b462-0f5d-4e78-ae28-f3c8a23a88e1",
                                             "name": "Convenio eliminado exitosamente",
                                             "originalRequest": {
                                                 "url": {
@@ -3107,7 +3099,7 @@
                     "description": "",
                     "item": [
                         {
-                            "id": "e5573ac6-ea07-427b-b017-aea36b142ffa",
+                            "id": "ede7474b-39ff-430b-8668-60803c1d15f7",
                             "name": "Listar descuentos",
                             "request": {
                                 "name": "Listar descuentos",
@@ -3191,7 +3183,7 @@
                                                 "type": "text/plain"
                                             },
                                             "key": "order",
-                                            "value": "ASC"
+                                            "value": "DESC"
                                         }
                                     ],
                                     "variable": []
@@ -3216,7 +3208,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "fc8e26d3-49ab-40a6-92ce-7c8c8e3f1f17",
+                                    "id": "b239ba37-130a-4cea-aa4d-32da7961ce21",
                                     "name": "Lista de descuentos",
                                     "originalRequest": {
                                         "url": {
@@ -3298,7 +3290,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "order",
-                                                    "value": "ASC"
+                                                    "value": "DESC"
                                                 }
                                             ],
                                             "variable": []
@@ -3339,7 +3331,7 @@
                             }
                         },
                         {
-                            "id": "b3c993a5-3b6d-417e-951b-c0b5be3966b1",
+                            "id": "ecf78660-4e76-472d-958e-342f8d30ea65",
                             "name": "Crear descuento (solo SUPER_USUARIO)",
                             "request": {
                                 "name": "Crear descuento (solo SUPER_USUARIO)",
@@ -3391,7 +3383,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "d28276d7-4c6b-4a95-9d84-d2af8ab246f7",
+                                    "id": "d04ec8a5-5b34-41fc-a948-5d65f6fbd947",
                                     "name": "Descuento creado",
                                     "originalRequest": {
                                         "url": {
@@ -3458,7 +3450,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "e468704f-7c3d-4914-b092-d7975149bb24",
+                                    "id": "f71e942e-612c-4728-a78a-e35bc9415d59",
                                     "name": "Obtener descuento por ID",
                                     "request": {
                                         "name": "Obtener descuento por ID",
@@ -3506,7 +3498,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "23d89980-836a-44b0-9697-6f5d28fdd44c",
+                                            "id": "151a9525-5910-4bcc-aa1f-40ef2d452581",
                                             "name": "Descuento encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -3562,7 +3554,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "b26c6472-d684-462f-b0db-7809f842bb15",
+                                            "id": "f4e40732-d362-48a6-b729-c7f22a9c7818",
                                             "name": "Descuento no encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -3614,7 +3606,7 @@
                                     }
                                 },
                                 {
-                                    "id": "67bc4b7a-5737-4150-ab6c-db5726a6339d",
+                                    "id": "aea4445d-0001-4ef3-9227-9d0cd339d924",
                                     "name": "Actualizar descuento (solo SUPER_USUARIO)",
                                     "request": {
                                         "name": "Actualizar descuento (solo SUPER_USUARIO)",
@@ -3675,7 +3667,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "d5ce591b-1dd2-40f9-ba2c-7cdd4953da08",
+                                            "id": "eb6a37cd-e9ce-4fdc-b4d1-66c66ef11ee9",
                                             "name": "Descuento actualizado",
                                             "originalRequest": {
                                                 "url": {
@@ -3750,7 +3742,7 @@
                                     }
                                 },
                                 {
-                                    "id": "ac98aa68-5fc6-4426-afc1-87b33a44cb9a",
+                                    "id": "5cb5b760-2bf2-46b8-82c3-c708e4bdc62d",
                                     "name": "Eliminar descuento (soft delete, solo SUPER_USUARIO)",
                                     "request": {
                                         "name": "Eliminar descuento (soft delete, solo SUPER_USUARIO)",
@@ -3792,7 +3784,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "da64906c-de50-46df-adae-f55cfd71f12b",
+                                            "id": "44225883-884b-4afd-9e47-dc6c2187a804",
                                             "name": "Descuento eliminado exitosamente",
                                             "originalRequest": {
                                                 "url": {
@@ -3860,7 +3852,7 @@
                                     "description": "",
                                     "item": [
                                         {
-                                            "id": "52d4cfa4-b776-4b50-a66b-8e03400181dd",
+                                            "id": "f25fb81e-646e-4848-8b35-47eca972fdbd",
                                             "name": "Listar empresas con sus descuentos (Público)",
                                             "request": {
                                                 "name": "Listar empresas con sus descuentos (Público)",
@@ -3893,7 +3885,7 @@
                                             },
                                             "response": [
                                                 {
-                                                    "id": "232b8d01-3ec5-4c11-ba4e-16d04634fbf6",
+                                                    "id": "6abebc55-3a05-482f-88de-6b10cb8f7cb6",
                                                     "name": "Lista simplificada de empresas y descuentos",
                                                     "originalRequest": {
                                                         "url": {
@@ -3949,7 +3941,7 @@
                             ]
                         },
                         {
-                            "id": "0b7d653d-b540-41bf-aca7-09212271d886",
+                            "id": "a67ae825-c1a7-4a0a-8577-4b0a28fec65e",
                             "name": "Listar todas las empresas",
                             "request": {
                                 "name": "Listar todas las empresas",
@@ -3997,7 +3989,7 @@
                                                 "type": "text/plain"
                                             },
                                             "key": "order",
-                                            "value": "ASC"
+                                            "value": "DESC"
                                         },
                                         {
                                             "disabled": false,
@@ -4040,7 +4032,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "835e200d-60d8-46f5-887a-44f07ce6a1b1",
+                                    "id": "6c5dbcce-1f42-4f1e-bd35-9e05367e9afc",
                                     "name": "Lista de empresas",
                                     "originalRequest": {
                                         "url": {
@@ -4086,7 +4078,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "order",
-                                                    "value": "ASC"
+                                                    "value": "DESC"
                                                 },
                                                 {
                                                     "disabled": false,
@@ -4145,7 +4137,7 @@
                             }
                         },
                         {
-                            "id": "c247fa52-0a98-4158-8345-30701f3a03c3",
+                            "id": "eb381c8b-2e5a-4557-a18e-6b27c4ae267a",
                             "name": "Crear empresa (solo SUPER_USUARIO)",
                             "request": {
                                 "name": "Crear empresa (solo SUPER_USUARIO)",
@@ -4194,7 +4186,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "be51cd97-91f4-40a5-9e64-76742abf132f",
+                                    "id": "a6073b9f-bd5a-4c26-86e7-411621d1069e",
                                     "name": "Empresa creada correctamente",
                                     "originalRequest": {
                                         "url": {
@@ -4261,7 +4253,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "6baf91fc-b813-4753-9e1b-9e6aea234267",
+                                    "id": "e3c69360-e425-4ffb-a9cc-f5bae4901fed",
                                     "name": "Obtener empresa por id",
                                     "request": {
                                         "name": "Obtener empresa por id",
@@ -4309,7 +4301,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "8affa4b3-d717-4bf7-8c5e-a2b8abfda8f6",
+                                            "id": "05689e0a-8e04-4d6c-96ed-9dd38d7cfcf5",
                                             "name": "Empresa",
                                             "originalRequest": {
                                                 "url": {
@@ -4365,7 +4357,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "cdb42e24-ba4d-4aab-abc7-a6b0becd9490",
+                                            "id": "86cff2fe-a74e-431a-ad1c-10f0ec433fb8",
                                             "name": "Empresa no encontrada",
                                             "originalRequest": {
                                                 "url": {
@@ -4417,7 +4409,7 @@
                                     }
                                 },
                                 {
-                                    "id": "485ac3fe-c34c-4a4c-ba82-6d9cbd113ecb",
+                                    "id": "2bfba6ae-dedb-4e1f-99a4-5ec2ced5b58a",
                                     "name": "Actualizar empresa (solo SUPER_USUARIO)",
                                     "request": {
                                         "name": "Actualizar empresa (solo SUPER_USUARIO)",
@@ -4478,7 +4470,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "635f5849-f2b6-4627-815a-89c2c93441a1",
+                                            "id": "b559ef69-0df4-4bf1-92e5-7e0abcc423ef",
                                             "name": "Empresa actualizada",
                                             "originalRequest": {
                                                 "url": {
@@ -4553,7 +4545,7 @@
                                     }
                                 },
                                 {
-                                    "id": "7735c0a2-915a-4dcc-afda-62f08ed490bd",
+                                    "id": "51ad53b2-679e-4910-b6c8-60453204bd38",
                                     "name": "Eliminar (soft) empresa (solo SUPER_USUARIO)",
                                     "request": {
                                         "name": "Eliminar (soft) empresa (solo SUPER_USUARIO)",
@@ -4595,7 +4587,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "f4dc9e26-05c5-4102-840e-b749da5dca54",
+                                            "id": "7e80f8d5-3689-4f76-ba38-c31cff036464",
                                             "name": "Empresa marcada como INACTIVA",
                                             "originalRequest": {
                                                 "url": {
@@ -4659,7 +4651,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "9ad39ada-b733-46d1-afd8-c8565aa15286",
+                                    "id": "92e0989e-51d2-4a2a-a8b9-9852bbe00f40",
                                     "name": "Crear evento de compra",
                                     "request": {
                                         "name": "Crear evento de compra",
@@ -4709,7 +4701,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "73f54fed-e7cc-45b9-b7b4-674fb190ed50",
+                                            "id": "dc5ca80e-16f8-4788-9b2a-b12e7a28c07b",
                                             "name": "Evento de compra creado",
                                             "originalRequest": {
                                                 "url": {
@@ -4779,7 +4771,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "95499bbd-e159-4946-833f-45973e8b04a5",
+                                    "id": "f8221921-ed74-4ba0-b5fe-03bbc3e64342",
                                     "name": "Crear evento de cambio",
                                     "request": {
                                         "name": "Crear evento de cambio",
@@ -4829,7 +4821,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "d498a629-7356-49b7-83a3-8aafb9432a5a",
+                                            "id": "d58057cf-5609-40f5-8f3d-49e7e11dfa04",
                                             "name": "Evento de cambio creado",
                                             "originalRequest": {
                                                 "url": {
@@ -4899,7 +4891,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "9a20227c-d3f6-494b-ba05-303bdda8f23d",
+                                    "id": "36ffa745-d3a1-436d-ac7b-249aac3451b6",
                                     "name": "Crear evento de devolución",
                                     "request": {
                                         "name": "Crear evento de devolución",
@@ -4949,7 +4941,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "f4208587-63bb-49a3-9249-ede27c87ab25",
+                                            "id": "b6723fbd-827a-430a-9179-ca84c1ba6f31",
                                             "name": "Evento de devolución creado",
                                             "originalRequest": {
                                                 "url": {
@@ -5015,7 +5007,7 @@
                             ]
                         },
                         {
-                            "id": "d1feccef-7def-4e80-8e06-fbfe77ee8de5",
+                            "id": "5e3c168a-7e0f-4351-b89f-159c79b9e3f7",
                             "name": "Listar eventos",
                             "request": {
                                 "name": "Listar eventos",
@@ -5099,7 +5091,7 @@
                                                 "type": "text/plain"
                                             },
                                             "key": "order",
-                                            "value": "ASC"
+                                            "value": "DESC"
                                         },
                                         {
                                             "disabled": false,
@@ -5133,7 +5125,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "8ddfd443-59f7-4185-8f36-b03aa682d97b",
+                                    "id": "c3b79a83-97e8-46b5-88d0-4fef162aa96f",
                                     "name": "Lista de eventos",
                                     "originalRequest": {
                                         "url": {
@@ -5215,7 +5207,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "order",
-                                                    "value": "ASC"
+                                                    "value": "DESC"
                                                 },
                                                 {
                                                     "disabled": false,
@@ -5254,7 +5246,7 @@
                                             "value": "application/json"
                                         }
                                     ],
-                                    "body": "{\n  \"totalItems\": \"<integer>\",\n  \"rows\": [\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"DEVOLUCION\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    },\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"CAMBIO\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    }\n  ],\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}",
+                                    "body": "{\n  \"totalItems\": \"<integer>\",\n  \"rows\": [\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"CAMBIO\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    },\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"CAMBIO\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    }\n  ],\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}",
                                     "cookie": [],
                                     "_postman_previewlanguage": "json"
                                 }
@@ -5269,7 +5261,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "629f4674-e5c9-49ae-8cb6-dc3a8f752f1f",
+                                    "id": "62a3a95e-b9ff-47db-b6a6-25fee72418fc",
                                     "name": "Obtener evento por ID",
                                     "request": {
                                         "name": "Obtener evento por ID",
@@ -5317,7 +5309,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "02c6334e-f142-44c2-8719-9f25c0077ac1",
+                                            "id": "2ea7306f-1f04-4f98-9493-2ef4b3a6423c",
                                             "name": "Evento encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -5373,7 +5365,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "0ed28808-7fd3-4358-a3fe-f94ddde42631",
+                                            "id": "3a7809d7-d6cd-4999-8fcf-e99026f7d820",
                                             "name": "Evento no encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -5425,7 +5417,7 @@
                                     }
                                 },
                                 {
-                                    "id": "f2a422d1-19c2-4774-b702-f2a53ab9fde6",
+                                    "id": "9c39e8e7-41d3-4cfa-9c9c-45256cf8c029",
                                     "name": "Eliminar evento (soft delete)",
                                     "request": {
                                         "name": "Eliminar evento (soft delete)",
@@ -5467,7 +5459,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "793f6c59-01ac-45f7-9112-a039d712999f",
+                                            "id": "501245fa-63f4-4241-bd02-f4863c03b1a6",
                                             "name": "Evento eliminado exitosamente",
                                             "originalRequest": {
                                                 "url": {
@@ -5529,7 +5521,7 @@
                                     "description": "",
                                     "item": [
                                         {
-                                            "id": "2386781a-b0c2-40f6-81ec-ac221e10ceea",
+                                            "id": "484e73e6-b8f5-4869-9feb-a0e196df76c7",
                                             "name": "Listar eventos por RUT de pasajero",
                                             "request": {
                                                 "name": "Listar eventos por RUT de pasajero",
@@ -5597,7 +5589,7 @@
                                             },
                                             "response": [
                                                 {
-                                                    "id": "2747ce80-f21a-45b1-990a-84ce1e62bd7d",
+                                                    "id": "73adf950-27ca-4bc0-9b6e-658c7ef39ac2",
                                                     "name": "Lista de eventos del pasajero",
                                                     "originalRequest": {
                                                         "url": {
@@ -5668,12 +5660,12 @@
                                                             "value": "application/json"
                                                         }
                                                     ],
-                                                    "body": "{\n  \"totalItems\": \"<integer>\",\n  \"rows\": [\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"DEVOLUCION\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    },\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"CAMBIO\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    }\n  ],\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}",
+                                                    "body": "{\n  \"totalItems\": \"<integer>\",\n  \"rows\": [\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"CAMBIO\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    },\n    {\n      \"id\": \"<integer>\",\n      \"tipo_evento\": \"CAMBIO\",\n      \"ciudad_origen\": \"<string>\",\n      \"ciudad_destino\": \"<string>\",\n      \"fecha_viaje\": \"<date>\",\n      \"tarifa_base\": \"<integer>\",\n      \"monto_pagado\": \"<integer>\",\n      \"porcentaje_descuento_aplicado\": \"<integer>\",\n      \"usuario_id\": \"<integer>\",\n      \"pasajero_id\": \"<integer>\",\n      \"empresa_id\": \"<integer>\"\n    }\n  ],\n  \"totalPages\": \"<integer>\",\n  \"currentPage\": \"<integer>\"\n}",
                                                     "cookie": [],
                                                     "_postman_previewlanguage": "json"
                                                 },
                                                 {
-                                                    "id": "42b6d6ad-487a-4ca4-bbab-372e8160cc72",
+                                                    "id": "260a5f3f-d8ba-428e-a289-e61f3b7844c5",
                                                     "name": "Pasajero no encontrado",
                                                     "originalRequest": {
                                                         "url": {
@@ -5759,7 +5751,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "f2901400-57fa-4101-a674-ac9ef87271bf",
+                                    "id": "c5999b03-6e4e-451b-a84f-e13703b911bb",
                                     "name": "Obtener resumen de KPIs",
                                     "request": {
                                         "name": "Obtener resumen de KPIs",
@@ -5830,7 +5822,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "69b1ca33-f1f6-4b00-bb1a-2ad6f6c0887c",
+                                            "id": "2b1e7830-e19a-4be1-8525-06d02ed9d7d8",
                                             "name": "Datos de KPIs",
                                             "originalRequest": {
                                                 "url": {
@@ -5914,7 +5906,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "79583216-1595-4120-8f47-6ccc500b2f93",
+                                    "id": "0d44db72-9a25-4aa2-8de4-a4b4d81ccaf0",
                                     "name": "KPIs por Convenio",
                                     "request": {
                                         "name": "KPIs por Convenio",
@@ -5964,7 +5956,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "3f011d39-9653-4694-a13c-6eac25709d4b",
+                                            "id": "e56d11a6-e835-4614-8c1d-1d2ca9d1a4d1",
                                             "name": "Lista de convenios con métricas",
                                             "originalRequest": {
                                                 "url": {
@@ -6031,7 +6023,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "3a1c3265-94bc-4169-93f6-f4f1c3283929",
+                                    "id": "1827eb1a-67de-4dd8-9f53-e379f3a94873",
                                     "name": "KPIs por Código de Descuento",
                                     "request": {
                                         "name": "KPIs por Código de Descuento",
@@ -6075,7 +6067,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "6297880d-e8cf-436c-a6d1-086965d57d85",
+                                            "id": "629fae00-cc21-4c5f-b799-da2260574b06",
                                             "name": "Lista de códigos con métricas",
                                             "originalRequest": {
                                                 "url": {
@@ -6132,7 +6124,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "437c658b-b924-463a-8580-d2e2e5d25f07",
+                                    "id": "328a0471-c990-4c23-bc21-0853087af69c",
                                     "name": "KPIs por Tipo de Pasajero",
                                     "request": {
                                         "name": "KPIs por Tipo de Pasajero",
@@ -6176,7 +6168,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "246a67b9-d1a6-4168-b70f-eec5e85fa3ec",
+                                            "id": "b22b5ce4-7dcf-4511-868e-8282e973aac8",
                                             "name": "Lista de tipos de pasajero con métricas",
                                             "originalRequest": {
                                                 "url": {
@@ -6235,7 +6227,7 @@
                     "description": "",
                     "item": [
                         {
-                            "id": "76c90e40-17b4-40d6-a92a-34fd702622a4",
+                            "id": "f248c454-a784-4585-93b8-c97d3a9287ad",
                             "name": "Listar pasajeros",
                             "request": {
                                 "name": "Listar pasajeros",
@@ -6319,7 +6311,7 @@
                                                 "type": "text/plain"
                                             },
                                             "key": "order",
-                                            "value": "ASC"
+                                            "value": "DESC"
                                         }
                                     ],
                                     "variable": []
@@ -6344,7 +6336,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "fc4c621f-f17c-4c21-96c5-4c79789dfb9d",
+                                    "id": "211f8cb1-9aff-4e86-abf8-1f05ff7752bd",
                                     "name": "Lista de pasajeros",
                                     "originalRequest": {
                                         "url": {
@@ -6426,7 +6418,7 @@
                                                         "type": "text/plain"
                                                     },
                                                     "key": "order",
-                                                    "value": "ASC"
+                                                    "value": "DESC"
                                                 }
                                             ],
                                             "variable": []
@@ -6467,7 +6459,7 @@
                             }
                         },
                         {
-                            "id": "5e95e1d4-9531-4a4e-84ae-5d02be4fd5c5",
+                            "id": "b0e04c1b-20c3-41aa-b75e-615f42e9b9ea",
                             "name": "Crear un nuevo pasajero",
                             "request": {
                                 "name": "Crear un nuevo pasajero",
@@ -6516,7 +6508,7 @@
                             },
                             "response": [
                                 {
-                                    "id": "133a12f7-3a08-42d7-bf5a-1a002ca61ec8",
+                                    "id": "73d58789-41b3-494c-aec7-0f4e979d5250",
                                     "name": "Pasajero creado exitosamente",
                                     "originalRequest": {
                                         "url": {
@@ -6583,7 +6575,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "b0d54b56-4b9c-4e32-8a3d-7ce639d553ba",
+                                    "id": "aaacb619-1a89-4c9d-827a-40ac8da69054",
                                     "name": "Asociar pasajero a eventos",
                                     "request": {
                                         "name": "Asociar pasajero a eventos",
@@ -6636,7 +6628,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "8379c603-bc09-4d5c-a575-5bc51af481b9",
+                                            "id": "534ba211-4336-4074-8d83-80c33798141b",
                                             "name": "Pasajero asociado exitosamente",
                                             "originalRequest": {
                                                 "url": {
@@ -6706,7 +6698,7 @@
                             "description": "",
                             "item": [
                                 {
-                                    "id": "17b55218-215f-4fba-b7f1-a2997a16a2dc",
+                                    "id": "7a1f0383-8392-40e4-8787-6d9a84f77bce",
                                     "name": "Obtener pasajero por ID",
                                     "request": {
                                         "name": "Obtener pasajero por ID",
@@ -6754,7 +6746,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "f6859b26-5310-4d77-ab65-93257c24d0dc",
+                                            "id": "dd46e984-9c19-46a1-92ff-75b704be9c0e",
                                             "name": "Pasajero encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -6810,7 +6802,7 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "74c94ae5-dee3-4c63-bc5d-ca0f68913c95",
+                                            "id": "9f03291b-4948-4d4c-b092-0339cae4ca60",
                                             "name": "Pasajero no encontrado",
                                             "originalRequest": {
                                                 "url": {
@@ -6862,7 +6854,7 @@
                                     }
                                 },
                                 {
-                                    "id": "1dd365dd-8d95-458b-8426-b3513321157e",
+                                    "id": "d47ed660-efc0-4dc8-9db3-ad6058091a49",
                                     "name": "Actualizar pasajero",
                                     "request": {
                                         "name": "Actualizar pasajero",
@@ -6923,7 +6915,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "bb17410f-d500-4b00-939a-efb5227740dd",
+                                            "id": "74d92b91-2978-43dc-836d-0b2a81105444",
                                             "name": "Pasajero actualizado",
                                             "originalRequest": {
                                                 "url": {
@@ -6998,7 +6990,7 @@
                                     }
                                 },
                                 {
-                                    "id": "0f7fdd16-acfe-4b99-8f1a-40bd5617658e",
+                                    "id": "a13f578f-a27d-45b1-afdb-457d1f1ccefd",
                                     "name": "Eliminar pasajero (soft delete)",
                                     "request": {
                                         "name": "Eliminar pasajero (soft delete)",
@@ -7040,7 +7032,7 @@
                                     },
                                     "response": [
                                         {
-                                            "id": "b00bb417-7d3f-4a52-94c1-ca039c7359dc",
+                                            "id": "c4981a19-9b54-4d16-8d29-84048de91a74",
                                             "name": "Pasajero eliminado exitosamente",
                                             "originalRequest": {
                                                 "url": {
@@ -7102,7 +7094,7 @@
                                     "description": "",
                                     "item": [
                                         {
-                                            "id": "c8e978e1-108a-4f3a-bc69-015dac51108d",
+                                            "id": "e761a44a-fee8-4040-b1e7-beb1b6582c66",
                                             "name": "Buscar pasajero por RUT",
                                             "request": {
                                                 "name": "Buscar pasajero por RUT",
@@ -7151,7 +7143,7 @@
                                             },
                                             "response": [
                                                 {
-                                                    "id": "a1aa4d8a-2db8-4a90-8387-4afab903d5a1",
+                                                    "id": "a8feef52-2acc-4774-a4fb-b90001a3aec2",
                                                     "name": "Pasajero encontrado",
                                                     "originalRequest": {
                                                         "url": {
@@ -7208,7 +7200,7 @@
                                                     "_postman_previewlanguage": "json"
                                                 },
                                                 {
-                                                    "id": "ce1f8c72-bc88-4c58-8861-323f6704ca7b",
+                                                    "id": "047ccd5c-c1a4-480b-9411-eea36f7b649a",
                                                     "name": "Pasajero no encontrado",
                                                     "originalRequest": {
                                                         "url": {
@@ -7287,7 +7279,7 @@
         }
     ],
     "info": {
-        "_postman_id": "b8595d87-071e-4c00-ab55-0445912b6eb9",
+        "_postman_id": "495a0421-5c50-4955-94d3-100caf2d66f0",
         "name": "API Convenios Pullman",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "description": {

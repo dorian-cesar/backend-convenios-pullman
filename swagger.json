@@ -1224,11 +1224,7 @@
         "tags": [
           "Códigos de Descuento"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "parameters": [
           {
             "in": "path",

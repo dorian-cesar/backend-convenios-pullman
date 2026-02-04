@@ -12,6 +12,9 @@ const router = Router();
  *   description: Gestión de códigos de descuento
  */
 
+// Endpoint público para buscar código
+router.get('/codigo/:codigo', codigoDescuentoController.buscarPorCodigo);
+
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);
 
@@ -154,8 +157,7 @@ router.get('/:id', codigoDescuentoController.obtener);
  *     summary: Buscar código de descuento por código
  *     tags:
  *       - Códigos de Descuento
- *     security:
- *       - bearerAuth: []
+ *     security: []
  *     parameters:
  *       - in: path
  *         name: codigo
@@ -197,7 +199,7 @@ router.get('/:id', codigoDescuentoController.obtener);
  *       404:
  *         description: Código de descuento no encontrado
  */
-router.get('/codigo/:codigo', codigoDescuentoController.buscarPorCodigo);
+
 
 /**
  * @openapi
