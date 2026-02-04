@@ -9,25 +9,12 @@ class ConvenioDTO {
         this.tipo_consulta = convenio.tipo;
 
         // Obtener endpoint:
-        let baseUrl = process.env.BASE_URL;
-        if (!baseUrl || !baseUrl.trim()) {
-            baseUrl = 'http://localhost:3000';
-        } else {
-            baseUrl = baseUrl.trim();
-        }
-
+        // Seguridad: NO exponer dominio, solo rutas relativas
         if (convenio.tipo === 'CODIGO_DESCUENTO') {
-            // 1. Si es interno, construir dinámicamente
-            this.endpoint = `${baseUrl}/api/codigos-descuento/codigo/{codigo}`;
+            this.endpoint = `/api/codigos-descuento/codigo/{codigo}`;
         } else {
-            // 2. Si es externo, tomar de la BD
-            let ep = convenio.apiConsulta ? convenio.apiConsulta.endpoint : null;
-
-            // Si es un path relativo (proxy), agregar base url
-            if (ep && ep.startsWith('/')) {
-                ep = `${baseUrl}${ep}`;
-            }
-            this.endpoint = ep;
+            // Si es externo, tomar de la BD (si es relativo, se queda relativo)
+            this.endpoint = convenio.apiConsulta ? convenio.apiConsulta.endpoint : null;
         }
 
         this.fecha_inicio = convenio.fecha_inicio;

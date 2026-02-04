@@ -306,18 +306,22 @@ exports.validarVigencia = async (convenioId) => {
     if (convenio.status === 'INACTIVO') return false;
 
     // Verificar fecha término
-    if (convenio.fecha_termino) {
-        const fechaTermino = new Date(convenio.fecha_termino);
-        const hoy = new Date();
-        // Normalizar horas para comparar solo fechas si es necesario, 
-        // pero date vs date funciona bien para expiración exacta.
+    if (hoy > fechaTermino) {
+        convenio.status = 'INACTIVO';
+        await convenio.save();
 
-        if (hoy > fechaTermino) {
-            convenio.status = 'INACTIVO';
-            await convenio.save();
-            return false;
+        // CASCADE: Desactivar descuento asociado
+        const activeDiscount = await Descuento.findOne({
+            where: { convenio_id: convenioId, status: 'ACTIVO' }
+        });
+        if (activeDiscount) {
+            activeDiscount.status = 'INACTIVO';
+            await activeDiscount.save();
         }
-    }
 
-    return true;
+        return false;
+    }
+}
+
+return true;
 };
