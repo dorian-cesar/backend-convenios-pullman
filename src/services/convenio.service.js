@@ -50,6 +50,14 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
         status: 'ACTIVO'
     });
 
+    // Recargar para obtener la asociación de ApiConsulta
+    await convenio.reload({
+        include: [{
+            model: ApiConsulta,
+            as: 'apiConsulta'
+        }]
+    });
+
     return convenio;
 };
 
@@ -121,6 +129,12 @@ exports.obtenerConvenio = async (id) => {
     if (!convenio) {
         throw new NotFoundError('Convenio no encontrado');
     }
+
+    // Validación Lazy de Vigencia
+    await exports.validarVigencia(id);
+
+    // Recargar para obtener el status actualizado si cambió
+    await convenio.reload();
 
     return convenio;
 };
@@ -195,6 +209,12 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         throw new NotFoundError('Convenio no encontrado');
     }
 
+    // 0. Validar Vigencia (Fechas)
+    const isVigente = await exports.validarVigencia(convenioId);
+    if (!isVigente) {
+        throw new BusinessError('El convenio ha expirado o se encuentra inactivo.');
+    }
+
     // Si no tienes topes definidos, pase
     if (!convenio.tope_monto_ventas && !convenio.tope_cantidad_tickets) {
         return true;
@@ -264,6 +284,34 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         // Asumimos que esta llamada es para agregar 1 ticket (una compra)
         if ((cantidadTicketsActual + 1) > convenio.tope_cantidad_tickets) {
             throw new BusinessError(`El convenio ha alcanzado su límite de cantidad de tickets. Tope: ${convenio.tope_cantidad_tickets}, Actual: ${cantidadTicketsActual}`);
+        }
+    }
+
+    return true;
+};
+
+
+/**
+ * Verificar vigencia del convenio
+ * Retorna true si está vigente, false si expiró (y actualiza el status)
+ */
+exports.validarVigencia = async (convenioId) => {
+    const convenio = await Convenio.findByPk(convenioId);
+    if (!convenio) return false;
+
+    if (convenio.status === 'INACTIVO') return false;
+
+    // Verificar fecha término
+    if (convenio.fecha_termino) {
+        const fechaTermino = new Date(convenio.fecha_termino);
+        const hoy = new Date();
+        // Normalizar horas para comparar solo fechas si es necesario, 
+        // pero date vs date funciona bien para expiración exacta.
+
+        if (hoy > fechaTermino) {
+            convenio.status = 'INACTIVO';
+            await convenio.save();
+            return false;
         }
     }
 

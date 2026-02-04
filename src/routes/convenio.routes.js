@@ -85,18 +85,24 @@ router.use(authMiddleware);
  *             properties:
  *               nombre:
  *                 type: string
+ *                 example: "Convenio Verano 2026"
  *               empresa_id:
  *                 type: integer
+ *                 example: 1
  *               tipo_consulta:
  *                 type: string
  *                 enum: [API_EXTERNA, CODIGO_DESCUENTO]
+ *                 default: CODIGO_DESCUENTO
  *               endpoint:
  *                 type: string
- *                 description: "URL del servicio externo (Requerido solo para API_EXTERNA)"
+ *                 description: "URL del servicio (Para CODIGO_DESCUENTO es auto-generado)"
+ *                 example: "http://localhost:3000/api/codigos-descuento/codigo/{codigo}"
  *               tope_monto_ventas:
  *                 type: integer
+ *                 example: 1000000
  *               tope_cantidad_tickets:
  *                 type: integer
+ *                 example: 50
  *           examples:
  *             CodigoDescuento:
  *               summary: Convenio de Código (Default)

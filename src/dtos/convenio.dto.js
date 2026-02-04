@@ -9,9 +9,8 @@ class ConvenioDTO {
         this.tipo_consulta = convenio.tipo;
 
         // Obtener endpoint de la relación ApiConsulta si existe
-        // Se concatena con BASE_URL para entregar la rutal absoluta
-        const baseUrl = process.env.BASE_URL || '';
-        this.endpoint = convenio.apiConsulta ? `${baseUrl}${convenio.apiConsulta.endpoint}` : null;
+        // Ya viene con la URL completa desde el servicio/BD
+        this.endpoint = convenio.apiConsulta ? convenio.apiConsulta.endpoint : null;
 
         this.fecha_inicio = convenio.fecha_inicio;
         this.fecha_termino = convenio.fecha_termino;
