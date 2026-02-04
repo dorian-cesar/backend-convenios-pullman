@@ -23,6 +23,12 @@ async function seedCleanDemo() {
             defaults: { nombre: 'La Araucana', status: 'ACTIVO' }
         });
 
+        // 3.1 Crear Empresa Araucana
+        const [empresaAraucana] = await Empresa.findOrCreate({
+            where: { rut_empresa: '60101000-1' },
+            defaults: { nombre: 'Caja La Araucana', status: 'ACTIVO' }
+        });
+
         // 4. Convenio Interno (Por Código)
         const [convCodigo] = await Convenio.findOrCreate({
             where: { nombre: 'Convenio Código Verano 2026' },
@@ -42,7 +48,7 @@ async function seedCleanDemo() {
         const [convAraucana] = await Convenio.findOrCreate({
             where: { nombre: 'Convenio Araucana 2026' },
             defaults: {
-                empresa_id: empresa.id,
+                empresa_id: empresaAraucana.id,
                 tipo: 'API_EXTERNA',
                 api_consulta_id: apiAraucana.id,
                 tope_monto_ventas: 5000000,
