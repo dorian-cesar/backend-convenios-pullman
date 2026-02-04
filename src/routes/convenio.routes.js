@@ -14,6 +14,35 @@ const router = Router();
 // Endpoint público para listar convenios
 router.get('/', convenioController.listar);
 
+/**
+ * @openapi
+ * /api/convenios/activos:
+ *   get:
+ *     summary: Listar solo convenios activos y vigentes
+ *     description: Retorna convenios que están ACTIVOS, tienen descuento ACTIVO y empresa ACTIVA.
+ *     tags:
+ *       - Convenios
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de convenios activos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Convenio'
+ */
+router.get('/activos', convenioController.listarActivos);
+
 // Rutas protegidas
 router.use(authMiddleware);
 
