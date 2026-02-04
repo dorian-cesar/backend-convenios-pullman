@@ -6,7 +6,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_ventas, tope_cantidad_tickets }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -17,19 +17,34 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, api_consulta_id, tope
         throw new NotFoundError('Empresa no encontrada');
     }
 
-    // Si es API_EXTERNA, verificar que api_consulta_id exista
-    if (tipo === 'API_EXTERNA' && api_consulta_id) {
-        const api = await ApiConsulta.findByPk(api_consulta_id);
-        if (!api) {
-            throw new NotFoundError('API de consulta no encontrada');
+    let apiConsultaId = null;
+
+    // Lógica para asignar/crear ApiConsulta según el tipo
+    if (tipo === 'CODIGO_DESCUENTO') {
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+        const defaultEndpoint = `${baseUrl}/api/codigos-descuento/codigo/{codigo}`;
+        const [api] = await ApiConsulta.findOrCreate({
+            where: { endpoint: defaultEndpoint },
+            defaults: { nombre: 'API Interna Códigos', status: 'ACTIVO' }
+        });
+        apiConsultaId = api.id;
+    } else if (tipo === 'API_EXTERNA') {
+        if (!endpoint) {
+            throw new BusinessError('Para API_EXTERNA se requiere un endpoint');
         }
+        // Buscar si ya existe esa API o crearla
+        const [api] = await ApiConsulta.findOrCreate({
+            where: { endpoint: endpoint },
+            defaults: { nombre: `API ${nombre}`, status: 'ACTIVO' }
+        });
+        apiConsultaId = api.id;
     }
 
     const convenio = await Convenio.create({
         nombre,
         empresa_id,
-        tipo: tipo || 'CODIGO_DESCUENTO', // Default
-        api_consulta_id: tipo === 'API_EXTERNA' ? api_consulta_id : null,
+        tipo: tipo || 'CODIGO_DESCUENTO',
+        api_consulta_id: apiConsultaId,
         tope_monto_ventas,
         tope_cantidad_tickets,
         status: 'ACTIVO'

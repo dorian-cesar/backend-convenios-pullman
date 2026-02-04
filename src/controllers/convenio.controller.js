@@ -6,7 +6,13 @@ const ConvenioDTO = require('../dtos/convenio.dto');
  */
 exports.crear = async (req, res, next) => {
     try {
-        const convenio = await convenioService.crearConvenio(req.body);
+        // Mapear tipo_consulta (JSON user) a tipo (Modelo interno)
+        const { tipo_consulta, ...rest } = req.body;
+        const data = {
+            ...rest,
+            tipo: tipo_consulta || rest.tipo
+        };
+        const convenio = await convenioService.crearConvenio(data);
         res.status(201).json(new ConvenioDTO(convenio));
     } catch (error) {
         next(error);
