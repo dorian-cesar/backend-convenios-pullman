@@ -1,8 +1,35 @@
 const { Router } = require('express');
 const convenioController = require('../controllers/convenio.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
+const validate = require('../middlewares/validate.middleware');
+const { crearConvenio } = require('../validations/convenio.validation');
 
 const router = Router();
+
+/**
+ * @openapi
+ * /api/convenios:
+ *   get:
+ *     description: Retorna lista de convenios con detalles de configuración.
+ *     tags:
+ *       - Convenios
+ *     security: []
+ *     parameters:
+ *       - in: query
+ *         name: empresa_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por empresa
+ *     responses:
+ *       201:
+ *         description: Convenio creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Convenio'
+ */
+router.post('/', validate(crearConvenio), convenioController.crear);
+
 
 /**
  * @openapi
@@ -151,14 +178,10 @@ router.use(authMiddleware);
  *                 tope_monto_ventas: 5000000
  *                 tope_cantidad_tickets: 100
  *     responses:
- *       201:
- *         description: Convenio creado exitosamente
- *         content:
- *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Convenio'
  */
-router.post('/', convenioController.crear);
+router.post('/', validate(crearConvenio), convenioController.crear);
 
 
 

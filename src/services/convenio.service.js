@@ -82,6 +82,7 @@ exports.listarConvenios = async (filters = {}) => {
 
     const data = await Convenio.findAndCountAll({
         where,
+        distinct: true, // Asegurar conteo de IDs únicos
         include: [
             {
                 model: Empresa,
