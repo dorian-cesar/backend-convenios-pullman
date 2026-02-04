@@ -1,4 +1,4 @@
-const { Convenio, Empresa, Descuento, ApiConsulta, Evento, sequelize } = require('../models');
+const { Convenio, Empresa, Descuento, ApiConsulta, Evento, CodigoDescuento, sequelize } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
@@ -102,6 +102,43 @@ exports.listarConvenios = async (filters = {}) => {
         order: [[sortField, sortOrder]],
         limit: limitVal,
         offset
+    });
+
+    return getPagingData(data, page, limitVal);
+};
+
+/**
+ * Listar convenios activos con descuentos activos
+ */
+exports.listarActivos = async (filters = {}) => {
+    const { page, limit } = filters;
+    const { offset, limit: limitVal } = getPagination(page, limit);
+
+    const data = await Convenio.findAndCountAll({
+        where: { status: 'ACTIVO' },
+        include: [
+            {
+                model: Empresa,
+                as: 'empresa',
+                attributes: ['id', 'nombre', 'rut_empresa'],
+                required: true, // Debe tener empresa
+                where: { status: 'ACTIVO' } // Opcional: ¿La empresa también debe estar activa? Asumo que sí por lógica de negocio.
+            },
+            {
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
+            },
+            {
+                model: Descuento,
+                as: 'descuento',
+                where: { status: 'ACTIVO' },
+                required: true // Debe tener descuento activo
+            }
+        ],
+        limit: limitVal,
+        offset,
+        order: [['nombre', 'ASC']]
     });
 
     return getPagingData(data, page, limitVal);
@@ -306,22 +343,37 @@ exports.validarVigencia = async (convenioId) => {
     if (convenio.status === 'INACTIVO') return false;
 
     // Verificar fecha término
-    if (hoy > fechaTermino) {
-        convenio.status = 'INACTIVO';
-        await convenio.save();
+    if (convenio.fecha_termino) {
+        const fechaTermino = new Date(convenio.fecha_termino);
+        const hoy = new Date();
 
-        // CASCADE: Desactivar descuento asociado
-        const activeDiscount = await Descuento.findOne({
-            where: { convenio_id: convenioId, status: 'ACTIVO' }
-        });
-        if (activeDiscount) {
-            activeDiscount.status = 'INACTIVO';
-            await activeDiscount.save();
+        if (hoy > fechaTermino) {
+            convenio.status = 'INACTIVO';
+            await convenio.save();
+
+            // CASCADE: Desactivar descuento asociado
+            const activeDiscount = await Descuento.findOne({
+                where: { convenio_id: convenioId, status: 'ACTIVO' }
+            });
+            if (activeDiscount) {
+                activeDiscount.status = 'INACTIVO';
+                await activeDiscount.save();
+            }
+
+            // CASCADE: Desactivar Códigos de Descuento asociados
+            const activeCodigos = await CodigoDescuento.findAll({
+                where: { convenio_id: convenioId, status: 'ACTIVO' }
+            });
+            if (activeCodigos.length > 0) {
+                for (const codigo of activeCodigos) {
+                    codigo.status = 'INACTIVO';
+                    await codigo.save();
+                }
+            }
+
+            return false;
         }
-
-        return false;
     }
-}
 
-return true;
+    return true;
 };
