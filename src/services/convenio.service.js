@@ -21,13 +21,9 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
 
     // Lógica para asignar/crear ApiConsulta según el tipo
     if (tipo === 'CODIGO_DESCUENTO') {
-        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-        const defaultEndpoint = `${baseUrl}/api/codigos-descuento/codigo/{codigo}`;
-        const [api] = await ApiConsulta.findOrCreate({
-            where: { endpoint: defaultEndpoint },
-            defaults: { nombre: 'API Interna Códigos', status: 'ACTIVO' }
-        });
-        apiConsultaId = api.id;
+        // Para código de descuento, NO usamos referencia a tabla externa (ApiConsulta).
+        // El endpoint se construye dinámicamente en el DTO usando la variable de entorno.
+        apiConsultaId = null;
     } else if (tipo === 'API_EXTERNA') {
         if (!endpoint) {
             throw new BusinessError('Para API_EXTERNA se requiere un endpoint');
