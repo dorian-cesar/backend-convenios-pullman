@@ -2,7 +2,7 @@ const { sequelize } = require('../models');
 const seedRoles = require('./rol.seed');
 const seedTipoPasajero = require('./tipoPasajero.seed');
 const seedUsuarios = require('./usuario.seed');
-const seedBusinessData = require('./business_data.seed');
+const seedCleanDemo = require('./seed_clean_demo');
 
 async function runSeeds() {
   try {
@@ -14,7 +14,7 @@ async function runSeeds() {
     await seedRoles();
     await seedTipoPasajero();
     await seedUsuarios();
-    await seedBusinessData();
+    await seedCleanDemo();
 
     console.log('✨ Seeding completado exitosamente');
     process.exit(0);

@@ -93,6 +93,10 @@ exports.listarConvenios = async (filters = {}) => {
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
             },
+            {
+                model: Descuento,
+                as: 'descuento'
+            }
 
         ],
         order: [[sortField, sortOrder]],
