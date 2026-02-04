@@ -6,8 +6,8 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'API Convenios Pullman',
-      version: '1.0.0',
-      description: 'Documentación del backend de convenios Pullman'
+      version: '1.1.0', // Updated
+      description: 'Documentación del backend de convenios Pullman (Enterprise)'
     },
     servers: [
       {

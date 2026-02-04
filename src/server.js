@@ -1,24 +1,26 @@
 require('dotenv').config();
 const app = require('./app');
 const { sequelize } = require('./models');
+const logger = require('./utils/logger');
 
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
     await sequelize.authenticate();
-    console.log('🗄️ Conectado a la base de datos');
+    logger.info('🗄️ Conectado a la base de datos');
 
     await sequelize.sync();
-    console.log('🗄️ Modelos sincronizados');
+    logger.info('🗄️ Modelos sincronizados');
 
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+      logger.info(`🚀 Servidor corriendo en puerto ${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error);
+    logger.error(`❌ Error al iniciar el servidor: ${error.message}`);
     process.exit(1);
   }
 }
+
 
 startServer();

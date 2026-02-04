@@ -1,4 +1,4 @@
-const { Empresa, Convenio, Descuento, CodigoDescuento, ApiConsulta } = require('../models');
+const { Empresa, Convenio, Descuento, CodigoDescuento, ApiConsulta, TipoPasajero } = require('../models');
 
 async function seedCleanDemo() {
     console.log('🌱 Iniciando Seed Limpio (Aligned with User JSON)...');
@@ -77,6 +77,78 @@ async function seedCleanDemo() {
             defaults: {
                 porcentaje_descuento: 20,
                 tipo_pasajero_id: 1,
+                status: 'ACTIVO'
+            }
+        });
+
+        // -------------------------------------------------------------
+        // NUEVO: Convenios Pullman Bus (Estudiante / Adulto Mayor)
+        // -------------------------------------------------------------
+
+        // 7. Crear Empresa "Pullman Bus"
+        const [empresaPullman] = await Empresa.findOrCreate({
+            where: { nombre: 'Pullman Bus' }, // Usamos nombre como key o rut si lo tuvieramos
+            defaults: {
+                rut_empresa: '77777777-7',
+                status: 'ACTIVO'
+            }
+        });
+
+        // 8. Asegurar Tipos de Pasajero
+        const [tipoEstudiante] = await TipoPasajero.findOrCreate({
+            where: { nombre: 'Estudiante' },
+            defaults: { status: 'ACTIVO' }
+        });
+
+        const [tipoAdultoMayor] = await TipoPasajero.findOrCreate({
+            where: { nombre: 'Adulto Mayor' },
+            defaults: { status: 'ACTIVO' }
+        });
+
+        // 9. Convenio "Estudiante"
+        const [convEstudiante] = await Convenio.findOrCreate({
+            where: { nombre: 'Convenio Estudiante' },
+            defaults: {
+                empresa_id: empresaPullman.id,
+                tipo: 'CODIGO_DESCUENTO', // O lo que corresponda, asumo codigo interno
+                tope_monto_ventas: 2000000,
+                tope_cantidad_tickets: 500,
+                fecha_inicio: new Date(),
+                fecha_termino: '2027-12-31T00:00:00.000Z',
+                status: 'ACTIVO'
+            }
+        });
+
+        // Descuento Estudiante
+        await Descuento.findOrCreate({
+            where: { convenio_id: convEstudiante.id },
+            defaults: {
+                porcentaje_descuento: 25, // Ejemplo 25%
+                tipo_pasajero_id: tipoEstudiante.id,
+                status: 'ACTIVO'
+            }
+        });
+
+        // 10. Convenio "Adulto Mayor"
+        const [convAdulto] = await Convenio.findOrCreate({
+            where: { nombre: 'Convenio Adulto Mayor' },
+            defaults: {
+                empresa_id: empresaPullman.id,
+                tipo: 'CODIGO_DESCUENTO',
+                tope_monto_ventas: 3000000,
+                tope_cantidad_tickets: 1000,
+                fecha_inicio: new Date(),
+                fecha_termino: '2027-12-31T00:00:00.000Z',
+                status: 'ACTIVO'
+            }
+        });
+
+        // Descuento Adulto Mayor
+        await Descuento.findOrCreate({
+            where: { convenio_id: convAdulto.id },
+            defaults: {
+                porcentaje_descuento: 30, // Ejemplo 30%
+                tipo_pasajero_id: tipoAdultoMayor.id,
                 status: 'ACTIVO'
             }
         });

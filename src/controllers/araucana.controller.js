@@ -77,20 +77,18 @@ exports.validar = async (req, res, next) => {
                     },
                     include: [{
                         model: Descuento,
-                        as: 'descuentos',
+                        as: 'descuento', // Alias singular correcto (1:1)
                         where: { status: 'ACTIVO' },
                         required: false
                     }]
                 });
 
-                // Aplanar descuentos
+                // Aplanar descuentos (Relación 1:1)
                 convenios.forEach(c => {
-                    if (c.descuentos && c.descuentos.length > 0) {
-                        c.descuentos.forEach(d => {
-                            descuentosDisponibles.push({
-                                convenio: c.nombre,
-                                porcentaje: d.porcentaje_descuento
-                            });
+                    if (c.descuento) {
+                        descuentosDisponibles.push({
+                            convenio: c.nombre,
+                            porcentaje: c.descuento.porcentaje_descuento
                         });
                     }
                 });
