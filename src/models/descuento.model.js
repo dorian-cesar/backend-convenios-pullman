@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         convenio_id: {
             type: DataTypes.INTEGER,
-            allowNull: true
+            allowNull: false
         },
         codigo_descuento_id: {
             type: DataTypes.INTEGER,
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         porcentaje_descuento: {
             type: DataTypes.INTEGER,
-            allowNull: true
+            allowNull: false
         },
         status: {
             type: DataTypes.STRING,

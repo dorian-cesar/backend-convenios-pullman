@@ -7,11 +7,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         empresa_id: {
             type: DataTypes.INTEGER,
-            allowNull: true
+            allowNull: false
         },
         nombre: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: false
         },
         fecha_inicio: {
             type: DataTypes.DATE,

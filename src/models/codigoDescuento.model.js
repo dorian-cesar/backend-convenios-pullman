@@ -7,11 +7,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         convenio_id: {
             type: DataTypes.INTEGER,
-            allowNull: true
+            allowNull: false
         },
         codigo: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: false
         },
         fecha_inicio: {
             type: DataTypes.DATEONLY,

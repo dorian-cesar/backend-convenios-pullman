@@ -9,13 +9,25 @@ class ConvenioDTO {
         this.tipo_consulta = convenio.tipo;
 
         // Obtener endpoint:
-        // 1. Si es CODIGO_DESCUENTO: Se construye dinámicamente con BASE_URL actual.
-        // 2. Si es API_EXTERNA: Se obtiene de la BD (tabla apis_consulta).
+        let baseUrl = process.env.BASE_URL;
+        if (!baseUrl || !baseUrl.trim()) {
+            baseUrl = 'http://localhost:3000';
+        } else {
+            baseUrl = baseUrl.trim();
+        }
+
         if (convenio.tipo === 'CODIGO_DESCUENTO') {
-            const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+            // 1. Si es interno, construir dinámicamente
             this.endpoint = `${baseUrl}/api/codigos-descuento/codigo/{codigo}`;
         } else {
-            this.endpoint = convenio.apiConsulta ? convenio.apiConsulta.endpoint : null;
+            // 2. Si es externo, tomar de la BD
+            let ep = convenio.apiConsulta ? convenio.apiConsulta.endpoint : null;
+
+            // Si es un path relativo (proxy), agregar base url
+            if (ep && ep.startsWith('/')) {
+                ep = `${baseUrl}${ep}`;
+            }
+            this.endpoint = ep;
         }
 
         this.fecha_inicio = convenio.fecha_inicio;
@@ -32,14 +44,16 @@ class ConvenioDTO {
             };
         }
 
-        // Si incluye descuentos
-        if (convenio.descuentos) {
-            this.descuentos = convenio.descuentos.map(d => ({
-                id: d.id,
-                porcentaje: d.porcentaje_descuento,
-                tipo_pasajero_id: d.tipo_pasajero_id,
-                status: d.status
-            }));
+        // Si incluye descuento (singular)
+        if (convenio.descuento) {
+            this.descuento = {
+                id: convenio.descuento.id,
+                porcentaje: convenio.descuento.porcentaje_descuento,
+                tipo_pasajero_id: convenio.descuento.tipo_pasajero_id,
+                status: convenio.descuento.status
+            };
+        } else {
+            this.descuento = null;
         }
     }
 

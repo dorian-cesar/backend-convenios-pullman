@@ -83,8 +83,7 @@ Evento.hasMany(Evento, { as: 'EventosRelacionados', foreignKey: 'evento_origen_i
 
 
 // RELACIONES DE DESCUENTOS
-// RELACIONES DE DESCUENTOS
-Convenio.hasMany(Descuento, { foreignKey: 'convenio_id', as: 'descuentos' });
+Convenio.hasOne(Descuento, { foreignKey: 'convenio_id', as: 'descuento' });
 Descuento.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
 CodigoDescuento.hasMany(Descuento, { foreignKey: 'codigo_descuento_id', as: 'descuentos' });

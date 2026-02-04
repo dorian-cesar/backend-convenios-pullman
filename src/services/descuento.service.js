@@ -57,6 +57,20 @@ exports.crearDescuento = async (data) => {
         throw new BusinessError('Ya existe un descuento con esa combinación');
     }
 
+    // NUEVA VALIDACIÓN: Un convenio solo puede tener 1 descuento activo a la vez
+    if (convenio_id) {
+        const activeDiscount = await Descuento.findOne({
+            where: {
+                convenio_id,
+                status: 'ACTIVO'
+            }
+        });
+
+        if (activeDiscount) {
+            throw new BusinessError(`El convenio ya tiene un descuento activo (ID: ${activeDiscount.id}). Debe desactivarlo antes de crear uno nuevo.`);
+        }
+    }
+
     const descuento = await Descuento.create({
         convenio_id,
         codigo_descuento_id,

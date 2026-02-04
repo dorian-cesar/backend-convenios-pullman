@@ -1,29 +1,33 @@
-const { Empresa, Convenio, Descuento, CodigoDescuento, ApiConsulta, TipoPasajero } = require('../models');
+const { Empresa, Convenio, Descuento, CodigoDescuento, ApiConsulta } = require('../models');
 
 async function seedCleanDemo() {
-    console.log('🌱 Iniciando Seed Limpio...');
-
-    // 1. Limpiar datos antiguos (Opcional, cuidado en prod)
-    // await Descuento.destroy({ where: {} });
-    // await CodigoDescuento.destroy({ where: {} });
-    // await Convenio.destroy({ where: {} });
-    // await Empresa.destroy({ where: {} });
-    // await ApiConsulta.destroy({ where: {} });
+    console.log('🌱 Iniciando Seed Limpio (Fix Proxy URL)...');
 
     try {
-        // 2. Crear Empresa Demo
+        // 1. Crear Empresa Demo
         const [empresa] = await Empresa.findOrCreate({
             where: { rut_empresa: '99999999-9' },
             defaults: { nombre: 'Empresa Demo SA', status: 'ACTIVO' }
         });
 
-        // 3. Crear API Configuración (Solo Araucana)
+        // 2. Crear Configuración API (Araucana)
+        // FIX: Usamos el PROXY URL para que el frontend consuama nuestra ruta interna
         const [apiAraucana] = await ApiConsulta.findOrCreate({
-            where: { endpoint: 'https://api.laaraucana.cl/validar' },
-            defaults: { nombre: 'La Araucana', status: 'ACTIVO' }
+            where: { endpoint: '/api/integraciones/araucana/validar' },
+            defaults: {
+                nombre: 'La Araucana (Proxy)',
+                status: 'ACTIVO'
+            }
         });
 
-        // 3.1 Crear Empresa Araucana
+        // Si existe pero tenía otro endpoint (el real), lo actualizamos
+        if (apiAraucana.endpoint !== '/api/integraciones/araucana/validar') {
+            apiAraucana.endpoint = '/api/integraciones/araucana/validar';
+            apiAraucana.nombre = 'La Araucana (Proxy)';
+            await apiAraucana.save();
+        }
+
+        // 3. Crear Empresa Araucana
         const [empresaAraucana] = await Empresa.findOrCreate({
             where: { rut_empresa: '60101000-1' },
             defaults: { nombre: 'Caja La Araucana', status: 'ACTIVO' }
@@ -35,7 +39,7 @@ async function seedCleanDemo() {
             defaults: {
                 empresa_id: empresa.id,
                 tipo: 'CODIGO_DESCUENTO',
-                api_consulta_id: null, // Interno: DTO construye URL dinámicamente
+                api_consulta_id: null,
                 tope_monto_ventas: 1000000,
                 tope_cantidad_tickets: 100,
                 fecha_inicio: new Date(),
@@ -59,7 +63,13 @@ async function seedCleanDemo() {
             }
         });
 
-        // 6. Códigos de Descuento (Solo para el interno)
+        // Asegurar que use el API correcto si ya existía
+        if (convAraucana.api_consulta_id !== apiAraucana.id) {
+            convAraucana.api_consulta_id = apiAraucana.id;
+            await convAraucana.save();
+        }
+
+        // 6. Códigos y Descuentos
         await CodigoDescuento.findOrCreate({
             where: { codigo: 'VERANO2026' },
             defaults: {
@@ -69,8 +79,6 @@ async function seedCleanDemo() {
             }
         });
 
-        // 7. Descuentos (Reglas de negocio)
-        // Asumiendo Tipo Pasajero ID 1 = Adulto
         await Descuento.findOrCreate({
             where: { convenio_id: convCodigo.id, tipo_pasajero_id: 1 },
             defaults: { porcentaje_descuento: 15, status: 'ACTIVO' }
@@ -81,14 +89,13 @@ async function seedCleanDemo() {
             defaults: { porcentaje_descuento: 20, status: 'ACTIVO' }
         });
 
-        console.log('✅ Seed Limpio Completado Exitosamente.');
+        console.log('✅ Seed Corregido Exitosamente.');
 
     } catch (error) {
         console.error('❌ Error en Seed:', error);
     }
 }
 
-// Ejecutar si se llama directo
 if (require.main === module) {
     seedCleanDemo().then(() => process.exit());
 }
