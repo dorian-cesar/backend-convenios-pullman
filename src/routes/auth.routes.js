@@ -17,6 +17,7 @@ const router = Router();
  *     summary: Login de usuario
  *     tags:
  *       - Auth
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -51,6 +52,7 @@ router.post('/login', authController.login);
  *     summary: Registrar usuario (crea un SUPER_USUARIO por defecto)
  *     tags:
  *       - Auth
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

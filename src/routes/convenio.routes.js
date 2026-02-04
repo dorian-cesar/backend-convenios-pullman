@@ -24,6 +24,7 @@ router.use(authMiddleware);
  *     description: Retorna lista de convenios con detalles de configuración.
  *     tags:
  *       - Convenios
+ *     security: []
  *     parameters:
  *       - in: query
  *         name: empresa_id

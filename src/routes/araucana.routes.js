@@ -15,6 +15,7 @@ const router = Router();
  *     description: Consulta API externa. Si es afiliado (1001), asocia al pasajero y retorna descuentos.
  *     tags:
  *       - Integraciones
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

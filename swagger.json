@@ -758,6 +758,7 @@
         "tags": [
           "Integraciones"
         ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -825,6 +826,7 @@
         "tags": [
           "Auth"
         ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -869,6 +871,7 @@
         "tags": [
           "Auth"
         ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1349,6 +1352,7 @@
         "tags": [
           "Convenios"
         ],
+        "security": [],
         "parameters": [
           {
             "in": "query",
