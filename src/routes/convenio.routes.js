@@ -85,10 +85,36 @@ router.use(authMiddleware);
  *             properties:
  *               nombre:
  *                 type: string
- *                 example: Convenio Verano 2026
  *               empresa_id:
  *                 type: integer
- *                 example: 1
+ *               tipo_consulta:
+ *                 type: string
+ *                 enum: [API_EXTERNA, CODIGO_DESCUENTO]
+ *               endpoint:
+ *                 type: string
+ *                 description: "URL del servicio externo (Requerido solo para API_EXTERNA)"
+ *               tope_monto_ventas:
+ *                 type: integer
+ *               tope_cantidad_tickets:
+ *                 type: integer
+ *           examples:
+ *             CodigoDescuento:
+ *               summary: Convenio de Código (Default)
+ *               value:
+ *                 nombre: "Convenio Verano 2026"
+ *                 empresa_id: 1
+ *                 tipo_consulta: "CODIGO_DESCUENTO"
+ *                 tope_monto_ventas: 1000000
+ *                 tope_cantidad_tickets: 50
+ *             ApiExterna:
+ *               summary: Convenio con API Externa
+ *               value:
+ *                 nombre: "Convenio Araucana"
+ *                 empresa_id: 2
+ *                 tipo_consulta: "API_EXTERNA"
+ *                 endpoint: "https://api.externa.com/validar"
+ *                 tope_monto_ventas: 5000000
+ *                 tope_cantidad_tickets: 100
  *     responses:
  *       201:
  *         description: Convenio creado exitosamente
