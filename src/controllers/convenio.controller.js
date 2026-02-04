@@ -36,6 +36,22 @@ exports.listar = async (req, res, next) => {
 };
 
 /**
+ * Listar convenios ACTIVOS
+ */
+exports.listarActivos = async (req, res, next) => {
+    try {
+        const result = await convenioService.listarActivos(req.query);
+        const response = {
+            ...result,
+            rows: ConvenioDTO.fromArray(result.rows)
+        };
+        res.json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Obtener convenio por ID
  */
 exports.obtener = async (req, res, next) => {
