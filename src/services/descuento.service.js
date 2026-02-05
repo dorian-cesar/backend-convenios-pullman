@@ -1,4 +1,4 @@
-const { Descuento, Convenio, CodigoDescuento, TipoPasajero, Pasajero } = require('../models');
+const { Descuento, Convenio, CodigoDescuento } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { Op } = require('sequelize');
@@ -8,7 +8,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
  * Crear descuento
  */
 exports.crearDescuento = async (data) => {
-    const { convenio_id, codigo_descuento_id, tipo_pasajero_id, pasajero_id, porcentaje_descuento } = data;
+    const { convenio_id, codigo_descuento_id, porcentaje_descuento } = data;
 
     if (!porcentaje_descuento) {
         throw new BusinessError('porcentaje_descuento es obligatorio');
@@ -34,22 +34,12 @@ exports.crearDescuento = async (data) => {
         if (!codigo) throw new NotFoundError('Código de descuento no encontrado');
     }
 
-    if (tipo_pasajero_id) {
-        const tipo = await TipoPasajero.findByPk(tipo_pasajero_id);
-        if (!tipo) throw new NotFoundError('Tipo de pasajero no encontrado');
-    }
-
-    if (pasajero_id) {
-        const pasajero = await Pasajero.findByPk(pasajero_id);
-        if (!pasajero) throw new NotFoundError('Pasajero no encontrado');
-    }
+    // Validation for TipoPasajero and Pasajero removed
 
     // Verificar que no exista ya la misma combinación
     const where = {
         convenio_id: convenio_id || null,
-        codigo_descuento_id: codigo_descuento_id || null,
-        tipo_pasajero_id: tipo_pasajero_id || null,
-        pasajero_id: pasajero_id || null
+        codigo_descuento_id: codigo_descuento_id || null
     };
 
     const existe = await Descuento.findOne({ where });
@@ -74,8 +64,6 @@ exports.crearDescuento = async (data) => {
     const descuento = await Descuento.create({
         convenio_id,
         codigo_descuento_id,
-        tipo_pasajero_id,
-        pasajero_id,
         porcentaje_descuento,
         status: 'ACTIVO'
     });
@@ -83,9 +71,7 @@ exports.crearDescuento = async (data) => {
     return await Descuento.findByPk(descuento.id, {
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: CodigoDescuento, attributes: ['id', 'codigo'] },
-            { model: TipoPasajero, attributes: ['id', 'nombre'] },
-            { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
+            { model: CodigoDescuento, attributes: ['id', 'codigo'] }
         ]
     });
 };
@@ -121,9 +107,7 @@ exports.listarDescuentos = async (filters = {}) => {
         where,
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: CodigoDescuento, attributes: ['id', 'codigo'] },
-            { model: TipoPasajero, attributes: ['id', 'nombre'] },
-            { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
+            { model: CodigoDescuento, attributes: ['id', 'codigo'] }
         ],
         order: [[sortField, sortOrder]],
         limit: limitVal,
@@ -140,9 +124,7 @@ exports.obtenerDescuento = async (id) => {
     const descuento = await Descuento.findByPk(id, {
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: CodigoDescuento, attributes: ['id', 'codigo'] },
-            { model: TipoPasajero, attributes: ['id', 'nombre'] },
-            { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
+            { model: CodigoDescuento, attributes: ['id', 'codigo'] }
         ]
     });
 
@@ -181,9 +163,7 @@ exports.actualizarDescuento = async (id, datos) => {
     return await Descuento.findByPk(id, {
         include: [
             { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: CodigoDescuento, attributes: ['id', 'codigo'] },
-            { model: TipoPasajero, attributes: ['id', 'nombre'] },
-            { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] }
+            { model: CodigoDescuento, attributes: ['id', 'codigo'] }
         ]
     });
 };
@@ -238,25 +218,11 @@ exports.obtenerDescuentoAplicable = async ({
         }
     }
 
-    // 2. Convenio + Tipo Pasajero
-    if (convenioId && tipoPasajeroId) {
-        const descuento = await Descuento.findOne({
-            where: {
-                convenio_id: convenioId,
-                tipo_pasajero_id: tipoPasajeroId,
-                status: 'ACTIVO'
-            }
-        });
-
-        if (descuento) return descuento;
-    }
-
-    // 3. Convenio General (sin tipo pasajero específico)
+    // 2. Convenio General (Ahora es la única opción para convenio)
     if (convenioId) {
         const descuentoGeneral = await Descuento.findOne({
             where: {
                 convenio_id: convenioId,
-                tipo_pasajero_id: null,
                 status: 'ACTIVO'
             }
         });

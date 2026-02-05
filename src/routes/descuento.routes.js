@@ -36,11 +36,6 @@ router.use(authMiddleware);
  *           type: integer
  *         description: Filtrar por código de descuento
  *       - in: query
- *         name: tipo_pasajero_id
- *         schema:
- *           type: integer
- *         description: Filtrar por tipo de pasajero
- *       - in: query
  *         name: status
  *         schema:
  *           type: string
@@ -100,14 +95,6 @@ router.use(authMiddleware);
  *                 type: integer
  *                 example: 1
  *                 description: Requerido si no se proporciona convenio_id
- *               tipo_pasajero_id:
- *                 type: integer
- *                 example: 1
- *                 description: Opcional, null = aplica a todos los tipos
- *               pasajero_id:
- *                 type: integer
- *                 example: 1
- *                 description: Opcional, para descuentos personalizados
  *               porcentaje_descuento:
  *                 type: integer
  *                 example: 15

@@ -3,8 +3,8 @@ class DescuentoDTO {
         this.id = descuento.id;
         this.convenio_id = descuento.convenio_id;
         this.codigo_descuento_id = descuento.codigo_descuento_id;
-        this.tipo_pasajero_id = descuento.tipo_pasajero_id;
-        this.pasajero_id = descuento.pasajero_id;
+        // tipo_pasajero_id removed
+        // pasajero_id removed
         this.porcentaje_descuento = descuento.porcentaje_descuento;
         this.status = descuento.status;
 
@@ -23,21 +23,7 @@ class DescuentoDTO {
             };
         }
 
-        if (descuento.TipoPasajero) {
-            this.tipo_pasajero = {
-                id: descuento.TipoPasajero.id,
-                nombre: descuento.TipoPasajero.nombre
-            };
-        }
-
-        if (descuento.Pasajero) {
-            this.pasajero = {
-                id: descuento.Pasajero.id,
-                rut: descuento.Pasajero.rut,
-                nombres: descuento.Pasajero.nombres,
-                apellidos: descuento.Pasajero.apellidos
-            };
-        }
+        // TipoPasajero and Pasajero relations removed from DTO
     }
 
     static fromArray(descuentos) {

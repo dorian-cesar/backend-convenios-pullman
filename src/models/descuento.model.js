@@ -13,14 +13,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true
         },
-        tipo_pasajero_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        pasajero_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
+        // tipo_pasajero_id removed
+        // pasajero_id removed
         porcentaje_descuento: {
             type: DataTypes.INTEGER,
             allowNull: false
