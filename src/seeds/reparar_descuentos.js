@@ -205,38 +205,66 @@ const rawDiscounts = [
 ];
 
 async function repararDescuentos() {
-    console.log('🔄 Iniciando reparación de semillas de descuentos...');
+    console.log('🔄 Iniciando reparación y deduplicación de descuentos...');
     try {
         let processed = 0;
         let skipped = 0;
+        let deleted = 0;
 
+        // 1. Group raw discounts by convenio_id to pick the best one
+        const discountsByConvenio = {};
         for (const raw of rawDiscounts) {
-            // Clean data
-            const data = {
-                id: raw.id,
-                convenio_id: raw.convenio_id,
-                porcentaje_descuento: raw.porcentaje_descuento,
-                status: raw.status,
-                codigo_descuento_id: null, // Force clear this field
-                // Explicitly remove codigo_descuento fields by not including them
-                // and ensuring we don't try to save them
-            };
+            if (!raw.convenio_id) continue;
 
-            // VALIDATION: convenio_id must be present
-            if (!data.convenio_id) {
-                console.warn(`⚠️ Saltando Descuento ID ${data.id}: convenio_id es null (ahora es obligatorio).`);
-                skipped++;
-                // Optional: Delete from DB if it exists as it's invalid
-                // await Descuento.destroy({ where: { id: data.id } });
-                continue;
+            if (!discountsByConvenio[raw.convenio_id]) {
+                discountsByConvenio[raw.convenio_id] = [];
             }
-
-            // Upsert (Create or Update)
-            await Descuento.upsert(data);
-            processed++;
+            discountsByConvenio[raw.convenio_id].push(raw);
         }
 
-        console.log(`✅ Reparación completada. Procesados: ${processed}, Saltados (inválidos): ${skipped}`);
+        // 2. Process each convenio
+        for (const convenioId in discountsByConvenio) {
+            const candidates = discountsByConvenio[convenioId];
+
+            // Pick the best one: Prefer 'ACTIVO', then highest ID
+            candidates.sort((a, b) => {
+                if (a.status === 'ACTIVO' && b.status !== 'ACTIVO') return -1;
+                if (a.status !== 'ACTIVO' && b.status === 'ACTIVO') return 1;
+                return b.id - a.id; // Highest ID first
+            });
+
+            const winner = candidates[0];
+            const toKeepId = winner.id;
+
+            // 3. Upsert the winner
+            const data = {
+                id: winner.id,
+                convenio_id: winner.convenio_id,
+                porcentaje_descuento: winner.porcentaje_descuento,
+                status: winner.status,
+                codigo_descuento_id: null
+            };
+            await Descuento.upsert(data);
+            processed++;
+
+            // 4. Delete others for this convenio from DB (Legacy duplicates)
+            // Get ALL discounts for this convenio from DB
+            const existingDiscounts = await Descuento.findAll({
+                where: { convenio_id: convenioId }
+            });
+
+            for (const existing of existingDiscounts) {
+                if (existing.id !== toKeepId) {
+                    console.warn(`🗑️ Eliminando descuento duplicado/obsoleto ID ${existing.id} para Convenio ${convenioId}. (Mantenemos ID ${toKeepId})`);
+                    await existing.destroy();
+                    deleted++;
+                }
+            }
+        }
+
+        console.log(`✅ Reparación completada.`);
+        console.log(`   - Descuentos únicos procesados/guardados: ${processed}`);
+        console.log(`   - Descuentos duplicados eliminados de BD: ${deleted}`);
 
     } catch (error) {
         console.error('❌ Error reparando descuentos:', error);
