@@ -90,7 +90,7 @@ const options = {
             nombre: { type: 'string', example: 'Convenio ABC' },
             empresa_id: { type: 'integer', example: 1 },
             tipo_consulta: { type: 'string', example: 'API_EXTERNA' },
-            endpoint: { type: 'string', example: 'http://localhost:3000/api/integraciones/araucana/validar' },
+            endpoint: { type: 'string', example: '/api/integraciones/araucana/validar', description: 'Ruta relativa del endpoint' },
             tope_monto_ventas: { type: 'integer', example: 1000000 },
             tope_cantidad_tickets: { type: 'integer', example: 50 },
             porcentaje_descuento: { type: 'integer', example: 15 },

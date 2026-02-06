@@ -156,8 +156,8 @@ router.use(authMiddleware);
  *                 default: CODIGO_DESCUENTO
  *               endpoint:
  *                 type: string
- *                 description: "URL del servicio. Se autogenera para CODIGO_DESCUENTO."
- *                 example: "/api/convenios/validar/PROMO2026"
+ *                 description: "URL del servicio. Para CODIGO_DESCUENTO se ignora y se usa la plantilla genérica."
+ *                 example: "/api/integraciones/araucana/validar"
  *               tope_monto_ventas:
  *                 type: integer
  *                 example: 1000000
@@ -171,7 +171,7 @@ router.use(authMiddleware);
  *               codigo:
  *                 type: string
  *                 example: "VERANO2026"
- *                 description: "Código de descuento (Obligatorio para CODIGO_DESCUENTO)"
+ *                 description: "Código de descuento (OBLIGATORIO si tipo_consulta es CODIGO_DESCUENTO)"
  *               limitar_por_stock:
  *                 type: boolean
  *                 example: false
