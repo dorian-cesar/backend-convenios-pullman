@@ -15,11 +15,10 @@ module.exports = (err, req, res, next) => {
 
   // If it's an AppError (business/operational), respond with its status and message
   if (err instanceof AppError) {
-    // Business errors correspond to Warn/Info usually, not critical logic crashes
-    // But we can log them if needed.
     return res.status(err.statusCode).json({
       error: err.code || 'ERROR',
-      message: err.message
+      message: err.message,
+      errors: err.errors || undefined
     });
   }
 
