@@ -1,6 +1,6 @@
 const { ApiConsulta } = require('../models');
 const NotFoundError = require('../exceptions/NotFoundError');
-const { getPagination, getPagingData } = require('../utils/pagination');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 const { Op } = require('sequelize');
 
 exports.crear = async (data) => {
