@@ -1,4 +1,4 @@
-const { Evento, Pasajero, Convenio, CodigoDescuento, TipoPasajero, sequelize } = require('../models');
+const { Evento, Pasajero, Convenio, TipoPasajero, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 
@@ -176,22 +176,24 @@ exports.getPorConvenio = async (params) => {
 exports.getPorCodigo = async (params) => {
     const where = buildBaseWhere(params);
     where.tipo_evento = 'COMPRA';
-    where.codigo_descuento_id = { [Op.ne]: null }; // Solo si hay código
 
+    // Joint with Convenio to get the 'codigo' field
     const rows = await Evento.findAll({
         attributes: [
-            'codigo_descuento_id',
-            [sequelize.col('CodigoDescuento.codigo'), 'codigo_nombre'],
+            [sequelize.col('Convenio.codigo'), 'codigo_nombre'],
             [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'cantidad_pasajes'],
             [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total_monto']
         ],
         include: [{
-            model: CodigoDescuento,
+            model: Convenio,
             attributes: [],
-            required: true
+            required: true,
+            where: {
+                codigo: { [Op.ne]: null }
+            }
         }],
         where: where,
-        group: ['codigo_descuento_id', 'CodigoDescuento.codigo'],
+        group: [sequelize.col('Convenio.codigo')],
         order: [[sequelize.literal('cantidad_pasajes'), 'DESC']],
         raw: true
     });

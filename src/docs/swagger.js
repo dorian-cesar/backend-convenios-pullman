@@ -21,8 +21,6 @@ const options = {
       { name: 'Empresas', description: 'Gestión de empresas' },
       { name: 'Convenios', description: 'Gestión de convenios empresariales' },
       { name: 'Pasajeros', description: 'Gestión de pasajeros' },
-      { name: 'Códigos de Descuento', description: 'Gestión de códigos de descuento' },
-      { name: 'Descuentos', description: 'Gestión de reglas de descuento' },
       { name: 'Eventos', description: 'Gestión de eventos (viajes)' }
     ],
     components: {
@@ -95,6 +93,10 @@ const options = {
             endpoint: { type: 'string', example: 'http://localhost:3000/api/integraciones/araucana/validar' },
             tope_monto_ventas: { type: 'integer', example: 1000000 },
             tope_cantidad_tickets: { type: 'integer', example: 50 },
+            porcentaje_descuento: { type: 'integer', example: 15 },
+            codigo: { type: 'string', example: 'PROMO2026' },
+            limitar_por_stock: { type: 'boolean', example: false },
+            limitar_por_monto: { type: 'boolean', example: false },
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
@@ -114,28 +116,7 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
-        CodigoDescuento: {
-          type: 'object',
-          properties: {
-            id: { type: 'integer', example: 1 },
-            codigo: { type: 'string', example: 'VERANO2026' },
-            convenio_id: { type: 'integer', example: 1 },
-            fecha_inicio: { type: 'string', format: 'date', example: '2026-01-01' },
-            fecha_termino: { type: 'string', format: 'date', example: '2026-03-01' },
-            max_usos: { type: 'integer', example: 100 },
-            usos_realizados: { type: 'integer', example: 10 },
-            status: { type: 'string', example: 'ACTIVO' }
-          }
-        },
-        Descuento: {
-          type: 'object',
-          properties: {
-            id: { type: 'integer', example: 1 },
-            convenio_id: { type: 'integer', example: 1 },
-            porcentaje_descuento: { type: 'integer', example: 15 },
-            status: { type: 'string', example: 'ACTIVO' }
-          }
-        },
+
         Evento: {
           type: 'object',
           properties: {

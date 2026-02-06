@@ -1,5 +1,5 @@
 const araucanaService = require('../services/araucana.service');
-const { Pasajero, Empresa, Convenio, Descuento } = require('../models');
+const { Pasajero, Empresa, Convenio } = require('../models');
 const { Op } = require('sequelize');
 
 exports.validar = async (req, res, next) => {
@@ -74,23 +74,15 @@ exports.validar = async (req, res, next) => {
                         status: 'ACTIVO',
                         fecha_inicio: { [Op.lte]: hoy },
                         fecha_termino: { [Op.gte]: hoy }
-                    },
-                    include: [{
-                        model: Descuento,
-                        as: 'descuento', // Alias singular correcto (1:1)
-                        where: { status: 'ACTIVO' },
-                        required: false
-                    }]
+                    }
                 });
 
-                // Aplanar descuentos (Relación 1:1)
+                // Mapping discounts
                 convenios.forEach(c => {
-                    if (c.descuento) {
-                        descuentosDisponibles.push({
-                            convenio: c.nombre,
-                            porcentaje: c.descuento.porcentaje_descuento
-                        });
-                    }
+                    descuentosDisponibles.push({
+                        convenio: c.nombre,
+                        porcentaje: c.porcentaje_descuento || 0
+                    });
                 });
             } else {
                 console.warn('Empresa La Araucana no encontrada en BD interna.');

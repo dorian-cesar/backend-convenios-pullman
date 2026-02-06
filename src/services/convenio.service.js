@@ -1,4 +1,4 @@
-const { Convenio, Empresa, Descuento, ApiConsulta, Evento, CodigoDescuento, sequelize } = require('../models');
+const { Convenio, Empresa, ApiConsulta, Evento, sequelize } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
@@ -6,7 +6,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_ventas, tope_cantidad_tickets }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_ventas, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -21,18 +21,20 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
 
     // Lógica para asignar/crear ApiConsulta según el tipo
     if (tipo === 'CODIGO_DESCUENTO') {
-        if (endpoint) {
-            throw new BusinessError('No se puede asignar un endpoint a un convenio de tipo CODIGO_DESCUENTO. Si necesita una API externa, seleccione el tipo API_EXTERNA.');
-        }
-
         const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-        const defaultEndpoint = `${baseUrl}/api/codigos-descuento/codigo/{codigo}`;
-        const [api] = await ApiConsulta.findOrCreate({
-            where: { endpoint: defaultEndpoint },
-            defaults: { nombre: 'API Interna Códigos', status: 'ACTIVO' }
-        });
-        apiConsultaId = api.id;
+        // Now using relative path for internal API
+        const defaultEndpoint = `${baseUrl}/api/convenios/validar/{codigo}`;
+        // We might want to just point to the self-validation logic.
+        // Or keep existing behavior but pointing to new unified logic?
+        // User asked to unify. Let's simplify.
+        // If type is CODIGO_DESCUENTO, we just store it. Logic will handle validation locally.
 
+        // KEEPING ApiConsulta creation for backwards compatibility if needed, OR removing it?
+        // Plan says: "Remove complex associations". Let's assume we don't need ApiConsulta for internal codes anymore.
+        // But the model still has the FK.
+        // Let's keep it simple: if API_EXTERNA, we need endpoint. if CODIGO_DESCUENTO, we don't need ApiConsulta necessarily?
+        // Existing logic created a dummy ApiConsulta. Let's keep it minimal or remove if possible.
+        // For now, removing the "API Interna" block and just setting to null/simple.
     } else if (tipo === 'API_EXTERNA') {
         if (!endpoint) {
             throw new BusinessError('Para API_EXTERNA se requiere un endpoint');
@@ -52,18 +54,20 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
         api_consulta_id: apiConsultaId,
         tope_monto_ventas,
         tope_cantidad_tickets,
+        porcentaje_descuento: porcentaje_descuento || 0,
+        codigo: codigo || null,
+        limitar_por_stock: limitar_por_stock || false,
+        limitar_por_monto: limitar_por_monto || false,
         status: 'ACTIVO'
     });
 
-    // Recargar para obtener la asociación de ApiConsulta
-    await convenio.reload({
+    return await Convenio.findByPk(convenio.id, {
         include: [{
-            model: ApiConsulta,
-            as: 'apiConsulta'
+            model: Empresa,
+            as: 'empresa',
+            attributes: ['id', 'nombre', 'rut_empresa']
         }]
     });
-
-    return convenio;
 };
 
 /**
@@ -100,8 +104,9 @@ exports.listarConvenios = async (filters = {}) => {
                 attributes: ['id', 'nombre', 'endpoint']
             },
             {
-                model: Descuento,
-                as: 'descuento'
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
             }
 
         ],
@@ -136,10 +141,9 @@ exports.listarActivos = async (filters = {}) => {
                 attributes: ['id', 'nombre', 'endpoint']
             },
             {
-                model: Descuento,
-                as: 'descuento',
-                where: { status: 'ACTIVO' },
-                required: true // Debe tener descuento activo
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
             }
         ],
         limit: limitVal,
@@ -167,8 +171,9 @@ exports.obtenerConvenio = async (id) => {
                 attributes: ['id', 'nombre', 'endpoint']
             },
             {
-                model: Descuento,
-                as: 'descuentos'
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
             }
         ]
     });
@@ -196,10 +201,14 @@ exports.actualizarConvenio = async (id, datos) => {
         throw new NotFoundError('Convenio no encontrado');
     }
 
-    const { nombre, status, empresa_id } = datos;
+    const { nombre, status, empresa_id, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto } = datos;
 
     if (nombre) convenio.nombre = nombre;
     if (status) convenio.status = status;
+    if (porcentaje_descuento !== undefined) convenio.porcentaje_descuento = porcentaje_descuento;
+    if (codigo !== undefined) convenio.codigo = codigo;
+    if (limitar_por_stock !== undefined) convenio.limitar_por_stock = limitar_por_stock;
+    if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
 
     if (empresa_id) {
         const empresa = await Empresa.findByPk(empresa_id);
@@ -223,9 +232,6 @@ exports.actualizarConvenio = async (id, datos) => {
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
-            },
-            {
-                model: Descuento
             }
         ]
     });
@@ -243,26 +249,6 @@ exports.eliminarConvenio = async (id) => {
 
     convenio.status = 'INACTIVO';
     await convenio.save();
-
-    // CASCADE: Desactivar descuento asociado
-    const activeDiscount = await Descuento.findOne({
-        where: { convenio_id: id, status: 'ACTIVO' }
-    });
-    if (activeDiscount) {
-        activeDiscount.status = 'INACTIVO';
-        await activeDiscount.save();
-    }
-
-    // CASCADE: Desactivar Códigos de Descuento asociados
-    const activeCodigos = await CodigoDescuento.findAll({
-        where: { convenio_id: id, status: 'ACTIVO' }
-    });
-    if (activeCodigos.length > 0) {
-        for (const codigo of activeCodigos) {
-            codigo.status = 'INACTIVO';
-            await codigo.save();
-        }
-    }
 
     return convenio;
 };
@@ -282,8 +268,8 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         throw new BusinessError('El convenio ha expirado o se encuentra inactivo.');
     }
 
-    // Si no tienes topes definidos, pase
-    if (!convenio.tope_monto_ventas && !convenio.tope_cantidad_tickets) {
+    // Si no tienes controles de topes activos, pase
+    if (!convenio.limitar_por_stock && !convenio.limitar_por_monto) {
         return true;
     }
 
@@ -341,13 +327,13 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
     console.log(`[Convenio Check] ID: ${convenioId} | Cantidad: ${cantidadTicketsActual} + 1 vs Tope: ${convenio.tope_cantidad_tickets}`);
 
     // 3. Verificaciones
-    if (convenio.tope_monto_ventas) {
+    if (convenio.limitar_por_monto && convenio.tope_monto_ventas) {
         if ((montoAcumuladoActual + montoNuevo) > convenio.tope_monto_ventas) {
             throw new BusinessError(`El convenio ha alcanzado su límite de monto de ventas. Tope: $${convenio.tope_monto_ventas}, Actual: $${montoAcumuladoActual}, Intento: $${montoNuevo}`);
         }
     }
 
-    if (convenio.tope_cantidad_tickets) {
+    if (convenio.limitar_por_stock && convenio.tope_cantidad_tickets) {
         // Asumimos que esta llamada es para agregar 1 ticket (una compra)
         if ((cantidadTicketsActual + 1) > convenio.tope_cantidad_tickets) {
             throw new BusinessError(`El convenio ha alcanzado su límite de cantidad de tickets. Tope: ${convenio.tope_cantidad_tickets}, Actual: ${cantidadTicketsActual}`);

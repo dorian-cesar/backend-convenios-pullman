@@ -1,8 +1,7 @@
-const { Evento, Usuario, Pasajero, Empresa, Convenio, CodigoDescuento, Descuento, TipoPasajero } = require('../models');
+const { Evento, Usuario, Pasajero, Empresa, Convenio, TipoPasajero } = require('../models');
 const { sequelize } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
-const descuentoService = require('./descuento.service');
 const convenioService = require('./convenio.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
@@ -52,14 +51,16 @@ exports.crearEvento = async (data) => {
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
   }
 
-  // Calcular descuento usando el servicio central
-  const pasajeroObj = await Pasajero.findByPk(pasajero_id);
-  const aplicable = await descuentoService.obtenerDescuentoAplicable({
-    convenioId: convenio_id,
-    codigoDescuentoId: codigo_descuento_id,
-    tipoPasajeroId: pasajeroObj ? pasajeroObj.tipo_pasajero_id : null
-  });
-  const porcentajeDescuento = aplicable ? aplicable.porcentaje_descuento : 0;
+  // Calcular descuento directamente del convenio
+  let porcentajeDescuento = 0;
+  if (convenio_id) {
+    const convenio = await Convenio.findByPk(convenio_id);
+    // Si se envía código de descuento, validar que coincida con el del convenio (si aplica)
+    // O simplemente usar el porcentaje del convenio.
+    if (convenio && convenio.status === 'ACTIVO') {
+      porcentajeDescuento = convenio.porcentaje_descuento || 0;
+    }
+  }
   const montoPagado = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
 
   // Verificar topes de convenio antes de crear
@@ -124,14 +125,9 @@ exports.crearCambio = async (data) => {
     throw new BusinessError('Solo se pueden cambiar eventos de tipo COMPRA');
   }
 
-  // Calcular diferencia de precio usando el servicio central
-  const pasajeroObj = await Pasajero.findByPk(eventoOrigen.pasajero_id);
-  const aplicable = await descuentoService.obtenerDescuentoAplicable({
-    convenioId: eventoOrigen.convenio_id,
-    codigoDescuentoId: eventoOrigen.codigo_descuento_id,
-    tipoPasajeroId: pasajeroObj ? pasajeroObj.tipo_pasajero_id : null
-  });
-  const porcentajeDescuento = aplicable ? aplicable.porcentaje_descuento : 0;
+  // Calcular diferencia de precio usando el porcentaje del convenio original
+  const convenio = await Convenio.findByPk(eventoOrigen.convenio_id);
+  const porcentajeDescuento = (convenio && convenio.status === 'ACTIVO') ? (convenio.porcentaje_descuento || 0) : 0;
 
   const nuevoMonto = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
   const montoPagado = nuevoMonto - eventoOrigen.monto_pagado;

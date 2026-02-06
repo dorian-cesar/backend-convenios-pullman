@@ -1,4 +1,4 @@
-const { Empresa, Convenio, Descuento, CodigoDescuento } = require('../models');
+const { Empresa, Convenio } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
@@ -17,29 +17,19 @@ exports.listarConDescuentos = async (req, res, next) => {
           fecha_termino: { [Op.gte]: new Date() }
         },
         // attributes: [], // Removed to fix Sequelize join issue
-        required: false, // Left join (show companies even if no discounts, or maybe true if only with discounts? stick to false for now)
-        include: [
-          {
-            model: Descuento,
-            as: 'descuentos',
-            where: { status: 'ACTIVO' },
-            attributes: ['porcentaje_descuento'],
-            required: false // Only direct discounts
-          }
-        ]
+        required: false // Left join 
       }],
       order: [['nombre', 'ASC']]
     });
 
     // Transform response to flat structure
     const response = empresas.map(empresa => {
-      // Map 1:1 Convention -> Discount (Take the first active one)
+      // Map Convention -> Discount
       const allDiscounts = empresa.convenios.map(c => {
-        if (c.descuentos && c.descuentos.length > 0) {
-          return c.descuentos[0]; // Take the first one (DB order or arbitrary)
-        }
-        return null;
-      }).filter(d => d !== null);
+        return {
+          porcentaje_descuento: c.porcentaje_descuento || 0
+        };
+      });
 
       return {
         nombre: empresa.nombre,

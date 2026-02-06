@@ -152,13 +152,27 @@ router.use(authMiddleware);
  *               endpoint:
  *                 type: string
  *                 description: "URL del servicio (Para CODIGO_DESCUENTO es auto-generado)"
- *                 example: "http://localhost:3000/api/codigos-descuento/codigo/{codigo}"
+ *                 example: "https://api.externa.com/validar"
  *               tope_monto_ventas:
  *                 type: integer
  *                 example: 1000000
  *               tope_cantidad_tickets:
  *                 type: integer
  *                 example: 50
+ *               porcentaje_descuento:
+ *                 type: integer
+ *                 example: 10
+ *                 description: "Porcentaje de descuento (0-100)"
+ *               codigo:
+ *                 type: string
+ *                 example: "VERANO2026"
+ *                 description: "Código de descuento opcional"
+ *               limitar_por_stock:
+ *                 type: boolean
+ *                 example: false
+ *               limitar_por_monto:
+ *                 type: boolean
+ *                 example: false
  *           examples:
  *             CodigoDescuento:
  *               summary: Convenio de Código (Default)
@@ -178,6 +192,10 @@ router.use(authMiddleware);
  *                 tope_monto_ventas: 5000000
  *                 tope_cantidad_tickets: 100
  *     responses:
+ *       201:
+ *         description: Convenio creado exitosamente
+ *         content:
+ *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Convenio'
  */
@@ -246,6 +264,18 @@ router.get('/:id', convenioController.obtener);
  *                 type: string
  *                 enum: [ACTIVO, INACTIVO]
  *                 example: ACTIVO
+ *               porcentaje_descuento:
+ *                 type: integer
+ *                 example: 15
+ *               codigo:
+ *                 type: string
+ *                 example: "INVIERNO2026"
+ *               limitar_por_stock:
+ *                 type: boolean
+ *                 example: true
+ *               limitar_por_monto:
+ *                 type: boolean
+ *                 example: false
  *     responses:
  *       200:
  *         description: Convenio actualizado

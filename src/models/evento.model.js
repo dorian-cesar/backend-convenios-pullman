@@ -42,11 +42,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
 
-        codigo_descuento_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-
         ciudad_origen: {
             type: DataTypes.STRING,
             allowNull: false

@@ -41,6 +41,27 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             comment: 'Cantidad máxima de tickets permitida'
         },
+        porcentaje_descuento: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+            comment: 'Porcentaje de descuento (0-100)'
+        },
+        codigo: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            comment: 'Código de descuento opcional para el convenio'
+        },
+        limitar_por_stock: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            comment: 'Si es true, valida tope_cantidad_tickets'
+        },
+        limitar_por_monto: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            comment: 'Si es true, valida tope_monto_ventas'
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'

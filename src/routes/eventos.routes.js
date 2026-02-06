@@ -50,9 +50,7 @@ router.use(authMiddleware);
  *               convenio_id:
  *                 type: integer
  *                 example: 1
- *               codigo_descuento_id:
- *                 type: integer
- *                 example: 1
+
  *               ciudad_origen:
  *                 type: string
  *                 example: Santiago

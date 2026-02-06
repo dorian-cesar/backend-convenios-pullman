@@ -11,6 +11,10 @@ const crearConvenio = {
         endpoint: Joi.string().uri().allow(null, ''),
         tope_monto_ventas: Joi.number().integer().min(0).allow(null),
         tope_cantidad_tickets: Joi.number().integer().min(0).allow(null),
+        porcentaje_descuento: Joi.number().integer().min(0).max(100).default(0),
+        codigo: Joi.string().allow(null, ''),
+        limitar_por_stock: Joi.boolean().default(false),
+        limitar_por_monto: Joi.boolean().default(false),
         status: Joi.string().valid('ACTIVO', 'INACTIVO').default('ACTIVO')
     }),
 };

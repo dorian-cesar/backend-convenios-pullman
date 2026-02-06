@@ -22,6 +22,12 @@ class ConvenioDTO {
         this.tope_monto_ventas = convenio.tope_monto_ventas;
         this.tope_cantidad_tickets = convenio.tope_cantidad_tickets;
 
+        // Nuevos campos directos
+        this.porcentaje_descuento = convenio.porcentaje_descuento || 0;
+        this.codigo = convenio.codigo;
+        this.limitar_por_stock = !!convenio.limitar_por_stock;
+        this.limitar_por_monto = !!convenio.limitar_por_monto;
+
         // Si incluye la empresa relacionada
         if (convenio.empresa) {
             this.empresa = {
@@ -29,18 +35,6 @@ class ConvenioDTO {
                 nombre: convenio.empresa.nombre,
                 rut: convenio.empresa.rut_empresa
             };
-        }
-
-        // Si incluye descuento (singular)
-        if (convenio.descuento) {
-            this.descuento = {
-                id: convenio.descuento.id,
-                porcentaje: convenio.descuento.porcentaje_descuento,
-                tipo_pasajero_id: convenio.descuento.tipo_pasajero_id,
-                status: convenio.descuento.status
-            };
-        } else {
-            this.descuento = null;
         }
     }
 
