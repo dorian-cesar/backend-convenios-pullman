@@ -20,6 +20,11 @@ exports.crearCodigoDescuento = async (data) => {
         throw new NotFoundError('Convenio no encontrado');
     }
 
+    // Validar tipo de convenio (Solicitud usuario: solo permitir códigos en convenios tipo CODIGO_DESCUENTO)
+    if (convenio.tipo !== 'CODIGO_DESCUENTO') {
+        throw new BusinessError(`No se puede asignar un código de descuento a un convenio de tipo ${convenio.tipo}. Este convenio debe ser gestionado vía API externa.`);
+    }
+
     // Verificar que el código no existe ya
     const existe = await CodigoDescuento.findOne({ where: { codigo } });
     if (existe) {
