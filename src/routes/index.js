@@ -9,6 +9,7 @@ const empresaRoutes = require('./empresa.routes');
 const convenioRoutes = require('./convenio.routes');
 const kpiRoutes = require('./kpi.routes');
 const araucanaRoutes = require('./araucana.routes');
+const apiConsultaRoutes = require('./apiConsulta.routes');
 
 const router = Router();
 
@@ -21,4 +22,5 @@ router.use('/empresas', empresaRoutes);
 router.use('/convenios', convenioRoutes);
 router.use('/kpis', kpiRoutes);
 router.use('/integraciones', araucanaRoutes);
+router.use('/apis-consulta', apiConsultaRoutes);
 module.exports = router;

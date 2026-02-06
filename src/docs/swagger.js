@@ -56,6 +56,15 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
+        ApiConsulta: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'API Araucana' },
+            endpoint: { type: 'string', example: '/api/integraciones/araucana/validar' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
         CreateEmpresa: {
           type: 'object',
           required: ['nombre', 'rut'],
