@@ -78,7 +78,7 @@ router.use(authMiddleware);
  *                 $ref: '#/components/schemas/Descuento'
  *   post:
  *     summary: Crear descuento (solo SUPER_USUARIO)
- *     description: Crea una regla de descuento para Convenio + TipoPasajero o CodigoDescuento
+ *     description: Crea una regla de descuento para un Convenio
  *     tags:
  *       - Descuentos
  *     security:
@@ -91,15 +91,12 @@ router.use(authMiddleware);
  *             type: object
  *             required:
  *               - porcentaje_descuento
+ *               - convenio_id
  *             properties:
  *               convenio_id:
  *                 type: integer
  *                 example: 1
- *                 description: Requerido si no se proporciona codigo_descuento_id
- *               codigo_descuento_id:
- *                 type: integer
- *                 example: 1
- *                 description: Requerido si no se proporciona convenio_id
+ *                 description: ID del convenio al que aplica el descuento
  *               porcentaje_descuento:
  *                 type: integer
  *                 example: 15

@@ -8,7 +8,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
  * Crear descuento
  */
 exports.crearDescuento = async (data) => {
-    const { convenio_id, codigo_descuento_id, porcentaje_descuento } = data;
+    const { convenio_id, porcentaje_descuento } = data;
 
     if (!porcentaje_descuento) {
         throw new BusinessError('porcentaje_descuento es obligatorio');
@@ -18,60 +18,35 @@ exports.crearDescuento = async (data) => {
         throw new BusinessError('El porcentaje de descuento debe estar entre 0 y 100');
     }
 
-    // Debe tener al menos convenio_id o codigo_descuento_id
-    if (!convenio_id && !codigo_descuento_id) {
-        throw new BusinessError('Debe proporcionar convenio_id o codigo_descuento_id');
+    if (!convenio_id) {
+        throw new BusinessError('Debe proporcionar convenio_id');
     }
 
-    // Validar que las entidades existan
-    if (convenio_id) {
-        const convenio = await Convenio.findByPk(convenio_id);
-        if (!convenio) throw new NotFoundError('Convenio no encontrado');
-    }
+    // Validar que el convenio exista
+    const convenio = await Convenio.findByPk(convenio_id);
+    if (!convenio) throw new NotFoundError('Convenio no encontrado');
 
-    if (codigo_descuento_id) {
-        const codigo = await CodigoDescuento.findByPk(codigo_descuento_id);
-        if (!codigo) throw new NotFoundError('Código de descuento no encontrado');
-    }
-
-    // Validation for TipoPasajero and Pasajero removed
-
-    // Verificar que no exista ya la misma combinación
-    const where = {
-        convenio_id: convenio_id || null,
-        codigo_descuento_id: codigo_descuento_id || null
-    };
-
-    const existe = await Descuento.findOne({ where });
-    if (existe) {
-        throw new BusinessError('Ya existe un descuento con esa combinación');
-    }
-
-    // NUEVA VALIDACIÓN: Un convenio solo puede tener 1 descuento activo a la vez
-    if (convenio_id) {
-        const activeDiscount = await Descuento.findOne({
-            where: {
-                convenio_id,
-                status: 'ACTIVO'
-            }
-        });
-
-        if (activeDiscount) {
-            throw new BusinessError(`El convenio ya tiene un descuento activo (ID: ${activeDiscount.id}). Debe desactivarlo antes de crear uno nuevo.`);
+    // Verificar que no exista ya un descuento para este convenio (solo se permite 1 activo)
+    const activeDiscount = await Descuento.findOne({
+        where: {
+            convenio_id,
+            status: 'ACTIVO'
         }
+    });
+
+    if (activeDiscount) {
+        throw new BusinessError(`El convenio ya tiene un descuento activo (ID: ${activeDiscount.id}). Debe desactivarlo antes de crear uno nuevo.`);
     }
 
     const descuento = await Descuento.create({
         convenio_id,
-        codigo_descuento_id,
         porcentaje_descuento,
         status: 'ACTIVO'
     });
 
     return await Descuento.findByPk(descuento.id, {
         include: [
-            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
-            { model: CodigoDescuento, attributes: ['id', 'codigo'] }
+            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] }
         ]
     });
 };
