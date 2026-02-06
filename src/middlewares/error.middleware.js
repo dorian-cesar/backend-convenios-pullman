@@ -1,4 +1,7 @@
 const logger = require('../utils/logger');
+const { ValidationError, UniqueConstraintError } = require('sequelize');
+const AppError = require('../exceptions/AppError');
+const ValidationAppError = require('../exceptions/ValidationError');
 
 module.exports = (err, req, res, next) => {
   // Convert sequelize validation/unique errors into ValidationAppError

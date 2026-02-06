@@ -79,7 +79,10 @@ exports.listarCodigosDescuento = async (filters = {}) => {
     const data = await CodigoDescuento.findAndCountAll({
         where,
         include: [
-            { model: Convenio, as: 'convenio', attributes: ['id', 'nombre'] },
+            {
+                model: Convenio, as: 'convenio', attributes: ['id', 'nombre', 'empresa_id'],
+                include: [{ model: Empresa, as: 'empresa', attributes: ['id', 'nombre'] }]
+            },
             { model: Descuento, as: 'descuentos' }
         ],
         order: [[sortField, sortOrder]],

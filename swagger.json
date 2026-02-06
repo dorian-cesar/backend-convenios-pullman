@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "title": "API Convenios Pullman",
-    "version": "1.0.0",
-    "description": "Documentación del backend de convenios Pullman"
+    "version": "1.1.0",
+    "description": "Documentación del backend de convenios Pullman (Enterprise)"
   },
   "servers": [
     {
@@ -1420,6 +1420,16 @@
                 }
               }
             }
+          },
+          "201": {
+            "description": "Convenio creado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Convenio"
+                }
+              }
+            }
           }
         }
       },
@@ -1445,27 +1455,33 @@
                 ],
                 "properties": {
                   "nombre": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Convenio Verano 2026"
                   },
                   "empresa_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                   },
                   "tipo_consulta": {
                     "type": "string",
                     "enum": [
                       "API_EXTERNA",
                       "CODIGO_DESCUENTO"
-                    ]
+                    ],
+                    "default": "CODIGO_DESCUENTO"
                   },
                   "endpoint": {
                     "type": "string",
-                    "description": "URL del servicio externo (Requerido solo para API_EXTERNA)"
+                    "description": "URL del servicio (Para CODIGO_DESCUENTO es auto-generado)",
+                    "example": "http://localhost:3000/api/codigos-descuento/codigo/{codigo}"
                   },
                   "tope_monto_ventas": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1000000
                   },
                   "tope_cantidad_tickets": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 50
                   }
                 }
               },
@@ -1496,12 +1512,45 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Convenio creado exitosamente",
+          "schema": {
+            "$ref": "#/components/schemas/Convenio"
+          }
+        }
+      }
+    },
+    "/api/convenios/activos": {
+      "get": {
+        "summary": "Listar solo convenios activos y vigentes",
+        "description": "Retorna convenios que están ACTIVOS, tienen descuento ACTIVO y empresa ACTIVA.",
+        "tags": [
+          "Convenios"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de convenios activos",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Convenio"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Convenio"
+                  }
                 }
               }
             }
@@ -1667,14 +1716,6 @@
           },
           {
             "in": "query",
-            "name": "tipo_pasajero_id",
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Filtrar por tipo de pasajero"
-          },
-          {
-            "in": "query",
             "name": "status",
             "schema": {
               "type": "string",
@@ -1768,16 +1809,6 @@
                     "type": "integer",
                     "example": 1,
                     "description": "Requerido si no se proporciona convenio_id"
-                  },
-                  "tipo_pasajero_id": {
-                    "type": "integer",
-                    "example": 1,
-                    "description": "Opcional, null = aplica a todos los tipos"
-                  },
-                  "pasajero_id": {
-                    "type": "integer",
-                    "example": 1,
-                    "description": "Opcional, para descuentos personalizados"
                   },
                   "porcentaje_descuento": {
                     "type": "integer",
