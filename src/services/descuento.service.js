@@ -103,6 +103,15 @@ exports.listarDescuentos = async (filters = {}) => {
     const sortField = sortBy || 'id';
     const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
+    // Search Logic
+    if (otherFilters.search) {
+        const searchTerm = `%${otherFilters.search}%`;
+        where[Op.or] = [
+            { '$convenio.nombre$': { [Op.like]: searchTerm } },
+            { '$CodigoDescuento.codigo$': { [Op.like]: searchTerm } }
+        ];
+    }
+
     const data = await Descuento.findAndCountAll({
         where,
         include: [
@@ -111,7 +120,8 @@ exports.listarDescuentos = async (filters = {}) => {
         ],
         order: [[sortField, sortOrder]],
         limit: limitVal,
-        offset
+        offset,
+        subQuery: false // Required for referencing included columns in where clause
     });
 
     return getPagingData(data, page, limitVal);

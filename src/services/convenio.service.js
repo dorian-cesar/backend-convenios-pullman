@@ -244,6 +244,26 @@ exports.eliminarConvenio = async (id) => {
     convenio.status = 'INACTIVO';
     await convenio.save();
 
+    // CASCADE: Desactivar descuento asociado
+    const activeDiscount = await Descuento.findOne({
+        where: { convenio_id: id, status: 'ACTIVO' }
+    });
+    if (activeDiscount) {
+        activeDiscount.status = 'INACTIVO';
+        await activeDiscount.save();
+    }
+
+    // CASCADE: Desactivar Códigos de Descuento asociados
+    const activeCodigos = await CodigoDescuento.findAll({
+        where: { convenio_id: id, status: 'ACTIVO' }
+    });
+    if (activeCodigos.length > 0) {
+        for (const codigo of activeCodigos) {
+            codigo.status = 'INACTIVO';
+            await codigo.save();
+        }
+    }
+
     return convenio;
 };
 

@@ -42,6 +42,11 @@ router.use(authMiddleware);
  *           enum: [ACTIVO, INACTIVO]
  *         description: Filtrar por estado
  *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Buscar por nombre de convenio o código
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer

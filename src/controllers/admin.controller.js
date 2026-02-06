@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { Usuario, Rol } = require('../models');
+const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const UsuarioDTO = require('../dtos/usuario.dto');
@@ -7,7 +8,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 exports.crearUsuario = async (req, res, next) => {
   try {
-    const { correo, password, rol, rol_id } = req.body;
+    const { correo, password, rol, rol_id, nombre, rut, telefono } = req.body;
 
     if (!correo || !password) {
       throw new BusinessError('Correo y password son requeridos');
@@ -36,7 +37,10 @@ exports.crearUsuario = async (req, res, next) => {
 
     const usuario = await Usuario.create({
       correo,
-      password_hash: hash
+      password_hash: hash,
+      nombre,
+      rut,
+      telefono
     });
 
     await usuario.addRol(rolRecord, { through: { status: 'ACTIVO' } });
@@ -54,12 +58,16 @@ exports.crearUsuario = async (req, res, next) => {
 
 exports.listarUsuarios = async (req, res, next) => {
   try {
-    const { page, limit, sortBy, order, status } = req.query;
+    const { page, limit, sortBy, order, status, correo } = req.query;
     const { offset, limit: limitVal } = getPagination(page, limit);
 
     const where = {};
     if (status) {
       where.status = status;
+    }
+
+    if (correo) {
+      where.correo = { [Op.like]: `%${correo}%` };
     }
 
     const sortField = sortBy || 'createdAt';

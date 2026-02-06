@@ -37,6 +37,15 @@ const router = express.Router();
  *               password:
  *                 type: string
  *                 example: Pass1234
+ *               nombre:
+ *                 type: string
+ *                 example: Juan Pérez
+ *               rut:
+ *                 type: string
+ *                 example: 12345678-9
+ *               telefono:
+ *                 type: string
+ *                 example: +56912345678
  *               rol:
  *                 type: string
  *                 enum: [USUARIO, SUPER_USUARIO]
@@ -101,6 +110,11 @@ router.post(
  *           type: string
  *           enum: [ACTIVO, INACTIVO]
  *         description: Filtrar por estado
+ *       - in: query
+ *         name: correo
+ *         schema:
+ *           type: string
+ *         description: Filtrar por coincidencia de correo
  *     tags:
  *       - Admin
  *     responses:
