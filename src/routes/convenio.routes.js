@@ -6,29 +6,7 @@ const { crearConvenio } = require('../validations/convenio.validation');
 
 const router = Router();
 
-/**
- * @openapi
- * /api/convenios:
- *   get:
- *     description: Retorna lista de convenios con detalles de configuración.
- *     tags:
- *       - Convenios
- *     security: []
- *     parameters:
- *       - in: query
- *         name: empresa_id
- *         schema:
- *           type: integer
- *         description: Filtrar por empresa
- *     responses:
- *       201:
- *         description: Convenio creado exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Convenio'
- */
-router.post('/', validate(crearConvenio), convenioController.crear);
+
 
 
 /**
@@ -40,6 +18,33 @@ router.post('/', validate(crearConvenio), convenioController.crear);
 
 // Endpoint público para listar convenios
 router.get('/', convenioController.listar);
+
+/**
+ * @openapi
+ * /api/convenios/validar/{codigo}:
+ *   get:
+ *     summary: Validar convenio por CÓDIGO
+ *     description: Retorna los detalles del convenio si el código es válido y está activo.
+ *     tags:
+ *       - Convenios
+ *     parameters:
+ *       - in: path
+ *         name: codigo
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Código de descuento a validar
+ *     responses:
+ *       200:
+ *         description: Convenio válido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Convenio'
+ *       404:
+ *         description: Código inválido o inactivo
+ */
+router.get('/validar/:codigo', convenioController.validarPorCodigo);
 
 /**
  * @openapi
@@ -151,8 +156,8 @@ router.use(authMiddleware);
  *                 default: CODIGO_DESCUENTO
  *               endpoint:
  *                 type: string
- *                 description: "URL del servicio (Para CODIGO_DESCUENTO es auto-generado)"
- *                 example: "https://api.externa.com/validar"
+ *                 description: "URL del servicio. Se autogenera para CODIGO_DESCUENTO."
+ *                 example: "/api/convenios/validar/PROMO2026"
  *               tope_monto_ventas:
  *                 type: integer
  *                 example: 1000000
@@ -166,7 +171,7 @@ router.use(authMiddleware);
  *               codigo:
  *                 type: string
  *                 example: "VERANO2026"
- *                 description: "Código de descuento opcional"
+ *                 description: "Código de descuento (Obligatorio para CODIGO_DESCUENTO)"
  *               limitar_por_stock:
  *                 type: boolean
  *                 example: false
@@ -180,8 +185,7 @@ router.use(authMiddleware);
  *                 nombre: "Convenio Verano 2026"
  *                 empresa_id: 1
  *                 tipo_consulta: "CODIGO_DESCUENTO"
- *                 tope_monto_ventas: 1000000
- *                 tope_cantidad_tickets: 50
+ *                 codigo: "VERANO2026"
  *             ApiExterna:
  *               summary: Convenio con API Externa
  *               value:
@@ -189,8 +193,6 @@ router.use(authMiddleware);
  *                 empresa_id: 2
  *                 tipo_consulta: "API_EXTERNA"
  *                 endpoint: "https://api.externa.com/validar"
- *                 tope_monto_ventas: 5000000
- *                 tope_cantidad_tickets: 100
  *     responses:
  *       201:
  *         description: Convenio creado exitosamente

@@ -89,3 +89,16 @@ exports.eliminar = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Validar convenio por CÓDIGO (Endpoint interno para autocompletar)
+ */
+exports.validarPorCodigo = async (req, res, next) => {
+    try {
+        const { codigo } = req.params;
+        const convenio = await convenioService.validarPorCodigo(codigo);
+        res.json(new ConvenioDTO(convenio));
+    } catch (error) {
+        next(error);
+    }
+};

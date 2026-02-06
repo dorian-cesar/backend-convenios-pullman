@@ -1,8 +1,9 @@
 const { sequelize } = require('../models');
 const seedRoles = require('./rol.seed');
+const seedEmpresas = require('./empresa.seed');
 const seedTipoPasajero = require('./tipoPasajero.seed');
 const seedUsuarios = require('./usuario.seed');
-const seedCleanDemo = require('./seed_clean_demo');
+const seedConvenios = require('./convenio.seed');
 
 async function runSeeds() {
   try {
@@ -12,9 +13,10 @@ async function runSeeds() {
     console.log('🗄️ Conexión establecida para seeding');
 
     await seedRoles();
+    await seedEmpresas();
     await seedTipoPasajero();
     await seedUsuarios();
-    await seedCleanDemo();
+    await seedConvenios();
 
     console.log('✨ Seeding completado exitosamente');
     process.exit(0);

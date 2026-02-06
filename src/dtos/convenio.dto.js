@@ -8,10 +8,8 @@ class ConvenioDTO {
         // Transformar tipo a array com pide el user -> ERROR: User corrected, single value.
         this.tipo_consulta = convenio.tipo;
 
-        // Obtener endpoint:
-        // Seguridad: NO exponer dominio, solo rutas relativas
         if (convenio.tipo === 'CODIGO_DESCUENTO') {
-            this.endpoint = `/api/codigos-descuento/codigo/{codigo}`;
+            this.endpoint = `/api/convenios/validar/{codigo}`;
         } else {
             // Si es externo, tomar de la BD (si es relativo, se queda relativo)
             this.endpoint = convenio.apiConsulta ? convenio.apiConsulta.endpoint : null;

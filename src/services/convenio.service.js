@@ -18,23 +18,22 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
     }
 
     let apiConsultaId = null;
+    let finalEndpoint = endpoint;
 
     // Lógica para asignar/crear ApiConsulta según el tipo
     if (tipo === 'CODIGO_DESCUENTO') {
-        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-        // Now using relative path for internal API
-        const defaultEndpoint = `${baseUrl}/api/convenios/validar/{codigo}`;
-        // We might want to just point to the self-validation logic.
-        // Or keep existing behavior but pointing to new unified logic?
-        // User asked to unify. Let's simplify.
-        // If type is CODIGO_DESCUENTO, we just store it. Logic will handle validation locally.
+        if (!codigo) {
+            throw new BusinessError('Para CODIGO_DESCUENTO se requiere un código');
+        }
+        // Usar endpoint de plantilla genérico para todos los códigos internos
+        finalEndpoint = `/api/convenios/validar/{codigo}`;
 
-        // KEEPING ApiConsulta creation for backwards compatibility if needed, OR removing it?
-        // Plan says: "Remove complex associations". Let's assume we don't need ApiConsulta for internal codes anymore.
-        // But the model still has the FK.
-        // Let's keep it simple: if API_EXTERNA, we need endpoint. if CODIGO_DESCUENTO, we don't need ApiConsulta necessarily?
-        // Existing logic created a dummy ApiConsulta. Let's keep it minimal or remove if possible.
-        // For now, removing the "API Interna" block and just setting to null/simple.
+        // Crear/Obtener la configuración de API interna genérica
+        const [api] = await ApiConsulta.findOrCreate({
+            where: { endpoint: finalEndpoint },
+            defaults: { nombre: 'Validación de Códigos Internos', status: 'ACTIVO' }
+        });
+        apiConsultaId = api.id;
     } else if (tipo === 'API_EXTERNA') {
         if (!endpoint) {
             throw new BusinessError('Para API_EXTERNA se requiere un endpoint');
@@ -45,6 +44,7 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
             defaults: { nombre: `API ${nombre}`, status: 'ACTIVO' }
         });
         apiConsultaId = api.id;
+        finalEndpoint = endpoint;
     }
 
     const convenio = await Convenio.create({
@@ -343,6 +343,26 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
     return true;
 };
 
+/**
+ * Validar convenio por código (Endpoint interno)
+ */
+exports.validarPorCodigo = async (codigo) => {
+    const convenio = await Convenio.findOne({
+        where: { codigo, status: 'ACTIVO' },
+        include: [{
+            model: Empresa,
+            as: 'empresa',
+            attributes: ['id', 'nombre', 'rut_empresa']
+        }]
+    });
+
+    if (!convenio) {
+        throw new NotFoundError('Código de descuento no válido o inactivo');
+    }
+
+    return convenio;
+};
+
 
 /**
  * Verificar vigencia del convenio
@@ -362,26 +382,6 @@ exports.validarVigencia = async (convenioId) => {
         if (hoy > fechaTermino) {
             convenio.status = 'INACTIVO';
             await convenio.save();
-
-            // CASCADE: Desactivar descuento asociado
-            const activeDiscount = await Descuento.findOne({
-                where: { convenio_id: convenioId, status: 'ACTIVO' }
-            });
-            if (activeDiscount) {
-                activeDiscount.status = 'INACTIVO';
-                await activeDiscount.save();
-            }
-
-            // CASCADE: Desactivar Códigos de Descuento asociados
-            const activeCodigos = await CodigoDescuento.findAll({
-                where: { convenio_id: convenioId, status: 'ACTIVO' }
-            });
-            if (activeCodigos.length > 0) {
-                for (const codigo of activeCodigos) {
-                    codigo.status = 'INACTIVO';
-                    await codigo.save();
-                }
-            }
 
             return false;
         }
