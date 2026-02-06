@@ -151,13 +151,21 @@ router.use(authMiddleware);
  *               empresa_id:
  *                 type: integer
  *                 example: 1
+ *               codigo:
+ *                 type: string
+ *                 example: "PROMO2026"
+ *                 description: "Código de descuento (OBLIGATORIO para convenios internos)"
  *               tipo_consulta:
  *                 type: string
  *                 enum: [API_EXTERNA, CODIGO_DESCUENTO]
  *                 default: CODIGO_DESCUENTO
+ *               porcentaje_descuento:
+ *                 type: integer
+ *                 example: 10
+ *                 description: "Porcentaje de descuento (0-100)"
  *               endpoint:
  *                 type: string
- *                 description: "URL del servicio. Para CODIGO_DESCUENTO se ignora y se usa la plantilla genérica."
+ *                 description: "Ruta del servicio (Solo para API_EXTERNA)"
  *                 example: "/api/integraciones/araucana/validar"
  *               tope_monto_ventas:
  *                 type: integer
@@ -165,14 +173,6 @@ router.use(authMiddleware);
  *               tope_cantidad_tickets:
  *                 type: integer
  *                 example: 50
- *               porcentaje_descuento:
- *                 type: integer
- *                 example: 10
- *                 description: "Porcentaje de descuento (0-100)"
- *               codigo:
- *                 type: string
- *                 example: "VERANO2026"
- *                 description: "Código de descuento (OBLIGATORIO si tipo_consulta es CODIGO_DESCUENTO)"
  *               limitar_por_stock:
  *                 type: boolean
  *                 example: false
