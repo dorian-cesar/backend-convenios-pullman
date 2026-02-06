@@ -143,6 +143,7 @@ router.use(authMiddleware);
  *             required:
  *               - nombre
  *               - empresa_id
+ *               - codigo
  *             properties:
  *               nombre:
  *                 type: string
