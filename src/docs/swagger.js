@@ -132,9 +132,6 @@ const options = {
           properties: {
             id: { type: 'integer', example: 1 },
             convenio_id: { type: 'integer', example: 1 },
-            codigo_descuento_id: { type: 'integer', example: null },
-            tipo_pasajero_id: { type: 'integer', example: 1 },
-            pasajero_id: { type: 'integer', example: null },
             porcentaje_descuento: { type: 'integer', example: 15 },
             status: { type: 'string', example: 'ACTIVO' }
           }

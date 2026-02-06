@@ -220,13 +220,9 @@ exports.crearDevolucion = async (data) => {
  * Listar eventos
  */
 exports.listarEventos = async (filters = {}) => {
-  const { page, limit, sortBy, order, status, ...otherFilters } = filters;
+  const { page, limit, sortBy, order, ...otherFilters } = filters;
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = { is_deleted: false };
-
-  if (status) {
-    where.status = status;
-  }
 
   if (otherFilters.tipo_evento) {
     where.tipo_evento = otherFilters.tipo_evento;

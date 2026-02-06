@@ -227,12 +227,6 @@ router.post('/devolucion', eventosController.crearDevolucion);
  *           type: string
  *           enum: [ASC, DESC]
  *         description: Orden de la clasificación
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [ACTIVO, INACTIVO]
- *         description: Filtrar por estado
  *     responses:
  *       200:
  *         description: Lista de eventos
