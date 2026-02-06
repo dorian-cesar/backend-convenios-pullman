@@ -186,6 +186,9 @@ router.use(authMiddleware);
  *                 empresa_id: 1
  *                 tipo_consulta: "CODIGO_DESCUENTO"
  *                 codigo: "VERANO2026"
+ *                 porcentaje_descuento: 10
+ *                 tope_monto_ventas: 1000000
+ *                 tope_cantidad_tickets: 50
  *             ApiExterna:
  *               summary: Convenio con API Externa
  *               value:

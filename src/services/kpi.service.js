@@ -177,7 +177,7 @@ exports.getPorCodigo = async (params) => {
     const where = buildBaseWhere(params);
     where.tipo_evento = 'COMPRA';
 
-    // Joint with Convenio to get the 'codigo' field
+    // Agrupar por el campo codigo de la tabla Convenio
     const rows = await Evento.findAll({
         attributes: [
             [sequelize.col('Convenio.codigo'), 'codigo_nombre'],
@@ -202,32 +202,27 @@ exports.getPorCodigo = async (params) => {
 };
 
 /**
- * KPI: Pasajes por Tipo de Pasajero (Requiere Join con Pasajero y TipoPasajero)
+ * KPI: Pasajes por Categoría (Nuevo "Por Tipo de Pasajero" basado en Convenios)
  */
 exports.getPorTipoPasajero = async (params) => {
     const where = buildBaseWhere(params);
     where.tipo_evento = 'COMPRA';
 
+    // Ahora agrupamos por el nombre del Convenio, 
+    // tratando los nombres como categorías (Adulto Mayor, Estudiante, etc)
     const rows = await Evento.findAll({
         attributes: [
-            [sequelize.col('Pasajero.tipo_pasajero_id'), 'tipo_pasajero_id'],
-            [sequelize.col('Pasajero.TipoPasajero.nombre'), 'tipo_pasajero_nombre'],
+            [sequelize.col('Convenio.nombre'), 'tipo_pasajero_nombre'],
             [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'cantidad_pasajes'],
             [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total_monto']
         ],
         include: [{
-            model: Pasajero,
+            model: Convenio,
             attributes: [],
-            required: true,
-            include: [{
-                model: TipoPasajero,
-                as: 'tipoPasajero',
-                attributes: [],
-                required: false
-            }]
+            required: true
         }],
         where: where,
-        group: ['Pasajero.tipo_pasajero_id', 'Pasajero.TipoPasajero.nombre'],
+        group: [sequelize.col('Convenio.nombre')],
         order: [[sequelize.literal('cantidad_pasajes'), 'DESC']],
         raw: true
     });
