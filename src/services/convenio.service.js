@@ -78,11 +78,18 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
     });
 
     return await Convenio.findByPk(convenio.id, {
-        include: [{
-            model: Empresa,
-            as: 'empresa',
-            attributes: ['id', 'nombre', 'rut_empresa']
-        }]
+        include: [
+            {
+                model: Empresa,
+                as: 'empresa',
+                attributes: ['id', 'nombre', 'rut_empresa']
+            },
+            {
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
+            }
+        ]
     });
 };
 
