@@ -12,7 +12,7 @@ exports.listar = async (params) => {
     const { limit: l, offset } = getPagination(page, limit);
 
     const where = {};
-    if (nombre) where.nombre = { [Op.like]: `%${nombre}%` };
+    if (nombre) where.nombre = nombre;
     if (status) where.status = status;
 
     const data = await ApiConsulta.findAndCountAll({
