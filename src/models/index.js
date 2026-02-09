@@ -46,6 +46,10 @@ Pasajero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 ApiConsulta.hasMany(Convenio, { foreignKey: 'api_consulta_id', as: 'convenios' });
 Convenio.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsulta' });
 
+// EMPRESA -> API_CONSULTA (1:N)
+Empresa.hasMany(ApiConsulta, { foreignKey: 'empresa_id', as: 'apisConsulta' });
+ApiConsulta.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+
 // RELACIONES DE EVENTOS (Registro de viajes)
 Usuario.hasMany(Evento, { foreignKey: 'usuario_id' });
 Evento.belongsTo(Usuario, { foreignKey: 'usuario_id' });

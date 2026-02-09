@@ -10,6 +10,7 @@ const crearApiConsulta = {
             'string.empty': 'El endpoint es obligatorio',
             'any.required': 'El endpoint es obligatorio'
         }),
+        empresa_id: Joi.number().integer().allow(null).optional(),
         status: Joi.string().valid('ACTIVO', 'INACTIVO').default('ACTIVO')
     })
 };
@@ -21,6 +22,7 @@ const actualizarApiConsulta = {
     body: Joi.object().keys({
         nombre: Joi.string(),
         endpoint: Joi.string(),
+        empresa_id: Joi.number().integer().allow(null),
         status: Joi.string().valid('ACTIVO', 'INACTIVO')
     }).min(1)
 };

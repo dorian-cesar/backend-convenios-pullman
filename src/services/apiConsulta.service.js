@@ -8,12 +8,13 @@ exports.crear = async (data) => {
 };
 
 exports.listar = async (params) => {
-    const { page, limit, nombre, status, sortBy = 'id', order = 'ASC' } = params;
+    const { page, limit, nombre, status, empresa_id, sortBy = 'id', order = 'ASC' } = params;
     const { limit: l, offset } = getPagination(page, limit);
 
     const where = {};
     if (nombre) where.nombre = nombre;
     if (status) where.status = status;
+    if (empresa_id) where.empresa_id = empresa_id;
 
     const data = await ApiConsulta.findAndCountAll({
         where,

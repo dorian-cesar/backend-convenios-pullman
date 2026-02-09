@@ -3,6 +3,7 @@ class ApiConsultaDTO {
         this.id = api.id;
         this.nombre = api.nombre;
         this.endpoint = api.endpoint;
+        this.empresa_id = api.empresa_id;
         this.status = api.status;
     }
 

@@ -6,7 +6,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_ventas, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -17,12 +17,13 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
         throw new NotFoundError('Empresa no encontrada');
     }
 
-    let apiConsultaId = null;
+    let finalApiConsultaId = api_consulta_id;
     let finalEndpoint = endpoint;
+    let finalCodigo = codigo;
 
     // Lógica para asignar/crear ApiConsulta según el tipo
     if (tipo === 'CODIGO_DESCUENTO') {
-        if (!codigo) {
+        if (!finalCodigo) {
             throw new BusinessError('Para CODIGO_DESCUENTO se requiere un código');
         }
         // Usar endpoint de plantilla genérico para todos los códigos internos
@@ -33,29 +34,44 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, tope_monto_
             where: { endpoint: finalEndpoint },
             defaults: { nombre: 'Validación de Códigos Internos', status: 'ACTIVO' }
         });
-        apiConsultaId = api.id;
+        finalApiConsultaId = api.id;
     } else if (tipo === 'API_EXTERNA') {
-        if (!endpoint) {
-            throw new BusinessError('Para API_EXTERNA se requiere un endpoint');
+        // Regla: En API_EXTERNA el código debe ser NULL
+        finalCodigo = null;
+
+        if (finalApiConsultaId) {
+            // Si pasan el ID directamente, validar que pertenezca a la misma empresa
+            const api = await ApiConsulta.findByPk(finalApiConsultaId);
+            if (!api) {
+                throw new NotFoundError('API de consulta no encontrada');
+            }
+            // Validar empresa (si la API tiene empresa_id asociada)
+            if (api.empresa_id && api.empresa_id !== parseInt(empresa_id)) {
+                throw new BusinessError('La API de consulta seleccionada no pertenece a la empresa del convenio');
+            }
+            finalEndpoint = api.endpoint;
+        } else if (endpoint) {
+            // Retrocompatibilidad/Creación al vuelo: Asociar a la empresa
+            const [api] = await ApiConsulta.findOrCreate({
+                where: { endpoint: endpoint, empresa_id: empresa_id },
+                defaults: { nombre: `API ${nombre}`, status: 'ACTIVO' }
+            });
+            finalApiConsultaId = api.id;
+            finalEndpoint = endpoint;
+        } else {
+            throw new BusinessError('Para API_EXTERNA se requiere un endpoint o el ID de una API de consulta');
         }
-        // Buscar si ya existe esa API o crearla
-        const [api] = await ApiConsulta.findOrCreate({
-            where: { endpoint: endpoint },
-            defaults: { nombre: `API ${nombre}`, status: 'ACTIVO' }
-        });
-        apiConsultaId = api.id;
-        finalEndpoint = endpoint;
     }
 
     const convenio = await Convenio.create({
         nombre,
         empresa_id,
         tipo: tipo || 'CODIGO_DESCUENTO',
-        api_consulta_id: apiConsultaId,
+        api_consulta_id: finalApiConsultaId,
         tope_monto_ventas,
         tope_cantidad_tickets,
         porcentaje_descuento: porcentaje_descuento || 0,
-        codigo: codigo || null,
+        codigo: finalCodigo,
         limitar_por_stock: limitar_por_stock || false,
         limitar_por_monto: limitar_por_monto || false,
         status: 'ACTIVO'

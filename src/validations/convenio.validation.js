@@ -8,9 +8,10 @@ const crearConvenio = {
         }),
         empresa_id: Joi.number().integer().required(),
         tipo_consulta: Joi.string().valid('API_EXTERNA', 'CODIGO_DESCUENTO').default('CODIGO_DESCUENTO'),
+        api_consulta_id: Joi.number().integer().allow(null).optional(),
         endpoint: Joi.string().uri().allow(null, '').when('tipo_consulta', {
             is: 'API_EXTERNA',
-            then: Joi.required(),
+            then: Joi.optional(), // Now optional if api_consulta_id is provided
             otherwise: Joi.optional()
         }),
         tope_monto_ventas: Joi.number().integer().min(0).allow(null),
@@ -22,7 +23,7 @@ const crearConvenio = {
                 'string.empty': 'El código es obligatorio para este tipo de convenio',
                 'any.required': 'El código es obligatorio para este tipo de convenio'
             }),
-            otherwise: Joi.string().allow(null, '').forbidden()
+            otherwise: Joi.any().strip() // Remove from payload for API_EXTERNA
         }),
         limitar_por_stock: Joi.boolean().default(false),
         limitar_por_monto: Joi.boolean().default(false),
