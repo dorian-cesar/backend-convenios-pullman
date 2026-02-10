@@ -11,6 +11,152 @@ const router = Router();
  *   description: Gestión de pasajeros
  */
 
+// Rutas públicas
+/**
+ * @openapi
+ * /api/pasajeros:
+ *   post:
+ *     summary: Crear un nuevo pasajero
+ *     tags:
+ *       - Pasajeros
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *               - nombres
+ *               - apellidos
+ *               - fecha_nacimiento
+ *             properties:
+ *               rut:
+ *                 type: string
+ *                 example: "12345678-9"
+ *               nombres:
+ *                 type: string
+ *                 example: Juan
+ *               apellidos:
+ *                 type: string
+ *                 example: Pérez
+ *               fecha_nacimiento:
+ *                 type: string
+ *                 format: date
+ *                 example: "1990-05-15"
+ *               correo:
+ *                 type: string
+ *                 example: juan.perez@email.com
+ *               telefono:
+ *                 type: string
+ *                 example: "+56912345678"
+ *               tipo_pasajero_id:
+ *                 type: integer
+ *                 example: 1
+ *                 description: Opcional, se calcula automáticamente por edad si no se proporciona
+ *               empresa_id:
+ *                 type: integer
+ *                 example: 1
+ *               convenio_id:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Pasajero creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Pasajero'
+ */
+router.post('/', pasajerosController.crear);
+
+/**
+ * @openapi
+ * /api/pasajeros/rut/{rut}:
+ *   get:
+ *     summary: Buscar pasajero por RUT
+ *     tags:
+ *       - Pasajeros
+ *     parameters:
+ *       - in: path
+ *         name: rut
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: RUT del pasajero
+ *         example: "12345678-9"
+ *     responses:
+ *       200:
+ *         description: Pasajero encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Pasajero'
+ *       404:
+ *         description: Pasajero no encontrado
+ */
+router.get('/rut/:rut', pasajerosController.buscarPorRut);
+
+/**
+ * @openapi
+ * /api/pasajeros/{id}:
+ *   put:
+ *     summary: Actualizar pasajero
+ *     tags:
+ *       - Pasajeros
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del pasajero
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombres:
+ *                 type: string
+ *                 example: Juan Carlos
+ *               apellidos:
+ *                 type: string
+ *                 example: Pérez González
+ *               fecha_nacimiento:
+ *                 type: string
+ *                 format: date
+ *                 example: "1990-05-15"
+ *               correo:
+ *                 type: string
+ *                 example: juan.perez@email.com
+ *               telefono:
+ *                 type: string
+ *                 example: "+56912345678"
+ *               tipo_pasajero_id:
+ *                 type: integer
+ *                 example: 1
+ *               empresa_id:
+ *                 type: integer
+ *                 example: 1
+ *               convenio_id:
+ *                 type: integer
+ *                 example: 1
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVO, INACTIVO]
+ *                 example: ACTIVO
+ *     responses:
+ *       200:
+ *         description: Pasajero actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Pasajero'
+ */
+router.put('/:id', pasajerosController.actualizar);
+
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);
 
@@ -84,62 +230,9 @@ router.use(authMiddleware);
  *                   type: integer
  *                 currentPage:
  *                   type: integer
- *   post:
- *     summary: Crear un nuevo pasajero
- *     tags:
- *       - Pasajeros
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - rut
- *               - nombres
- *               - apellidos
- *               - fecha_nacimiento
- *             properties:
- *               rut:
- *                 type: string
- *                 example: "12345678-9"
- *               nombres:
- *                 type: string
- *                 example: Juan
- *               apellidos:
- *                 type: string
- *                 example: Pérez
- *               fecha_nacimiento:
- *                 type: string
- *                 format: date
- *                 example: "1990-05-15"
- *               correo:
- *                 type: string
- *                 example: juan.perez@email.com
- *               telefono:
- *                 type: string
- *                 example: "+56912345678"
- *               tipo_pasajero_id:
- *                 type: integer
- *                 example: 1
- *                 description: Opcional, se calcula automáticamente por edad si no se proporciona
- *               empresa_id:
- *                 type: integer
- *                 example: 1
- *               convenio_id:
- *                 type: integer
- *                 example: 1
- *     responses:
- *       201:
- *         description: Pasajero creado exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Pasajero'
+
  */
-router.post('/', pasajerosController.crear);
+
 
 /**
  * @openapi
@@ -224,96 +317,9 @@ router.get('/', pasajerosController.listar);
  */
 router.get('/:id', pasajerosController.obtener);
 
-/**
- * @openapi
- * /api/pasajeros/rut/{rut}:
- *   get:
- *     summary: Buscar pasajero por RUT
- *     tags:
- *       - Pasajeros
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: rut
- *         required: true
- *         schema:
- *           type: string
- *         description: RUT del pasajero
- *         example: "12345678-9"
- *     responses:
- *       200:
- *         description: Pasajero encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Pasajero'
- *       404:
- *         description: Pasajero no encontrado
- */
-router.get('/rut/:rut', pasajerosController.buscarPorRut);
 
-/**
- * @openapi
- * /api/pasajeros/{id}:
- *   put:
- *     summary: Actualizar pasajero
- *     tags:
- *       - Pasajeros
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID del pasajero
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nombres:
- *                 type: string
- *                 example: Juan Carlos
- *               apellidos:
- *                 type: string
- *                 example: Pérez González
- *               fecha_nacimiento:
- *                 type: string
- *                 format: date
- *                 example: "1990-05-15"
- *               correo:
- *                 type: string
- *                 example: juan.perez@email.com
- *               telefono:
- *                 type: string
- *                 example: "+56912345678"
- *               tipo_pasajero_id:
- *                 type: integer
- *                 example: 1
- *               empresa_id:
- *                 type: integer
- *                 example: 1
- *               convenio_id:
- *                 type: integer
- *                 example: 1
- *               status:
- *                 type: string
- *                 enum: [ACTIVO, INACTIVO]
- *                 example: ACTIVO
- *     responses:
- *       200:
- *         description: Pasajero actualizado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Pasajero'
- */
-router.put('/:id', pasajerosController.actualizar);
+
+
 
 /**
  * @openapi

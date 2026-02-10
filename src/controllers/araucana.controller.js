@@ -99,6 +99,7 @@ exports.validar = async (req, res, next) => {
 
                 todosLosConvenios.forEach(c => {
                     descuentosDisponibles.push({
+                        id: c.id,
                         convenio: c.nombre,
                         porcentaje: c.porcentaje_descuento || 0
                     });
