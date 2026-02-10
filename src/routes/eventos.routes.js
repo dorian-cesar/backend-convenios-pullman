@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const eventosController = require('../controllers/eventos.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
+const authMiddleware = require('../middlewares/eventoAuth.middleware');
 const validate = require('../middlewares/validate.middleware');
 const eventoValidation = require('../validations/evento.validation');
 
