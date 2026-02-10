@@ -13,25 +13,25 @@ class PasajeroDTO {
         this.status = pasajero.status;
 
         // Incluir relaciones si existen
-        if (pasajero.TipoPasajero) {
+        if (pasajero.tipoPasajero) {
             this.tipo_pasajero = {
-                id: pasajero.TipoPasajero.id,
-                nombre: pasajero.TipoPasajero.nombre
+                id: pasajero.tipoPasajero.id,
+                nombre: pasajero.tipoPasajero.nombre
             };
         }
 
-        if (pasajero.Empresa) {
+        if (pasajero.empresa) {
             this.empresa = {
-                id: pasajero.Empresa.id,
-                nombre: pasajero.Empresa.nombre,
-                rut: pasajero.Empresa.rut_empresa
+                id: pasajero.empresa.id,
+                nombre: pasajero.empresa.nombre,
+                rut: pasajero.empresa.rut_empresa
             };
         }
 
-        if (pasajero.Convenio) {
+        if (pasajero.convenio) {
             this.convenio = {
-                id: pasajero.Convenio.id,
-                nombre: pasajero.Convenio.nombre
+                id: pasajero.convenio.id,
+                nombre: pasajero.convenio.nombre
             };
         }
 
