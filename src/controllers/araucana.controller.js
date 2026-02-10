@@ -1,5 +1,5 @@
 const araucanaService = require('../services/araucana.service');
-const { Pasajero, Empresa, Convenio } = require('../models');
+const { Pasajero, Empresa, Convenio, ApiConsulta } = require('../models');
 const { Op } = require('sequelize');
 
 exports.validar = async (req, res, next) => {
@@ -18,8 +18,6 @@ exports.validar = async (req, res, next) => {
             // --- ES AFILIADO ---
 
             // 2. Buscar o Crear Pasajero
-            // Parsear nombre: "NOMBRE1 NOMBRE2 APELLIDO1 APELLIDO2" 
-            // Esto es heurístico, asumiremos el último token es apellido2, penúltimo apellido1, resto nombres.
             const nombreCompleto = resultadoExterno.nombre || '';
             const partes = nombreCompleto.trim().split(/\s+/);
 
@@ -27,16 +25,14 @@ exports.validar = async (req, res, next) => {
             let apellidos = '';
 
             if (partes.length >= 2) {
-                // Últimos 2 son apellidos
                 const ap2 = partes.pop();
                 const ap1 = partes.pop();
                 apellidos = `${ap1} ${ap2}`;
                 nombres = partes.join(' ');
             } else {
-                nombres = nombreCompleto; // Fallback
+                nombres = nombreCompleto;
             }
 
-            // Find or Create Pasajero (sin empresa/convenio aun)
             let [pasajero] = await Pasajero.findOrCreate({
                 where: { rut: rut },
                 defaults: {
@@ -46,14 +42,12 @@ exports.validar = async (req, res, next) => {
                 }
             });
 
-            // 3. Buscar Empresa "La Araucana" (o configurada)
-            // Idealmente buscar por RUT de La Araucana si lo tuviéramos, o por nombre exacto.
-            // O usaremos alguna convención.
+            // 3. Buscar Empresa "La Araucana"
             let empresa = await Empresa.findOne({
                 where: {
                     [Op.or]: [
                         { nombre: { [Op.like]: '%Araucana%' } },
-                        { rut_empresa: 'LaAraucana' } // Placeholder si no existe
+                        { rut_empresa: 'LaAraucana' }
                     ]
                 }
             });
@@ -64,9 +58,37 @@ exports.validar = async (req, res, next) => {
                 // Asociar pasajero a esta empresa
                 pasajero.empresa_id = empresa.id;
 
-                // 4. Buscar Convenios y Descuentos Activos para esta empresa
+                // 4. Buscar el Convenio específico vinculado al endpoint de validación de Araucana
+                const convenioApi = await Convenio.findOne({
+                    where: {
+                        empresa_id: empresa.id,
+                        status: 'ACTIVO',
+                        tipo: 'API_EXTERNA'
+                    },
+                    include: [{
+                        model: ApiConsulta,
+                        as: 'apiConsulta',
+                        where: { endpoint: '/api/integraciones/araucana/validar' }
+                    }]
+                });
+
+                if (convenioApi) {
+                    pasajero.convenio_id = convenioApi.id;
+                } else {
+                    // Fallback: Si no hay uno específico de API, buscar cualquier activo para poblar descuentos
+                    const conveniosActivos = await Convenio.findAll({
+                        where: { empresa_id: empresa.id, status: 'ACTIVO' }
+                    });
+                    if (conveniosActivos.length > 0 && !pasajero.convenio_id) {
+                        pasajero.convenio_id = conveniosActivos[0].id;
+                    }
+                }
+
+                await pasajero.save();
+
+                // Buscar todos los convenios activos para mostrar descuentos en la respuesta
                 const hoy = new Date();
-                const convenios = await Convenio.findAll({
+                const todosLosConvenios = await Convenio.findAll({
                     where: {
                         empresa_id: empresa.id,
                         status: 'ACTIVO',
@@ -75,17 +97,7 @@ exports.validar = async (req, res, next) => {
                     }
                 });
 
-                // Si encontramos convenios, asociar el primero (o el más relevante) al pasajero
-                if (convenios.length > 0) {
-                    // Buscar específicamente el que sea de tipo API_EXTERNA si hay varios
-                    const convenioApi = convenios.find(c => c.tipo === 'API_EXTERNA') || convenios[0];
-                    pasajero.convenio_id = convenioApi.id;
-                }
-
-                await pasajero.save();
-
-                // Mapping discounts for response
-                convenios.forEach(c => {
+                todosLosConvenios.forEach(c => {
                     descuentosDisponibles.push({
                         convenio: c.nombre,
                         porcentaje: c.porcentaje_descuento || 0
