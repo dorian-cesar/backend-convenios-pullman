@@ -139,7 +139,12 @@ const options = {
             porcentaje_descuento_aplicado: { type: 'integer', example: 20 },
             usuario_id: { type: 'integer', example: 1 },
             pasajero_id: { type: 'integer', example: 1 },
-            empresa_id: { type: 'integer', example: 1 }
+            empresa_id: { type: 'integer', example: 1 },
+            hora_salida: { type: 'string', example: '14:30' },
+            terminal_origen: { type: 'string', example: 'Terminal Sur' },
+            terminal_destino: { type: 'string', example: 'Terminal Valparaíso' },
+            numero_ticket: { type: 'string', example: 'T-12345' },
+            pnr: { type: 'string', example: 'PNR-XYZ' }
           }
         }
       }

@@ -6,7 +6,7 @@ const EventoDTO = require('../dtos/evento.dto');
  */
 exports.crearCompra = async (req, res, next) => {
   try {
-    const evento = await eventosService.crearEvento(req.body);
+    const evento = await eventosService.crearCompraEvento(req.body);
     res.status(201).json(new EventoDTO(evento));
   } catch (error) {
     next(error);
@@ -18,7 +18,7 @@ exports.crearCompra = async (req, res, next) => {
  */
 exports.crearCambio = async (req, res, next) => {
   try {
-    const evento = await eventosService.crearCambio(req.body);
+    const evento = await eventosService.crearCambioEvento(req.body);
     res.status(201).json(new EventoDTO(evento));
   } catch (error) {
     next(error);
@@ -30,7 +30,7 @@ exports.crearCambio = async (req, res, next) => {
  */
 exports.crearDevolucion = async (req, res, next) => {
   try {
-    const evento = await eventosService.crearDevolucion(req.body);
+    const evento = await eventosService.crearDevolucionEvento(req.body);
     res.status(201).json(new EventoDTO(evento));
   } catch (error) {
     next(error);
@@ -67,6 +67,32 @@ exports.obtener = async (req, res, next) => {
 };
 
 /**
+ * Obtener historial de eventos para una cadena
+ */
+exports.obtenerHistorial = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const historial = await eventosService.obtenerHistorialEventos(id);
+    res.json(EventoDTO.fromArray(historial));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Obtener el estado actual (último evento) de una cadena
+ */
+exports.obtenerEventoActual = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const actual = await eventosService.obtenerEventoActual(id);
+    res.json(new EventoDTO(actual));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Eliminar evento (soft delete)
  */
 exports.eliminar = async (req, res, next) => {
@@ -78,6 +104,7 @@ exports.eliminar = async (req, res, next) => {
     next(error);
   }
 };
+
 /**
  * Listar eventos por RUT de pasajero
  */

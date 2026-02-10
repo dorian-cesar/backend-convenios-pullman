@@ -1,0 +1,55 @@
+const Joi = require('joi');
+
+const crearCompra = {
+    body: Joi.object().keys({
+        usuario_id: Joi.number().integer().required(),
+        pasajero_id: Joi.number().integer().required(),
+        empresa_id: Joi.number().integer().required(),
+        convenio_id: Joi.number().integer().allow(null).optional(),
+        ciudad_origen: Joi.string().required(),
+        ciudad_destino: Joi.string().required(),
+        fecha_viaje: Joi.date().iso().required(),
+        hora_salida: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/).required().messages({
+            'string.pattern.base': 'El formato de hora_salida debe ser HH:mm'
+        }),
+        numero_asiento: Joi.string().allow(null, '').optional(),
+        numero_ticket: Joi.string().allow(null, '').optional(),
+        pnr: Joi.string().allow(null, '').optional(),
+        terminal_origen: Joi.string().allow(null, '').optional(),
+        terminal_destino: Joi.string().allow(null, '').optional(),
+        tarifa_base: Joi.number().integer().min(0).required()
+    })
+};
+
+const crearCambio = {
+    body: Joi.object().keys({
+        evento_origen_id: Joi.number().integer().required(),
+        usuario_id: Joi.number().integer().optional(),
+        ciudad_origen: Joi.string().required(),
+        ciudad_destino: Joi.string().required(),
+        fecha_viaje: Joi.date().iso().required(),
+        hora_salida: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/).required().messages({
+            'string.pattern.base': 'El formato de hora_salida debe ser HH:mm'
+        }),
+        numero_asiento: Joi.string().allow(null, '').optional(),
+        numero_ticket: Joi.string().allow(null, '').optional(),
+        pnr: Joi.string().allow(null, '').optional(),
+        terminal_origen: Joi.string().allow(null, '').optional(),
+        terminal_destino: Joi.string().allow(null, '').optional(),
+        tarifa_base: Joi.number().integer().min(0).required()
+    })
+};
+
+const crearDevolucion = {
+    body: Joi.object().keys({
+        evento_origen_id: Joi.number().integer().required(),
+        usuario_id: Joi.number().integer().optional(),
+        monto_devolucion: Joi.number().integer().min(0).required()
+    })
+};
+
+module.exports = {
+    crearCompra,
+    crearCambio,
+    crearDevolucion
+};

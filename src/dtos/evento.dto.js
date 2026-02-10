@@ -12,6 +12,11 @@ class EventoDTO {
         this.ciudad_destino = evento.ciudad_destino;
         this.fecha_viaje = evento.fecha_viaje;
         this.numero_asiento = evento.numero_asiento;
+        this.numero_ticket = evento.numero_ticket;
+        this.pnr = evento.pnr;
+        this.hora_salida = evento.hora_salida;
+        this.terminal_origen = evento.terminal_origen;
+        this.terminal_destino = evento.terminal_destino;
         this.tarifa_base = evento.tarifa_base;
         this.porcentaje_descuento_aplicado = evento.porcentaje_descuento_aplicado;
         this.monto_pagado = evento.monto_pagado;

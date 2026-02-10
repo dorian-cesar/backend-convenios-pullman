@@ -62,6 +62,31 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
 
+        numero_ticket: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+
+        pnr: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+
+        hora_salida: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+
+        terminal_origen: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+
+        terminal_destino: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+
         tarifa_base: {
             type: DataTypes.INTEGER,
             allowNull: false
