@@ -111,9 +111,12 @@ exports.validar = async (req, res, next) => {
                 afiliado: true,
                 mensaje: 'Afiliado validado correctamente.',
                 pasajero: {
+                    id: pasajero.id,
                     rut: pasajero.rut,
                     nombres: pasajero.nombres,
-                    apellidos: pasajero.apellidos
+                    apellidos: pasajero.apellidos,
+                    empresa_id: pasajero.empresa_id,
+                    convenio_id: pasajero.convenio_id
                 },
                 empresa: empresa ? empresa.nombre : 'No asignada en BD',
                 descuentos: descuentosDisponibles,
