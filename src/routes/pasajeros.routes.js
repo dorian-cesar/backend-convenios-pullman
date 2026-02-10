@@ -29,7 +29,6 @@ const router = Router();
  *               - rut
  *               - nombres
  *               - apellidos
- *               - fecha_nacimiento
  *             properties:
  *               rut:
  *                 type: string

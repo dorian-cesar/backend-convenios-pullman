@@ -23,6 +23,10 @@ const calcularEdad = (fechaNacimiento) => {
  * Determinar tipo de pasajero por edad
  */
 const determinarTipoPasajero = async (fechaNacimiento) => {
+  if (!fechaNacimiento) {
+    const defaultTipo = await TipoPasajero.findOne({ where: { nombre: 'GENERAL' } });
+    return defaultTipo ? defaultTipo.id : null;
+  }
   const edad = calcularEdad(fechaNacimiento);
 
   const tipoPorEdad = await TipoPasajero.findOne({
@@ -46,8 +50,8 @@ const determinarTipoPasajero = async (fechaNacimiento) => {
 exports.crearPasajero = async (data) => {
   const { rut, nombres, apellidos, fecha_nacimiento, correo, telefono, tipo_pasajero_id, empresa_id, convenio_id } = data;
 
-  if (!rut || !nombres || !apellidos || !fecha_nacimiento) {
-    throw new BusinessError('RUT, nombres, apellidos y fecha de nacimiento son obligatorios');
+  if (!rut || !nombres || !apellidos) {
+    throw new BusinessError('RUT, nombres y apellidos son obligatorios');
   }
 
   // Verificar si ya existe
@@ -307,8 +311,8 @@ exports.asociarPasajeroAEventos = async (data) => {
 
   if (!pasajero) {
     // Validaciones mínimas para crear
-    if (!nombres || !apellidos || !fecha_nacimiento) {
-      throw new BusinessError('Para crear un nuevo pasajero se requieren nombres, apellidos y fecha de nacimiento');
+    if (!nombres || !apellidos) {
+      throw new BusinessError('Para crear un nuevo pasajero se requieren nombres y apellidos');
     }
 
     const tipoPasajeroId = await determinarTipoPasajero(fecha_nacimiento);
