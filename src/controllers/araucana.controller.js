@@ -61,12 +61,10 @@ exports.validar = async (req, res, next) => {
             let descuentosDisponibles = [];
 
             if (empresa) {
-                // Asociar pasajero a esta empresa temporalmente o permanentemente?
-                // El requerimiento dice: "la empresa que sera la araucana se le asignara"
+                // Asociar pasajero a esta empresa
                 pasajero.empresa_id = empresa.id;
-                await pasajero.save();
 
-                // 4. Buscar Convenios y Descuentos Activos
+                // 4. Buscar Convenios y Descuentos Activos para esta empresa
                 const hoy = new Date();
                 const convenios = await Convenio.findAll({
                     where: {
@@ -77,7 +75,16 @@ exports.validar = async (req, res, next) => {
                     }
                 });
 
-                // Mapping discounts
+                // Si encontramos convenios, asociar el primero (o el más relevante) al pasajero
+                if (convenios.length > 0) {
+                    // Buscar específicamente el que sea de tipo API_EXTERNA si hay varios
+                    const convenioApi = convenios.find(c => c.tipo === 'API_EXTERNA') || convenios[0];
+                    pasajero.convenio_id = convenioApi.id;
+                }
+
+                await pasajero.save();
+
+                // Mapping discounts for response
                 convenios.forEach(c => {
                     descuentosDisponibles.push({
                         convenio: c.nombre,
