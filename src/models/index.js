@@ -11,6 +11,7 @@ const Pasajero = require('./pasajero.model')(sequelize, Sequelize.DataTypes);
 const Evento = require('./evento.model')(sequelize, Sequelize.DataTypes);
 const UsuarioRoles = require('./usuarioRoles.model')(sequelize, Sequelize.DataTypes);
 const ApiConsulta = require('./apiConsulta.model')(sequelize, Sequelize.DataTypes);
+const ApiKey = require('./apiKey.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -78,5 +79,6 @@ module.exports = {
   Pasajero,
   Evento,
   UsuarioRoles,
-  ApiConsulta
+  ApiConsulta,
+  ApiKey
 };

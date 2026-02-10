@@ -1,6 +1,7 @@
 const express = require('express');
 const controller = require('../controllers/admin.controller');
 const auth = require('../middlewares/auth.middleware');
+const apiKeyController = require('../controllers/apiKey.controller');
 const roles = require('../middlewares/roles.middleware');
 
 const router = express.Router();
@@ -238,6 +239,115 @@ router.delete(
   roles(['SUPER_USUARIO']),
   controller.eliminarUsuario
 );
+
+/**
+ * @openapi
+ * tags:
+ *   name: ApiKeys
+ *   description: Gestión de llaves API para servicios externos
+ */
+
+/**
+ * @openapi
+ * /api/admin/api-keys:
+ *   post:
+ *     summary: Crear nueva API Key
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [ApiKeys]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name: { type: string, example: "Servicio Externo X" }
+ *     responses:
+ *       201:
+ *         description: API Key creada
+ */
+router.post('/api-keys', auth, roles(['SUPER_USUARIO']), apiKeyController.crearApiKey);
+
+/**
+ * @openapi
+ * /api/admin/api-keys:
+ *   get:
+ *     summary: Listar API Keys
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [ApiKeys]
+ *     responses:
+ *       200:
+ *         description: Lista de API Keys
+ */
+router.get('/api-keys', auth, roles(['SUPER_USUARIO']), apiKeyController.listarApiKeys);
+
+/**
+ * @openapi
+ * /api/admin/api-keys/{id}:
+ *   get:
+ *     summary: Obtener API Key por id
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [ApiKeys]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Datos de la API Key
+ */
+router.get('/api-keys/:id', auth, roles(['SUPER_USUARIO']), apiKeyController.obtenerApiKey);
+
+/**
+ * @openapi
+ * /api/admin/api-keys/{id}:
+ *   put:
+ *     summary: Actualizar API Key
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [ApiKeys]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               status: { type: string, enum: [ACTIVO, INACTIVO] }
+ *     responses:
+ *       200:
+ *         description: API Key actualizada
+ */
+router.put('/api-keys/:id', auth, roles(['SUPER_USUARIO']), apiKeyController.actualizarApiKey);
+
+/**
+ * @openapi
+ * /api/admin/api-keys/{id}:
+ *   delete:
+ *     summary: Eliminar API Key
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [ApiKeys]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       204:
+ *         description: API Key eliminada
+ */
+router.delete('/api-keys/:id', auth, roles(['SUPER_USUARIO']), apiKeyController.eliminarApiKey);
 
 
 module.exports = router;
