@@ -81,6 +81,16 @@ router.use(authMiddleware);
  *               tarifa_base:
  *                 type: integer
  *                 example: 50000
+ *               codigo_autorizacion:
+ *                 type: string
+ *                 example: "123456"
+ *               token:
+ *                 type: string
+ *                 example: "token_transbank_abc123"
+ *               estado:
+ *                 type: string
+ *                 enum: [confirmado, anulado, revertido]
+ *                 example: "confirmado"
  *     responses:
  *       201:
  *         description: Evento de compra creado exitosamente

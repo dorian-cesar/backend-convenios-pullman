@@ -149,7 +149,10 @@ const options = {
             terminal_origen: { type: 'string', example: 'Terminal Sur' },
             terminal_destino: { type: 'string', example: 'Terminal Valparaíso' },
             numero_ticket: { type: 'string', example: 'T-12345' },
-            pnr: { type: 'string', example: 'PNR-XYZ' }
+            pnr: { type: 'string', example: 'PNR-XYZ' },
+            codigo_autorizacion: { type: 'string', example: '123456' },
+            token: { type: 'string', example: 'token_transbank_abc123' },
+            estado: { type: 'string', enum: ['confirmado', 'anulado', 'revertido'], example: 'confirmado' }
           }
         },
         ApiKey: {
