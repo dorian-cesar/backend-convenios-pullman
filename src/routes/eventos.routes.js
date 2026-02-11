@@ -20,6 +20,9 @@ router.use(authMiddleware);
  * /api/eventos/compra:
  *   post:
  *     summary: Crear evento de compra
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     tags: [Eventos]
  *     requestBody:
  *       required: true
@@ -27,9 +30,9 @@ router.use(authMiddleware);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [usuario_id, pasajero_id, empresa_id, ciudad_origen, ciudad_destino, fecha_viaje, hora_salida, tarifa_base]
+ *             required: [pasajero_id, empresa_id, ciudad_origen, ciudad_destino, fecha_viaje, hora_salida, tarifa_base]
  *             properties:
- *               usuario_id: { type: integer, example: 1 }
+ *               usuario_id: { type: integer, example: 1, description: "Opcional. ID del usuario administrativo" }
  *               pasajero_id: { type: integer, example: 1 }
  *               empresa_id: { type: integer, example: 1 }
  *               convenio_id: { type: integer, example: 1 }
@@ -51,6 +54,9 @@ router.post('/compra', validate(eventoValidation.crearCompra), eventosController
  * /api/eventos/cambio:
  *   post:
  *     summary: Crear evento de cambio
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     tags: [Eventos]
  *     requestBody:
  *       required: true
@@ -74,6 +80,9 @@ router.post('/cambio', validate(eventoValidation.crearCambio), eventosController
  * /api/eventos/devolucion:
  *   post:
  *     summary: Crear evento de devolución
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     tags: [Eventos]
  *     requestBody:
  *       required: true
@@ -124,6 +133,9 @@ router.get('/:id/actual', eventosController.obtenerEventoActual);
  * /api/eventos:
  *   get:
  *     summary: Listar todos los eventos
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     tags: [Eventos]
  *     parameters:
  *       - in: query
