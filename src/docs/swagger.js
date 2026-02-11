@@ -143,7 +143,6 @@ const options = {
             tarifa_base: { type: 'integer', example: 10000 },
             monto_pagado: { type: 'integer', example: 8000 },
             porcentaje_descuento_aplicado: { type: 'integer', example: 20 },
-            usuario_id: { type: 'integer', example: 1 },
             pasajero_id: { type: 'integer', example: 1 },
             empresa_id: { type: 'integer', example: 1 },
             hora_salida: { type: 'string', example: '14:30' },

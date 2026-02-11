@@ -3,7 +3,6 @@ class EventoDTO {
         this.id = evento.id;
         this.tipo_evento = evento.tipo_evento;
         this.evento_origen_id = evento.evento_origen_id;
-        this.usuario_id = evento.usuario_id;
         this.pasajero_id = evento.pasajero_id;
         this.empresa_id = evento.empresa_id;
         this.convenio_id = evento.convenio_id;
@@ -27,13 +26,6 @@ class EventoDTO {
         this.token = evento.token;
         this.estado = evento.estado;
 
-        // Incluir relaciones si existen
-        if (evento.Usuario) {
-            this.usuario = {
-                id: evento.Usuario.id,
-                correo: evento.Usuario.correo
-            };
-        }
 
         if (evento.Pasajero) {
             this.pasajero = {
