@@ -107,8 +107,10 @@ exports.crearCompraEvento = async (data) => {
   } = data;
 
   // Verificar que existan las entidades relacionadas
-  const usuario = await Usuario.findByPk(usuario_id);
-  if (!usuario) throw new NotFoundError('Usuario no encontrado');
+  if (usuario_id) {
+    const usuario = await Usuario.findByPk(usuario_id);
+    if (!usuario) throw new NotFoundError('Usuario no encontrado');
+  }
 
   const pasajero = await Pasajero.findByPk(pasajero_id);
   if (!pasajero) throw new NotFoundError('Pasajero no encontrado');

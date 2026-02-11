@@ -81,6 +81,19 @@ router.use(authMiddleware);
  *               tarifa_base:
  *                 type: integer
  *                 example: 50000
+ *     responses:
+ *       201:
+ *         description: Evento de compra creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Evento'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Entidad relacionada no encontrada
  */
 router.post('/compra', validate(eventoValidation.crearCompra), eventosController.crearCompra);
 
@@ -127,6 +140,19 @@ router.post('/compra', validate(eventoValidation.crearCompra), eventosController
  *               tarifa_base:
  *                 type: integer
  *                 example: 55000
+ *     responses:
+ *       201:
+ *         description: Evento de cambio creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Evento'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Evento origen no encontrado
  */
 router.post('/cambio', validate(eventoValidation.crearCambio), eventosController.crearCambio);
 
@@ -155,6 +181,19 @@ router.post('/cambio', validate(eventoValidation.crearCambio), eventosController
  *               monto_devolucion:
  *                 type: integer
  *                 example: 20000
+ *     responses:
+ *       201:
+ *         description: Evento de devolución creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Evento'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Evento origen no encontrado
  */
 router.post('/devolucion', validate(eventoValidation.crearDevolucion), eventosController.crearDevolucion);
 
