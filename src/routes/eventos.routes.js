@@ -273,6 +273,50 @@ router.get('/:id/actual', eventosController.obtenerEventoActual);
 router.get('/', eventosController.listar);
 router.get('/:id', eventosController.obtener);
 router.delete('/:id', eventosController.eliminar);
+/**
+ * @openapi
+ * /api/eventos/pasajero/{rut}:
+ *   get:
+ *     summary: Listar eventos por RUT de pasajero
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     tags: [Eventos]
+ *     parameters:
+ *       - in: path
+ *         name: rut
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: RUT del pasajero
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Lista paginada de eventos del pasajero
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalItems: { type: integer }
+ *                 rows:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Evento'
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Pasajero no encontrado
+ */
 router.get('/pasajero/:rut', eventosController.listarPorRut);
 
 module.exports = router;
