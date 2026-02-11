@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 module.exports = (sequelize, DataTypes) => {
     const ApiKey = sequelize.define('ApiKey', {
         id: {
@@ -12,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         key: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             unique: true
         },
         status: {
@@ -21,7 +23,14 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'api_keys',
-        timestamps: true
+        timestamps: true,
+        hooks: {
+            beforeCreate: (apiKey) => {
+                if (!apiKey.key) {
+                    apiKey.key = 'pb_' + crypto.randomBytes(24).toString('hex');
+                }
+            }
+        }
     });
 
     return ApiKey;

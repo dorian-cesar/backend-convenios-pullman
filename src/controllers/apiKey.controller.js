@@ -12,12 +12,8 @@ exports.crearApiKey = async (req, res, next) => {
         const existe = await ApiKey.findOne({ where: { name } });
         if (existe) throw new BusinessError('Ya existe una API Key con ese nombre');
 
-        // Generate a secure random key
-        const key = crypto.randomBytes(32).toString('hex');
-
         const apiKey = await ApiKey.create({
             name,
-            key,
             status: 'ACTIVO'
         });
 
