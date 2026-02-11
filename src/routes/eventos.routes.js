@@ -30,22 +30,57 @@ router.use(authMiddleware);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [pasajero_id, empresa_id, ciudad_origen, ciudad_destino, fecha_viaje, hora_salida, tarifa_base]
+ *             required:
+ *               - pasajero_id
+ *               - empresa_id
+ *               - ciudad_origen
+ *               - ciudad_destino
+ *               - fecha_viaje
+ *               - hora_salida
+ *               - tarifa_base
  *             properties:
- *               usuario_id: { type: integer, example: 1, description: "Opcional. ID del usuario administrativo" }
- *               pasajero_id: { type: integer, example: 1 }
- *               empresa_id: { type: integer, example: 1 }
- *               convenio_id: { type: integer, example: 1 }
- *               ciudad_origen: { type: string, example: "Santiago" }
- *               ciudad_destino: { type: string, example: "Valparaíso" }
- *               fecha_viaje: { type: string, format: date, example: "2026-02-15" }
- *               hora_salida: { type: string, example: "14:30", description: "Formato HH:mm" }
- *               terminal_origen: { type: string, example: "Terminal Sur" }
- *               terminal_destino: { type: string, example: "Terminal Valparaíso" }
- *               numero_asiento: { type: string, example: "A12" }
- *               numero_ticket: { type: string, example: "T-12345" }
- *               pnr: { type: string, example: "PNR-XYZ" }
- *               tarifa_base: { type: integer, example: 50000 }
+ *               pasajero_id:
+ *                 type: integer
+ *                 example: 1
+ *               empresa_id:
+ *                 type: integer
+ *                 example: 1
+ *               convenio_id:
+ *                 type: integer
+ *                 example: 1
+ *                 nullable: true
+ *               ciudad_origen:
+ *                 type: string
+ *                 example: "Santiago"
+ *               ciudad_destino:
+ *                 type: string
+ *                 example: "Valparaíso"
+ *               fecha_viaje:
+ *                 type: string
+ *                 format: date
+ *                 example: "2026-02-15"
+ *               hora_salida:
+ *                 type: string
+ *                 example: "14:30"
+ *                 description: "Formato HH:mm"
+ *               terminal_origen:
+ *                 type: string
+ *                 example: "Terminal Sur"
+ *               terminal_destino:
+ *                 type: string
+ *                 example: "Terminal Valparaíso"
+ *               numero_asiento:
+ *                 type: string
+ *                 example: "A12"
+ *               numero_ticket:
+ *                 type: string
+ *                 example: "T-12345"
+ *               pnr:
+ *                 type: string
+ *                 example: "PNR-XYZ"
+ *               tarifa_base:
+ *                 type: integer
+ *                 example: 50000
  */
 router.post('/compra', validate(eventoValidation.crearCompra), eventosController.crearCompra);
 
@@ -64,14 +99,34 @@ router.post('/compra', validate(eventoValidation.crearCompra), eventosController
  *         application/json:
  *           schema:
  *             type: object
- *             required: [evento_origen_id, ciudad_origen, ciudad_destino, fecha_viaje, hora_salida, tarifa_base]
+ *             required:
+ *               - evento_origen_id
+ *               - ciudad_origen
+ *               - ciudad_destino
+ *               - fecha_viaje
+ *               - hora_salida
+ *               - tarifa_base
  *             properties:
- *               evento_origen_id: { type: integer, example: 100, description: "ID del último evento válido de la cadena" }
- *               ciudad_origen: { type: string, example: "Santiago" }
- *               ciudad_destino: { type: string, example: "Viña del Mar" }
- *               fecha_viaje: { type: string, format: date, example: "2026-02-20" }
- *               hora_salida: { type: string, example: "10:00" }
- *               tarifa_base: { type: integer, example: 55000 }
+ *               evento_origen_id:
+ *                 type: integer
+ *                 example: 100
+ *                 description: "ID del último evento válido de la cadena"
+ *               ciudad_origen:
+ *                 type: string
+ *                 example: "Santiago"
+ *               ciudad_destino:
+ *                 type: string
+ *                 example: "Viña del Mar"
+ *               fecha_viaje:
+ *                 type: string
+ *                 format: date
+ *                 example: "2026-02-20"
+ *               hora_salida:
+ *                 type: string
+ *                 example: "10:00"
+ *               tarifa_base:
+ *                 type: integer
+ *                 example: 55000
  */
 router.post('/cambio', validate(eventoValidation.crearCambio), eventosController.crearCambio);
 
@@ -90,10 +145,16 @@ router.post('/cambio', validate(eventoValidation.crearCambio), eventosController
  *         application/json:
  *           schema:
  *             type: object
- *             required: [evento_origen_id, monto_devolucion]
+ *             required:
+ *               - evento_origen_id
+ *               - monto_devolucion
  *             properties:
- *               evento_origen_id: { type: integer, example: 100 }
- *               monto_devolucion: { type: integer, example: 20000 }
+ *               evento_origen_id:
+ *                 type: integer
+ *                 example: 100
+ *               monto_devolucion:
+ *                 type: integer
+ *                 example: 20000
  */
 router.post('/devolucion', validate(eventoValidation.crearDevolucion), eventosController.crearDevolucion);
 

@@ -167,7 +167,8 @@ const options = {
     },
     security: [
       {
-        bearerAuth: []
+        bearerAuth: [],
+        apiKeyAuth: []
       }
     ]
   },
