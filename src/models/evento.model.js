@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 
         usuario_id: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: true
         },
 
         pasajero_id: {
@@ -116,6 +116,19 @@ module.exports = (sequelize, DataTypes) => {
         fecha_evento: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
+        },
+        // 💳 TRANSBANK FIELDS
+        codigo_autorizacion: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        token: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        estado: {
+            type: DataTypes.ENUM('confirmado', 'anulado', 'revertido'),
+            allowNull: true
         }
 
     }, {

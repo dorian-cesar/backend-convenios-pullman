@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const crearCompra = {
     body: Joi.object().keys({
-        usuario_id: Joi.number().integer().required(),
+        usuario_id: Joi.number().integer().optional(),
         pasajero_id: Joi.number().integer().required(),
         empresa_id: Joi.number().integer().required(),
         convenio_id: Joi.number().integer().allow(null).optional(),
@@ -17,7 +17,10 @@ const crearCompra = {
         pnr: Joi.string().allow(null, '').optional(),
         terminal_origen: Joi.string().allow(null, '').optional(),
         terminal_destino: Joi.string().allow(null, '').optional(),
-        tarifa_base: Joi.number().integer().min(0).required()
+        tarifa_base: Joi.number().integer().min(0).required(),
+        codigo_autorizacion: Joi.string().allow(null, '').optional(),
+        token: Joi.string().allow(null, '').optional(),
+        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional()
     })
 };
 
