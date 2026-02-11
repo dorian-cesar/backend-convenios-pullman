@@ -21,7 +21,8 @@ const options = {
       { name: 'Empresas', description: 'Gestión de empresas' },
       { name: 'Convenios', description: 'Gestión de convenios empresariales' },
       { name: 'Pasajeros', description: 'Gestión de pasajeros' },
-      { name: 'Eventos', description: 'Gestión de eventos (viajes)' }
+      { name: 'Eventos', description: 'Gestión de eventos (viajes)' },
+      { name: 'ApiKeys', description: 'Gestión de llaves de acceso para integraciones externas' }
     ],
     components: {
       securitySchemes: {
@@ -145,6 +146,17 @@ const options = {
             terminal_destino: { type: 'string', example: 'Terminal Valparaíso' },
             numero_ticket: { type: 'string', example: 'T-12345' },
             pnr: { type: 'string', example: 'PNR-XYZ' }
+          }
+        },
+        ApiKey: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            name: { type: 'string', example: 'Servicio Externo X' },
+            key: { type: 'string', example: 'pb_6aac4c1130df091c9...' },
+            status: { type: 'string', example: 'ACTIVO' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
           }
         }
       }

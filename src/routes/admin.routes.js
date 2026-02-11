@@ -267,6 +267,10 @@ router.delete(
  *     responses:
  *       201:
  *         description: API Key creada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiKey'
  */
 router.post('/api-keys', auth, roles(['SUPER_USUARIO']), apiKeyController.crearApiKey);
 
@@ -281,6 +285,12 @@ router.post('/api-keys', auth, roles(['SUPER_USUARIO']), apiKeyController.crearA
  *     responses:
  *       200:
  *         description: Lista de API Keys
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ApiKey'
  */
 router.get('/api-keys', auth, roles(['SUPER_USUARIO']), apiKeyController.listarApiKeys);
 
@@ -300,6 +310,10 @@ router.get('/api-keys', auth, roles(['SUPER_USUARIO']), apiKeyController.listarA
  *     responses:
  *       200:
  *         description: Datos de la API Key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiKey'
  */
 router.get('/api-keys/:id', auth, roles(['SUPER_USUARIO']), apiKeyController.obtenerApiKey);
 
@@ -327,6 +341,10 @@ router.get('/api-keys/:id', auth, roles(['SUPER_USUARIO']), apiKeyController.obt
  *     responses:
  *       200:
  *         description: API Key actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiKey'
  */
 router.put('/api-keys/:id', auth, roles(['SUPER_USUARIO']), apiKeyController.actualizarApiKey);
 
