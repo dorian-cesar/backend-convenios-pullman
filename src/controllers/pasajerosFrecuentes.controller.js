@@ -9,6 +9,18 @@ exports.crear = async (req, res, next) => {
     }
 };
 
+exports.obtenerPorRut = async (req, res, next) => {
+    try {
+        const frecuente = await pasajerosFrecuentesService.obtenerPorRut(req.params.rut);
+        if (!frecuente) {
+            return res.status(404).json({ message: 'Pasajero Frecuente no encontrado' });
+        }
+        res.json(frecuente);
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.obtener = async (req, res, next) => {
     try {
         const frecuente = await pasajerosFrecuentesService.obtenerPorId(req.params.id);

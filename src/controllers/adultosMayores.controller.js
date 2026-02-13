@@ -9,6 +9,18 @@ exports.crear = async (req, res, next) => {
     }
 };
 
+exports.obtenerPorRut = async (req, res, next) => {
+    try {
+        const adulto = await adultosMayoresService.obtenerPorRut(req.params.rut);
+        if (!adulto) {
+            return res.status(404).json({ message: 'Adulto Mayor no encontrado' });
+        }
+        res.json(adulto);
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.obtener = async (req, res, next) => {
     try {
         const adulto = await adultosMayoresService.obtenerPorId(req.params.id);

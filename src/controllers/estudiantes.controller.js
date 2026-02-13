@@ -9,6 +9,18 @@ exports.crear = async (req, res, next) => {
     }
 };
 
+exports.obtenerPorRut = async (req, res, next) => {
+    try {
+        const estudiante = await estudiantesService.obtenerPorRut(req.params.rut);
+        if (!estudiante) {
+            return res.status(404).json({ message: 'Estudiante no encontrado' });
+        }
+        res.json(estudiante);
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.obtener = async (req, res, next) => {
     try {
         const estudiante = await estudiantesService.obtenerPorId(req.params.id);

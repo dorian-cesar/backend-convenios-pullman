@@ -88,6 +88,26 @@ const adultosMayoresController = require('../controllers/adultosMayores.controll
  *       404:
  *         description: Adulto mayor no encontrado
  *
+ * /api/adultos-mayores/rut/{rut}:
+ *   get:
+ *     summary: Obtener un adulto mayor por RUT
+ *     tags: [Adultos Mayores]
+ *     parameters:
+ *       - in: path
+ *         name: rut
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Datos del adulto mayor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AdultoMayor'
+ *       404:
+ *         description: Adulto mayor no encontrado
+ *
  *   put:
  *     summary: Actualizar un adulto mayor por ID
  *     tags: [Adultos Mayores]
@@ -131,6 +151,7 @@ const adultosMayoresController = require('../controllers/adultosMayores.controll
 router.post('/', adultosMayoresController.crear);
 router.get('/', adultosMayoresController.listar);
 router.get('/:id', adultosMayoresController.obtener);
+router.get('/rut/:rut', adultosMayoresController.obtenerPorRut);
 router.put('/:id', adultosMayoresController.actualizar);
 router.delete('/:id', adultosMayoresController.eliminar);
 

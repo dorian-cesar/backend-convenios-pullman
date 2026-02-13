@@ -93,6 +93,26 @@ const pasajerosFrecuentesController = require('../controllers/pasajerosFrecuente
  *       404:
  *         description: Pasajero frecuente no encontrado
  *
+ * /api/pasajeros-frecuentes/rut/{rut}:
+ *   get:
+ *     summary: Obtener un pasajero frecuente por RUT
+ *     tags: [Pasajeros Frecuentes]
+ *     parameters:
+ *       - in: path
+ *         name: rut
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Datos del pasajero frecuente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PasajeroFrecuente'
+ *       404:
+ *         description: Pasajero frecuente no encontrado
+ *
  *   put:
  *     summary: Actualizar un pasajero frecuente por ID
  *     tags: [Pasajeros Frecuentes]
@@ -136,6 +156,7 @@ const pasajerosFrecuentesController = require('../controllers/pasajerosFrecuente
 router.post('/', pasajerosFrecuentesController.crear);
 router.get('/', pasajerosFrecuentesController.listar);
 router.get('/:id', pasajerosFrecuentesController.obtener);
+router.get('/rut/:rut', pasajerosFrecuentesController.obtenerPorRut);
 router.put('/:id', pasajerosFrecuentesController.actualizar);
 router.delete('/:id', pasajerosFrecuentesController.eliminar);
 

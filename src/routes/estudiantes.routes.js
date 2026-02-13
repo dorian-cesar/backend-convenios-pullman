@@ -88,6 +88,26 @@ const estudiantesController = require('../controllers/estudiantes.controller');
  *       404:
  *         description: Estudiante no encontrado
  *
+ * /api/estudiantes/rut/{rut}:
+ *   get:
+ *     summary: Obtener un estudiante por RUT
+ *     tags: [Estudiantes]
+ *     parameters:
+ *       - in: path
+ *         name: rut
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Datos del estudiante
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Estudiante'
+ *       404:
+ *         description: Estudiante no encontrado
+ *
  *   put:
  *     summary: Actualizar un estudiante por ID
  *     tags: [Estudiantes]
@@ -131,6 +151,7 @@ const estudiantesController = require('../controllers/estudiantes.controller');
 router.post('/', estudiantesController.crear);
 router.get('/', estudiantesController.listar);
 router.get('/:id', estudiantesController.obtener);
+router.get('/rut/:rut', estudiantesController.obtenerPorRut);
 router.put('/:id', estudiantesController.actualizar);
 router.delete('/:id', estudiantesController.eliminar);
 
