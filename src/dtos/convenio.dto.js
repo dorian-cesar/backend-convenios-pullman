@@ -7,6 +7,7 @@ class ConvenioDTO {
 
         // Transformar tipo a array com pide el user -> ERROR: User corrected, single value.
         this.tipo_consulta = convenio.tipo;
+        this.api_url_id = convenio.api_consulta_id;
 
         if (convenio.tipo === 'CODIGO_DESCUENTO') {
             this.endpoint = `/api/convenios/validar/{codigo}`;

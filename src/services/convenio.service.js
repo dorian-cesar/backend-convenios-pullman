@@ -6,7 +6,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -74,6 +74,8 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         codigo: finalCodigo,
         limitar_por_stock: limitar_por_stock || false,
         limitar_por_monto: limitar_por_monto || false,
+        fecha_inicio,
+        fecha_termino,
         status: 'ACTIVO'
     });
 
@@ -125,13 +127,7 @@ exports.listarConvenios = async (filters = {}) => {
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
-            },
-            {
-                model: ApiConsulta,
-                as: 'apiConsulta',
-                attributes: ['id', 'nombre', 'endpoint']
             }
-
         ],
         order: [[sortField, sortOrder]],
         limit: limitVal,
@@ -162,11 +158,6 @@ exports.listarActivos = async (filters = {}) => {
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
-            },
-            {
-                model: ApiConsulta,
-                as: 'apiConsulta',
-                attributes: ['id', 'nombre', 'endpoint']
             }
         ],
         limit: limitVal,
@@ -187,11 +178,6 @@ exports.obtenerConvenio = async (id) => {
                 model: Empresa,
                 as: 'empresa',
                 attributes: ['id', 'nombre', 'rut_empresa']
-            },
-            {
-                model: ApiConsulta,
-                as: 'apiConsulta',
-                attributes: ['id', 'nombre', 'endpoint']
             },
             {
                 model: ApiConsulta,
@@ -224,7 +210,11 @@ exports.actualizarConvenio = async (id, datos) => {
         throw new NotFoundError('Convenio no encontrado');
     }
 
-    const { nombre, status, empresa_id, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto } = datos;
+    const {
+        nombre, status, empresa_id, porcentaje_descuento, codigo,
+        limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
+        tipo, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets
+    } = datos;
 
     if (nombre) convenio.nombre = nombre;
     if (status) convenio.status = status;
@@ -232,6 +222,20 @@ exports.actualizarConvenio = async (id, datos) => {
     if (codigo !== undefined) convenio.codigo = codigo;
     if (limitar_por_stock !== undefined) convenio.limitar_por_stock = limitar_por_stock;
     if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
+
+    // Nuevos campos para actualización
+    if (fecha_inicio !== undefined) convenio.fecha_inicio = fecha_inicio;
+    if (fecha_termino !== undefined) convenio.fecha_termino = fecha_termino;
+    if (tipo !== undefined) convenio.tipo = tipo;
+    if (api_consulta_id !== undefined) {
+        if (api_consulta_id) {
+            const api = await ApiConsulta.findByPk(api_consulta_id);
+            if (!api) throw new NotFoundError('API de consulta no encontrada');
+        }
+        convenio.api_consulta_id = api_consulta_id;
+    }
+    if (tope_monto_ventas !== undefined) convenio.tope_monto_ventas = tope_monto_ventas;
+    if (tope_cantidad_tickets !== undefined) convenio.tope_cantidad_tickets = tope_cantidad_tickets;
 
     if (empresa_id) {
         const empresa = await Empresa.findByPk(empresa_id);

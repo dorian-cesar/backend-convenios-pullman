@@ -2,7 +2,7 @@ const { Router } = require('express');
 const convenioController = require('../controllers/convenio.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
-const { crearConvenio } = require('../validations/convenio.validation');
+const { crearConvenio, actualizarConvenio } = require('../validations/convenio.validation');
 
 const router = Router();
 
@@ -179,6 +179,15 @@ router.use(authMiddleware);
  *               limitar_por_monto:
  *                 type: boolean
  *                 example: false
+ *               api_url_id:
+ *                 type: integer
+ *                 example: 1
+ *               fecha_inicio:
+ *                 type: string
+ *                 format: date-time
+ *               fecha_termino:
+ *                 type: string
+ *                 format: date-time
  *           examples:
  *             CodigoDescuento:
  *               summary: Convenio de Código (Default)
@@ -282,6 +291,15 @@ router.get('/:id', convenioController.obtener);
  *               limitar_por_monto:
  *                 type: boolean
  *                 example: false
+ *               api_url_id:
+ *                 type: integer
+ *                 example: 1
+ *               fecha_inicio:
+ *                 type: string
+ *                 format: date-time
+ *               fecha_termino:
+ *                 type: string
+ *                 format: date-time
  *     responses:
  *       200:
  *         description: Convenio actualizado
@@ -289,8 +307,10 @@ router.get('/:id', convenioController.obtener);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Convenio'
+ *       404:
+ *         description: Convenio no encontrado
  */
-router.put('/:id', convenioController.actualizar);
+router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
 
 /**
  * @openapi
