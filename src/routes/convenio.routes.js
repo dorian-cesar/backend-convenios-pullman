@@ -88,6 +88,11 @@ router.use(authMiddleware);
  *     security: []
  *     parameters:
  *       - in: query
+ *         name: nombre
+ *         schema:
+ *           type: string
+ *         description: Buscar por nombre exacto
+ *       - in: query
  *         name: empresa_id
  *         schema:
  *           type: integer
