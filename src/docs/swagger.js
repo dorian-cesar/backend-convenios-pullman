@@ -6,7 +6,7 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'API Convenios Pullman',
-      version: '1.1.0', // Updated
+      version: '1.2.0', // Refactor Pasajeros v2
       description: 'Documentación del backend de convenios Pullman (Enterprise)'
     },
     servers: [
@@ -22,7 +22,10 @@ const options = {
       { name: 'Convenios', description: 'Gestión de convenios empresariales' },
       { name: 'Pasajeros', description: 'Gestión de pasajeros' },
       { name: 'Eventos', description: 'Gestión de eventos (viajes)' },
-      { name: 'ApiKeys', description: 'Gestión de llaves de acceso para integraciones externas' }
+      { name: 'ApiKeys', description: 'Gestión de llaves de acceso para integraciones externas' },
+      { name: 'Estudiantes', description: 'Gestión de estudiantes independientes' },
+      { name: 'Adultos Mayores', description: 'Gestión de adultos mayores independientes' },
+      { name: 'Pasajeros Frecuentes', description: 'Gestión de pasajeros frecuentes independientes' }
     ],
     components: {
       securitySchemes: {
@@ -128,6 +131,52 @@ const options = {
             tipo_pasajero_id: { type: 'integer', example: 1 },
             empresa_id: { type: 'integer', example: 1 },
             convenio_id: { type: 'integer', example: 1 },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        Estudiante: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Maria Estudiante' },
+            rut: { type: 'string', example: '20.200.200-K' },
+            telefono: { type: 'string', example: '+56911111111' },
+            correo: { type: 'string', example: 'maria@test.com' },
+            direccion: { type: 'string', example: 'Av. Universidad 123' },
+            carnet_estudiante: { type: 'string', example: 'TNE-2026' },
+            fecha_vencimiento: { type: 'string', format: 'date', example: '2026-12-31' },
+            imagen_base64: { type: 'string', description: 'Imagen en base64' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        AdultoMayor: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Juan Mayor' },
+            rut: { type: 'string', example: '5.500.500-5' },
+            telefono: { type: 'string', example: '+56922222222' },
+            correo: { type: 'string', example: 'juan@test.com' },
+            direccion: { type: 'string', example: 'Calle Mayor 456' },
+            certificado: { type: 'string', example: 'CERT-SENAMA-001' },
+            fecha_emision: { type: 'string', format: 'date', example: '2025-01-01' },
+            imagen_base64: { type: 'string', description: 'Imagen en base64' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        PasajeroFrecuente: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'Pedro Frecuente' },
+            rut: { type: 'string', example: '10.100.100-1' },
+            telefono: { type: 'string', example: '+56933333333' },
+            correo: { type: 'string', example: 'pedro@test.com' },
+            direccion: { type: 'string', example: 'Av. Viajes 789' },
+            codigo_frecuente: { type: 'string', example: 'PF-123456' },
+            nivel: { type: 'string', example: 'GOLD' },
+            puntos: { type: 'integer', example: 1500 },
+            imagen_base64: { type: 'string', description: 'Imagen en base64' },
             status: { type: 'string', example: 'ACTIVO' }
           }
         },

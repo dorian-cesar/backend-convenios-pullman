@@ -1,0 +1,49 @@
+const { PasajeroFrecuente } = require('../models');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
+const { Op } = require('sequelize');
+
+exports.crear = async (data) => {
+    return await PasajeroFrecuente.create(data);
+};
+
+exports.obtenerPorRut = async (rut) => {
+    return await PasajeroFrecuente.findOne({ where: { rut } });
+};
+
+exports.listar = async (filters = {}) => {
+    const { page, limit, nombre, rut, status, codigo_frecuente } = filters;
+    const { offset, limit: limitVal } = getPagination(page, limit);
+    const where = {};
+
+    if (nombre) where.nombre = { [Op.like]: `%${nombre}%` };
+    if (rut) where.rut = rut;
+    if (status) where.status = status;
+    if (codigo_frecuente) where.codigo_frecuente = codigo_frecuente;
+
+    const data = await PasajeroFrecuente.findAndCountAll({
+        where,
+        attributes: { exclude: ['imagen_base64'] },
+        limit: limitVal,
+        offset,
+        order: [['id', 'DESC']]
+    });
+
+    return getPagingData(data, page, limitVal);
+};
+
+exports.obtenerPorId = async (id) => {
+    return await PasajeroFrecuente.findByPk(id);
+};
+
+exports.actualizar = async (id, data) => {
+    const frecuente = await PasajeroFrecuente.findByPk(id);
+    if (!frecuente) return null;
+    return await frecuente.update(data);
+};
+
+exports.eliminar = async (id) => {
+    const frecuente = await PasajeroFrecuente.findByPk(id);
+    if (!frecuente) return false;
+    await frecuente.destroy();
+    return true;
+};
