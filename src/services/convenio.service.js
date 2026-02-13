@@ -111,6 +111,10 @@ exports.listarConvenios = async (filters = {}) => {
         where.empresa_id = otherFilters.empresa_id;
     }
 
+    if (otherFilters.nombre) {
+        where.nombre = otherFilters.nombre;
+    }
+
     const sortField = sortBy || 'id';
     const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
