@@ -111,6 +111,10 @@ exports.listarConvenios = async (filters = {}) => {
         where.empresa_id = otherFilters.empresa_id;
     }
 
+    if (otherFilters.id) {
+        where.id = otherFilters.id;
+    }
+
     if (otherFilters.nombre) {
         where.nombre = otherFilters.nombre;
     }
