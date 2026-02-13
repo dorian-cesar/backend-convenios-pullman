@@ -47,3 +47,9 @@ exports.eliminar = async (id) => {
     await frecuente.destroy();
     return true;
 };
+
+exports.activar = async (id) => {
+    const frecuente = await PasajeroFrecuente.findByPk(id);
+    if (!frecuente) return null;
+    return await frecuente.update({ status: 'ACTIVO' });
+};

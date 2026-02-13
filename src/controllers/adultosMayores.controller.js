@@ -65,3 +65,15 @@ exports.eliminar = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.activar = async (req, res, next) => {
+    try {
+        const adulto = await adultosMayoresService.activar(req.params.id);
+        if (!adulto) {
+            return res.status(404).json({ message: 'Adulto Mayor no encontrado' });
+        }
+        res.json(adulto);
+    } catch (error) {
+        next(error);
+    }
+};

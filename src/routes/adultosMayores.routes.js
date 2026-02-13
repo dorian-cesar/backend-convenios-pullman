@@ -147,12 +147,33 @@ const adultosMayoresController = require('../controllers/adultosMayores.controll
  *         description: Adulto mayor eliminado
  *       404:
  *         description: Adulto mayor no encontrado
+ *
+ * /api/adultos-mayores/activar/{id}:
+ *   patch:
+ *     summary: Activar un adulto mayor por ID
+ *     tags: [Adultos Mayores]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Adulto mayor activado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AdultoMayor'
+ *       404:
+ *         description: Adulto mayor no encontrado
  */
 router.post('/', adultosMayoresController.crear);
 router.get('/', adultosMayoresController.listar);
 router.get('/:id', adultosMayoresController.obtener);
 router.get('/rut/:rut', adultosMayoresController.obtenerPorRut);
 router.put('/:id', adultosMayoresController.actualizar);
+router.patch('/activar/:id', adultosMayoresController.activar);
 router.delete('/:id', adultosMayoresController.eliminar);
 
 module.exports = router;

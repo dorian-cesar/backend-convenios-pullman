@@ -65,3 +65,15 @@ exports.eliminar = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.activar = async (req, res, next) => {
+    try {
+        const estudiante = await estudiantesService.activar(req.params.id);
+        if (!estudiante) {
+            return res.status(404).json({ message: 'Estudiante no encontrado' });
+        }
+        res.json(estudiante);
+    } catch (error) {
+        next(error);
+    }
+};

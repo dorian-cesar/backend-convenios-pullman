@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         status: {
             type: DataTypes.STRING,
-            defaultValue: 'ACTIVO'
+            defaultValue: 'INACTIVO'
         }
     }, {
         tableName: 'adultos_mayores',

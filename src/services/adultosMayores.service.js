@@ -46,3 +46,9 @@ exports.eliminar = async (id) => {
     await adulto.destroy();
     return true;
 };
+
+exports.activar = async (id) => {
+    const adulto = await AdultoMayor.findByPk(id);
+    if (!adulto) return null;
+    return await adulto.update({ status: 'ACTIVO' });
+};

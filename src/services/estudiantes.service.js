@@ -46,3 +46,9 @@ exports.eliminar = async (id) => {
     await estudiante.destroy();
     return true;
 };
+
+exports.activar = async (id) => {
+    const estudiante = await Estudiante.findByPk(id);
+    if (!estudiante) return null;
+    return await estudiante.update({ status: 'ACTIVO' });
+};

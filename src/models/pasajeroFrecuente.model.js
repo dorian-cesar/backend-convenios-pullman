@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         status: {
             type: DataTypes.STRING,
-            defaultValue: 'ACTIVO'
+            defaultValue: 'INACTIVO'
         }
     }, {
         tableName: 'pasajeros_frecuentes',

@@ -65,3 +65,15 @@ exports.eliminar = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.activar = async (req, res, next) => {
+    try {
+        const frecuente = await pasajerosFrecuentesService.activar(req.params.id);
+        if (!frecuente) {
+            return res.status(404).json({ message: 'Pasajero Frecuente no encontrado' });
+        }
+        res.json(frecuente);
+    } catch (error) {
+        next(error);
+    }
+};

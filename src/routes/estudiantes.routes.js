@@ -147,12 +147,33 @@ const estudiantesController = require('../controllers/estudiantes.controller');
  *         description: Estudiante eliminado
  *       404:
  *         description: Estudiante no encontrado
+ *
+ * /api/estudiantes/activar/{id}:
+ *   patch:
+ *     summary: Activar un estudiante por ID
+ *     tags: [Estudiantes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Estudiante activado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Estudiante'
+ *       404:
+ *         description: Estudiante no encontrado
  */
 router.post('/', estudiantesController.crear);
 router.get('/', estudiantesController.listar);
 router.get('/:id', estudiantesController.obtener);
 router.get('/rut/:rut', estudiantesController.obtenerPorRut);
 router.put('/:id', estudiantesController.actualizar);
+router.patch('/activar/:id', estudiantesController.activar);
 router.delete('/:id', estudiantesController.eliminar);
 
 module.exports = router;

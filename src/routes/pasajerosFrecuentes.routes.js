@@ -152,12 +152,33 @@ const pasajerosFrecuentesController = require('../controllers/pasajerosFrecuente
  *         description: Pasajero frecuente eliminado
  *       404:
  *         description: Pasajero frecuente no encontrado
+ *
+ * /api/pasajeros-frecuentes/activar/{id}:
+ *   patch:
+ *     summary: Activar un pasajero frecuente por ID
+ *     tags: [Pasajeros Frecuentes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Pasajero frecuente activado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PasajeroFrecuente'
+ *       404:
+ *         description: Pasajero frecuente no encontrado
  */
 router.post('/', pasajerosFrecuentesController.crear);
 router.get('/', pasajerosFrecuentesController.listar);
 router.get('/:id', pasajerosFrecuentesController.obtener);
 router.get('/rut/:rut', pasajerosFrecuentesController.obtenerPorRut);
 router.put('/:id', pasajerosFrecuentesController.actualizar);
+router.patch('/activar/:id', pasajerosFrecuentesController.activar);
 router.delete('/:id', pasajerosFrecuentesController.eliminar);
 
 module.exports = router;
