@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adultosMayoresController = require('../controllers/adultosMayores.controller');
+const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
 
 /**
  * @swagger
@@ -168,6 +169,7 @@ const adultosMayoresController = require('../controllers/adultosMayores.controll
  *       404:
  *         description: Adulto mayor no encontrado
  */
+router.use(apiKeyMiddleware);
 router.post('/', adultosMayoresController.crear);
 router.get('/', adultosMayoresController.listar);
 router.get('/:id', adultosMayoresController.obtener);

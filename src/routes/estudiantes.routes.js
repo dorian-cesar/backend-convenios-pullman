@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const estudiantesController = require('../controllers/estudiantes.controller');
+const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
 
 /**
  * @swagger
@@ -168,6 +169,7 @@ const estudiantesController = require('../controllers/estudiantes.controller');
  *       404:
  *         description: Estudiante no encontrado
  */
+router.use(apiKeyMiddleware);
 router.post('/', estudiantesController.crear);
 router.get('/', estudiantesController.listar);
 router.get('/:id', estudiantesController.obtener);

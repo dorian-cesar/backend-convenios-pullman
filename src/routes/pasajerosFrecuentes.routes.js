@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pasajerosFrecuentesController = require('../controllers/pasajerosFrecuentes.controller');
+const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
 
 /**
  * @swagger
@@ -173,6 +174,7 @@ const pasajerosFrecuentesController = require('../controllers/pasajerosFrecuente
  *       404:
  *         description: Pasajero frecuente no encontrado
  */
+router.use(apiKeyMiddleware);
 router.post('/', pasajerosFrecuentesController.crear);
 router.get('/', pasajerosFrecuentesController.listar);
 router.get('/:id', pasajerosFrecuentesController.obtener);
