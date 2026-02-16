@@ -32,19 +32,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        codigo_frecuente: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
-        },
-        nivel: {
-            type: DataTypes.STRING,
-            allowNull: false // e.g., 'GOLD', 'PLATINUM'
-        },
-        puntos: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0
-        },
+
         imagen_base64: {
             type: DataTypes.TEXT('long'),
             allowNull: true

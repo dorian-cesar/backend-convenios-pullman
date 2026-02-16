@@ -15,6 +15,7 @@ const ApiKey = require('./apiKey.model')(sequelize, Sequelize.DataTypes);
 const Estudiante = require('./estudiante.model')(sequelize, Sequelize.DataTypes);
 const AdultoMayor = require('./adultoMayor.model')(sequelize, Sequelize.DataTypes);
 const PasajeroFrecuente = require('./pasajeroFrecuente.model')(sequelize, Sequelize.DataTypes);
+const Carabinero = require('./carabinero.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -86,5 +87,6 @@ module.exports = {
   ApiKey,
   Estudiante,
   AdultoMayor,
-  PasajeroFrecuente
+  PasajeroFrecuente,
+  Carabinero
 };
