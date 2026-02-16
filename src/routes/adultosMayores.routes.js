@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adultosMayoresController = require('../controllers/adultosMayores.controller');
-const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
+const authMiddleware = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -10,6 +10,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Crear un nuevo adulto mayor
  *     tags: [Adultos Mayores]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
@@ -29,6 +30,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Listar todos los adultos mayores
  *     tags: [Adultos Mayores]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: query
@@ -78,6 +80,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Obtener un adulto mayor por ID
  *     tags: [Adultos Mayores]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -99,6 +102,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Actualizar un adulto mayor por ID
  *     tags: [Adultos Mayores]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -126,6 +130,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Eliminar un adulto mayor por ID
  *     tags: [Adultos Mayores]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -179,7 +184,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *       404:
  *         description: Adulto mayor no encontrado
  */
-router.use(apiKeyMiddleware);
+router.use(authMiddleware);
 router.post('/', adultosMayoresController.crear);
 router.get('/', adultosMayoresController.listar);
 router.get('/:id', adultosMayoresController.obtener);

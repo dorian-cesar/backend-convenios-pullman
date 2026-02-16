@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const estudiantesController = require('../controllers/estudiantes.controller');
-const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
+const authMiddleware = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -10,6 +10,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Crear un nuevo estudiante
  *     tags: [Estudiantes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
@@ -29,6 +30,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Listar todos los estudiantes
  *     tags: [Estudiantes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: query
@@ -78,6 +80,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Obtener un estudiante por ID
  *     tags: [Estudiantes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -99,6 +102,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Actualizar un estudiante por ID
  *     tags: [Estudiantes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -126,6 +130,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Eliminar un estudiante por ID
  *     tags: [Estudiantes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -179,7 +184,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *       404:
  *         description: Estudiante no encontrado
  */
-router.use(apiKeyMiddleware);
+router.use(authMiddleware);
 router.post('/', estudiantesController.crear);
 router.get('/', estudiantesController.listar);
 router.get('/:id', estudiantesController.obtener);

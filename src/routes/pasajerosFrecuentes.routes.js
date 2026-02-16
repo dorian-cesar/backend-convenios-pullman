@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pasajerosFrecuentesController = require('../controllers/pasajerosFrecuentes.controller');
-const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
+const authMiddleware = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -10,6 +10,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Crear un nuevo pasajero frecuente
  *     tags: [Pasajeros Frecuentes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
@@ -29,6 +30,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Listar todos los pasajeros frecuentes
  *     tags: [Pasajeros Frecuentes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: query
@@ -83,6 +85,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Obtener un pasajero frecuente por ID
  *     tags: [Pasajeros Frecuentes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -104,6 +107,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Actualizar un pasajero frecuente por ID
  *     tags: [Pasajeros Frecuentes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -131,6 +135,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *     summary: Eliminar un pasajero frecuente por ID
  *     tags: [Pasajeros Frecuentes]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
@@ -184,7 +189,7 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *       404:
  *         description: Pasajero frecuente no encontrado
  */
-router.use(apiKeyMiddleware);
+router.use(authMiddleware);
 router.post('/', pasajerosFrecuentesController.crear);
 router.get('/', pasajerosFrecuentesController.listar);
 router.get('/:id', pasajerosFrecuentesController.obtener);
