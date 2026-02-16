@@ -13,6 +13,7 @@ const apiConsultaRoutes = require('./apiConsulta.routes');
 const estudiantesRoutes = require('./estudiantes.routes');
 const adultosMayoresRoutes = require('./adultosMayores.routes');
 const pasajerosFrecuentesRoutes = require('./pasajerosFrecuentes.routes');
+const carabinerosRoutes = require('./carabineros.routes');
 
 const router = Router();
 
@@ -29,4 +30,5 @@ router.use('/apis-consulta', apiConsultaRoutes);
 router.use('/estudiantes', estudiantesRoutes);
 router.use('/adultos-mayores', adultosMayoresRoutes);
 router.use('/pasajeros-frecuentes', pasajerosFrecuentesRoutes);
+router.use('/carabineros', carabinerosRoutes);
 module.exports = router;
