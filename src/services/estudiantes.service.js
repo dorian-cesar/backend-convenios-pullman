@@ -21,6 +21,7 @@ exports.listar = async (filters = {}) => {
 
     const data = await Estudiante.findAndCountAll({
         where,
+        attributes: { exclude: ['imagen_base64'] },
         limit: limitVal,
         offset,
         order: [['id', 'DESC']]
