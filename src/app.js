@@ -11,7 +11,8 @@ const app = express();
 app.use(cors('*'));
 
 // Middlewares base
-app.use(express.json());
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Swagger
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
