@@ -9,6 +9,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   post:
  *     summary: Crear un nuevo pasajero frecuente
  *     tags: [Pasajeros Frecuentes]
+ *     security:
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -26,6 +28,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   get:
  *     summary: Listar todos los pasajeros frecuentes
  *     tags: [Pasajeros Frecuentes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -78,6 +82,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   get:
  *     summary: Obtener un pasajero frecuente por ID
  *     tags: [Pasajeros Frecuentes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -97,6 +103,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   put:
  *     summary: Actualizar un pasajero frecuente por ID
  *     tags: [Pasajeros Frecuentes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -122,6 +130,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   delete:
  *     summary: Eliminar un pasajero frecuente por ID
  *     tags: [Pasajeros Frecuentes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id

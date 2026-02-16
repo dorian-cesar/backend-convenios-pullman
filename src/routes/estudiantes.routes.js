@@ -9,6 +9,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   post:
  *     summary: Crear un nuevo estudiante
  *     tags: [Estudiantes]
+ *     security:
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -26,6 +28,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   get:
  *     summary: Listar todos los estudiantes
  *     tags: [Estudiantes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -73,6 +77,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   get:
  *     summary: Obtener un estudiante por ID
  *     tags: [Estudiantes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -92,6 +98,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   put:
  *     summary: Actualizar un estudiante por ID
  *     tags: [Estudiantes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -117,6 +125,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   delete:
  *     summary: Eliminar un estudiante por ID
  *     tags: [Estudiantes]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -9,6 +9,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   post:
  *     summary: Crear un nuevo adulto mayor
  *     tags: [Adultos Mayores]
+ *     security:
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -26,6 +28,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   get:
  *     summary: Listar todos los adultos mayores
  *     tags: [Adultos Mayores]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -73,6 +77,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   get:
  *     summary: Obtener un adulto mayor por ID
  *     tags: [Adultos Mayores]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -92,6 +98,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   put:
  *     summary: Actualizar un adulto mayor por ID
  *     tags: [Adultos Mayores]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -117,6 +125,8 @@ const apiKeyMiddleware = require('../middlewares/apiKey.middleware');
  *   delete:
  *     summary: Eliminar un adulto mayor por ID
  *     tags: [Adultos Mayores]
+ *     security:
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id

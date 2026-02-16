@@ -25,7 +25,8 @@ const options = {
       { name: 'ApiKeys', description: 'Gestión de llaves de acceso para integraciones externas' },
       { name: 'Estudiantes', description: 'Gestión de estudiantes independientes' },
       { name: 'Adultos Mayores', description: 'Gestión de adultos mayores independientes' },
-      { name: 'Pasajeros Frecuentes', description: 'Gestión de pasajeros frecuentes independientes' }
+      { name: 'Pasajeros Frecuentes', description: 'Gestión de pasajeros frecuentes independientes' },
+      { name: 'Carabineros', description: 'Validación de convenio Carabineros' }
     ],
     components: {
       securitySchemes: {
