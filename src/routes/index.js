@@ -14,6 +14,7 @@ const estudiantesRoutes = require('./estudiantes.routes');
 const adultosMayoresRoutes = require('./adultosMayores.routes');
 const pasajerosFrecuentesRoutes = require('./pasajerosFrecuentes.routes');
 const carabinerosRoutes = require('./carabineros.routes');
+const rolesRoutes = require('./roles.routes');
 
 const router = Router();
 
@@ -31,4 +32,5 @@ router.use('/estudiantes', estudiantesRoutes);
 router.use('/adultos-mayores', adultosMayoresRoutes);
 router.use('/pasajeros-frecuentes', pasajerosFrecuentesRoutes);
 router.use('/carabineros', carabinerosRoutes);
+router.use('/roles', rolesRoutes);
 module.exports = router;

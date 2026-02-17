@@ -177,9 +177,6 @@ const options = {
             telefono: { type: 'string', example: '+56933333333' },
             correo: { type: 'string', example: 'pedro@test.com' },
             direccion: { type: 'string', example: 'Av. Viajes 789' },
-            codigo_frecuente: { type: 'string', example: 'PF-123456' },
-            nivel: { type: 'string', example: 'GOLD' },
-            puntos: { type: 'integer', example: 1500 },
             imagen_base64: { type: 'string', description: 'Imagen en base64' },
             status: { type: 'string', example: 'ACTIVO' }
           }

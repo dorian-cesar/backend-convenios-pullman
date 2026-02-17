@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     nombre: {
-      type: DataTypes.ENUM('USUARIO', 'SUPER_USUARIO'),
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true
     },

@@ -310,14 +310,14 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
 
     // 1. Calcular Monto Acumulado Neto (Ventas + Cambios - Devoluciones)
     // Sumar montos pagados (COMPRA + CAMBIO)
+    // Nota: Sequelize ignora registros con deletedAt por defecto (paranoid: true)
     const totalVentasData = await Evento.findAll({
         attributes: [
             [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total']
         ],
         where: {
             convenio_id: convenioId,
-            tipo_evento: ['COMPRA', 'CAMBIO'],
-            is_deleted: false
+            tipo_evento: ['COMPRA', 'CAMBIO']
         },
         raw: true
     });
@@ -329,8 +329,7 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         ],
         where: {
             convenio_id: convenioId,
-            tipo_evento: 'DEVOLUCION',
-            is_deleted: false
+            tipo_evento: 'DEVOLUCION'
         },
         raw: true
     });
@@ -343,16 +342,14 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
     const cantidadCompras = await Evento.count({
         where: {
             convenio_id: convenioId,
-            tipo_evento: 'COMPRA',
-            is_deleted: false
+            tipo_evento: 'COMPRA'
         }
     });
 
     const cantidadDevoluciones = await Evento.count({
         where: {
             convenio_id: convenioId,
-            tipo_evento: 'DEVOLUCION',
-            is_deleted: false
+            tipo_evento: 'DEVOLUCION'
         }
     });
 

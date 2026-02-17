@@ -11,7 +11,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         nombre: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: {
+                msg: 'El nombre del convenio debe ser único'
+            }
         },
         fecha_inicio: {
             type: DataTypes.DATE,
