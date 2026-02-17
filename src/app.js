@@ -8,7 +8,12 @@ const swaggerSpec = require('./docs/swagger'); // { changed code }
 const app = express();
 
 // CORS
-app.use(cors('*'));
+// CORS
+app.use(cors({
+    origin: '*', // En producción limitar
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
+}));
 
 // Middlewares base
 app.use(express.json({ limit: '100mb' }));

@@ -77,3 +77,36 @@ exports.activar = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.validarRut = async (req, res, next) => {
+    try {
+        const { rut } = req.body;
+        if (!rut) {
+            return res.status(400).json({ message: 'El RUT es obligatorio' });
+        }
+
+        const estudiante = await estudiantesService.obtenerPorRut(rut);
+
+        if (!estudiante) {
+            return res.status(404).json({ message: 'Estudiante no encontrado' });
+        }
+
+        if (estudiante.status !== 'ACTIVO') {
+            return res.status(409).json({ message: 'El Estudiante se encuentra INACTIVO' });
+        }
+
+        res.json({
+            id: estudiante.id,
+            nombre: estudiante.nombre,
+            rut: estudiante.rut,
+            telefono: estudiante.telefono,
+            correo: estudiante.correo,
+            direccion: estudiante.direccion,
+            carnet_estudiante: estudiante.carnet_estudiante, // Extra field for student
+            fecha_vencimiento: estudiante.fecha_vencimiento,
+            status: estudiante.status
+        });
+    } catch (error) {
+        next(error);
+    }
+};

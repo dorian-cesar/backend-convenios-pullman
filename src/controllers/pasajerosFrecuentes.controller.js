@@ -77,3 +77,34 @@ exports.activar = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.validarRut = async (req, res, next) => {
+    try {
+        const { rut } = req.body;
+        if (!rut) {
+            return res.status(400).json({ message: 'El RUT es obligatorio' });
+        }
+
+        const frecuente = await pasajerosFrecuentesService.obtenerPorRut(rut);
+
+        if (!frecuente) {
+            return res.status(404).json({ message: 'Pasajero Frecuente no encontrado' });
+        }
+
+        if (frecuente.status !== 'ACTIVO') {
+            return res.status(409).json({ message: 'El Pasajero Frecuente se encuentra INACTIVO' });
+        }
+
+        res.json({
+            id: frecuente.id,
+            nombre: frecuente.nombre,
+            rut: frecuente.rut,
+            telefono: frecuente.telefono,
+            correo: frecuente.correo,
+            direccion: frecuente.direccion,
+            status: frecuente.status
+        });
+    } catch (error) {
+        next(error);
+    }
+};

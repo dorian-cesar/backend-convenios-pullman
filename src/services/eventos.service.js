@@ -66,7 +66,7 @@ exports.obtenerHistorialEventos = async (eventoId) => {
   let tieneDescendientes = true;
   while (tieneDescendientes) {
     const descendiente = await Evento.findOne({
-      where: { evento_origen_id: actual.id, is_deleted: false },
+      where: { evento_origen_id: actual.id },
       include: [
         { model: Usuario, attributes: ['id', 'correo'] },
         { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
@@ -152,8 +152,7 @@ exports.crearCompraEvento = async (data) => {
     pnr,
     tarifa_base,
     porcentaje_descuento_aplicado: porcentajeDescuento,
-    monto_pagado: montoPagado,
-    is_deleted: false
+    monto_pagado: montoPagado
   });
 
   return await this.obtenerEvento(evento.id);
@@ -186,7 +185,7 @@ exports.crearCambioEvento = async (data) => {
   }
 
   // 2. Validar que no haya sido ya cambiado (en nuestro modelo lineal, el evento_origen_id debe ser único en la tabla para nuevos eventos)
-  const yaCambiado = await Evento.findOne({ where: { evento_origen_id: eventoActual.id, is_deleted: false } });
+  const yaCambiado = await Evento.findOne({ where: { evento_origen_id: eventoActual.id } });
   if (yaCambiado) {
     throw new EventoInvalidoError('Este evento ya tiene una acción posterior vinculada');
   }
@@ -218,8 +217,7 @@ exports.crearCambioEvento = async (data) => {
     pnr: pnr || eventoActual.pnr,
     tarifa_base,
     porcentaje_descuento_aplicado: porcentajeDescuento,
-    monto_pagado: diferenciaMonto,
-    is_deleted: false
+    monto_pagado: diferenciaMonto
   });
 
   return await this.obtenerEvento(evento.id);
@@ -239,7 +237,7 @@ exports.crearDevolucionEvento = async (data) => {
   }
 
   // 2. Verificar que no haya sido ya procesado
-  const yaProcesado = await Evento.findOne({ where: { evento_origen_id: eventoActual.id, is_deleted: false } });
+  const yaProcesado = await Evento.findOne({ where: { evento_origen_id: eventoActual.id } });
   if (yaProcesado) {
     throw new EventoInvalidoError('No se puede devolver un evento que ya tiene acciones posteriores');
   }
@@ -263,8 +261,7 @@ exports.crearDevolucionEvento = async (data) => {
     tarifa_base: eventoActual.tarifa_base,
     porcentaje_descuento_aplicado: eventoActual.porcentaje_descuento_aplicado,
     monto_pagado: 0,
-    monto_devolucion: monto_devolucion,
-    is_deleted: false
+    monto_devolucion: monto_devolucion
   });
 
   return await this.obtenerEvento(evento.id);
@@ -276,7 +273,8 @@ exports.crearDevolucionEvento = async (data) => {
 exports.listarEventos = async (filters = {}) => {
   const { page, limit, sortBy, order, ...otherFilters } = filters;
   const { offset, limit: limitVal } = getPagination(page, limit);
-  const where = { is_deleted: false };
+  // Eliminamos is_deleted: false, Sequelize paranoid lo maneja
+  const where = {};
 
   if (otherFilters.tipo_evento) where.tipo_evento = otherFilters.tipo_evento;
   if (otherFilters.empresa_id) where.empresa_id = otherFilters.empresa_id;
@@ -338,7 +336,7 @@ exports.eliminarEvento = async (id) => {
   const evento = await Evento.findByPk(id);
   if (!evento) throw new NotFoundError('Evento no encontrado');
 
-  evento.is_deleted = true;
-  await evento.save();
+  // is_deleted = true y save() reemplazado por destroy()
+  await evento.destroy();
   return evento;
 };

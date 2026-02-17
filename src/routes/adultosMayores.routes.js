@@ -193,4 +193,46 @@ router.put('/:id', adultosMayoresController.actualizar);
 router.patch('/activar/:id', adultosMayoresController.activar);
 router.delete('/:id', adultosMayoresController.eliminar);
 
+/**
+ * @swagger
+ * /api/adultos-mayores/validar-rut:
+ *   post:
+ *     summary: Validar estado de Adulto Mayor por RUT
+ *     tags: [Adultos Mayores]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *             properties:
+ *               rut:
+ *                 type: string
+ *                 example: "10.100.100-1"
+ *     responses:
+ *       200:
+ *         description: Adulto Mayor activo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id: { type: integer }
+ *                 nombre: { type: string }
+ *                 rut: { type: string }
+ *                 telefono: { type: string }
+ *                 correo: { type: string }
+ *                 direccion: { type: string }
+ *                 certificado: { type: string }
+ *                 fecha_emision: { type: string }
+ *                 status: { type: string }
+ *       404:
+ *         description: Adulto Mayor no encontrado
+ *       409:
+ *         description: Adulto Mayor INACTIVO
+ */
+router.post('/validar-rut', adultosMayoresController.validarRut);
+
 module.exports = router;

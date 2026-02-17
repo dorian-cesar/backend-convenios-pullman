@@ -17,7 +17,7 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *     summary: Listar roles
  *     tags: [Roles]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -44,7 +44,7 @@ router.get('/', authMiddleware, rolesController.getAll);
  *     summary: Obtener rol por ID
  *     tags: [Roles]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -66,7 +66,7 @@ router.get('/:id', authMiddleware, rolesController.getOne);
  *     summary: Crear un nuevo rol
  *     tags: [Roles]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -96,7 +96,7 @@ router.post('/', authMiddleware, rolesController.create);
  *     summary: Actualizar un rol
  *     tags: [Roles]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -127,7 +127,7 @@ router.put('/:id', authMiddleware, rolesController.update);
  *     summary: Desactivar un rol (Soft Delete lógico)
  *     tags: [Roles]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

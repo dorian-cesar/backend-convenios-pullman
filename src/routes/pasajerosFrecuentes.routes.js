@@ -198,4 +198,44 @@ router.put('/:id', pasajerosFrecuentesController.actualizar);
 router.patch('/activar/:id', pasajerosFrecuentesController.activar);
 router.delete('/:id', pasajerosFrecuentesController.eliminar);
 
+/**
+ * @swagger
+ * /api/pasajeros-frecuentes/validar-rut:
+ *   post:
+ *     summary: Validar estado de Pasajero Frecuente por RUT
+ *     tags: [Pasajeros Frecuentes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *             properties:
+ *               rut:
+ *                 type: string
+ *                 example: "10.100.100-1"
+ *     responses:
+ *       200:
+ *         description: Pasajero Frecuente activo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id: { type: integer }
+ *                 nombre: { type: string }
+ *                 rut: { type: string }
+ *                 telefono: { type: string }
+ *                 correo: { type: string }
+ *                 direccion: { type: string }
+ *                 status: { type: string }
+ *       404:
+ *         description: Pasajero Frecuente no encontrado
+ *       409:
+ *         description: Pasajero Frecuente INACTIVO
+ */
+router.post('/validar-rut', pasajerosFrecuentesController.validarRut);
+
 module.exports = router;

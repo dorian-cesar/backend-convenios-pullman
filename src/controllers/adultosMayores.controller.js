@@ -77,3 +77,36 @@ exports.activar = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.validarRut = async (req, res, next) => {
+    try {
+        const { rut } = req.body;
+        if (!rut) {
+            return res.status(400).json({ message: 'El RUT es obligatorio' });
+        }
+
+        const adulto = await adultosMayoresService.obtenerPorRut(rut);
+
+        if (!adulto) {
+            return res.status(404).json({ message: 'Adulto Mayor no encontrado' });
+        }
+
+        if (adulto.status !== 'ACTIVO') {
+            return res.status(409).json({ message: 'El Adulto Mayor se encuentra INACTIVO' });
+        }
+
+        res.json({
+            id: adulto.id,
+            nombre: adulto.nombre,
+            rut: adulto.rut,
+            telefono: adulto.telefono,
+            correo: adulto.correo,
+            direccion: adulto.direccion,
+            certificado: adulto.certificado, // Extra field
+            fecha_emision: adulto.fecha_emision,
+            status: adulto.status
+        });
+    } catch (error) {
+        next(error);
+    }
+};

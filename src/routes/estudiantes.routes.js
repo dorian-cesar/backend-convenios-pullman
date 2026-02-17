@@ -193,4 +193,46 @@ router.put('/:id', estudiantesController.actualizar);
 router.patch('/activar/:id', estudiantesController.activar);
 router.delete('/:id', estudiantesController.eliminar);
 
+/**
+ * @swagger
+ * /api/estudiantes/validar-rut:
+ *   post:
+ *     summary: Validar estado de Estudiante por RUT
+ *     tags: [Estudiantes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *             properties:
+ *               rut:
+ *                 type: string
+ *                 example: "10.100.100-1"
+ *     responses:
+ *       200:
+ *         description: Estudiante activo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id: { type: integer }
+ *                 nombre: { type: string }
+ *                 rut: { type: string }
+ *                 telefono: { type: string }
+ *                 correo: { type: string }
+ *                 direccion: { type: string }
+ *                 carnet_estudiante: { type: string }
+ *                 fecha_vencimiento: { type: string }
+ *                 status: { type: string }
+ *       404:
+ *         description: Estudiante no encontrado
+ *       409:
+ *         description: Estudiante INACTIVO
+ */
+router.post('/validar-rut', estudiantesController.validarRut);
+
 module.exports = router;
