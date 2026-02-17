@@ -6,9 +6,9 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true
         },
 
-        // COMPRA | CAMBIO | DEVOLUCION
+        // COMPRA | DEVOLUCION (CAMBIO eliminado)
         tipo_evento: {
-            type: DataTypes.ENUM('COMPRA', 'CAMBIO', 'DEVOLUCION'),
+            type: DataTypes.ENUM('COMPRA', 'DEVOLUCION'),
             allowNull: false
         },
 

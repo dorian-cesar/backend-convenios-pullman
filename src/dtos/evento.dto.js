@@ -51,7 +51,7 @@ class EventoDTO {
             };
         }
 
-        // Evento origen (para CAMBIO y DEVOLUCION)
+        // Evento origen (para DEVOLUCION)
         if (evento.EventoOrigen) {
             this.evento_origen = {
                 id: evento.EventoOrigen.id,

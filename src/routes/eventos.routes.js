@@ -107,64 +107,8 @@ router.use(authMiddleware);
  */
 router.post('/compra', validate(eventoValidation.crearCompra), eventosController.crearCompra);
 
-/**
- * @openapi
- * /api/eventos/cambio:
- *   post:
- *     summary: Crear evento de cambio
- *     security:
- *       - bearerAuth: []
- *       - apiKeyAuth: []
- *     tags: [Eventos]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - evento_origen_id
- *               - ciudad_origen
- *               - ciudad_destino
- *               - fecha_viaje
- *               - hora_salida
- *               - tarifa_base
- *             properties:
- *               evento_origen_id:
- *                 type: integer
- *                 example: 100
- *                 description: "ID del último evento válido de la cadena"
- *               ciudad_origen:
- *                 type: string
- *                 example: "Santiago"
- *               ciudad_destino:
- *                 type: string
- *                 example: "Viña del Mar"
- *               fecha_viaje:
- *                 type: string
- *                 format: date
- *                 example: "2026-02-20"
- *               hora_salida:
- *                 type: string
- *                 example: "10:00"
- *               tarifa_base:
- *                 type: integer
- *                 example: 55000
- *     responses:
- *       201:
- *         description: Evento de cambio creado exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Evento'
- *       400:
- *         description: Datos de entrada inválidos
- *       401:
- *         description: No autorizado
- *       404:
- *         description: Evento origen no encontrado
- */
-router.post('/cambio', validate(eventoValidation.crearCambio), eventosController.crearCambio);
+
+
 
 /**
  * @openapi

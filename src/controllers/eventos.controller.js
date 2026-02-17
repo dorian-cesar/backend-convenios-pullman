@@ -13,17 +13,7 @@ exports.crearCompra = async (req, res, next) => {
   }
 };
 
-/**
- * Crear cambio
- */
-exports.crearCambio = async (req, res, next) => {
-  try {
-    const evento = await eventosService.crearCambioEvento(req.body);
-    res.status(201).json(new EventoDTO(evento));
-  } catch (error) {
-    next(error);
-  }
-};
+
 
 /**
  * Crear devolución

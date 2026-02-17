@@ -173,77 +173,7 @@ exports.crearCompraEvento = async (data) => {
   return await this.obtenerEvento(evento.id);
 };
 
-/**
- * Crear cambio de evento
- */
-exports.crearCambioEvento = async (data) => {
-  const {
-    evento_origen_id: origenIdParam,
-    ciudad_origen,
-    ciudad_destino,
-    fecha_viaje,
-    hora_salida,
-    terminal_origen,
-    terminal_destino,
-    numero_asiento,
-    numero_ticket,
-    pnr,
-    tarifa_base,
-    codigo_autorizacion,
-    token,
-    estado
-  } = data;
 
-  // Automate origin detection if not provided
-  let eventoOrigenId = origenIdParam;
-  if (!eventoOrigenId) {
-    const latestEvent = await findLatestEventByTicketOrPnr(numero_ticket, pnr);
-    eventoOrigenId = latestEvent.id;
-  }
-
-  // 1. Obtener el evento origen (debe ser el ÚLTIMO de la cadena y no ser una DEVOLUCION)
-  const eventoActual = await this.obtenerEventoActual(eventoOrigenId);
-
-  if (eventoActual.tipo_evento === 'DEVOLUCION') {
-    throw new EventoInvalidoError('No se puede realizar un CAMBIO sobre un evento que ya ha sido devuelto');
-  }
-
-  // 2. Validar que no haya sido ya cambiado
-  const yaCambiado = await Evento.findOne({ where: { evento_origen_id: eventoActual.id } });
-  if (yaCambiado) {
-    throw new EventoInvalidoError('Este evento ya tiene una acción posterior vinculada');
-  }
-
-  // 3. Calcular montos
-  const porcentajeDescuento = eventoActual.porcentaje_descuento_aplicado || 0;
-  const nuevoMonto = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
-  const diferenciaMonto = nuevoMonto - (eventoActual.monto_pagado || 0);
-
-  const evento = await Evento.create({
-    tipo_evento: 'CAMBIO',
-    evento_origen_id: eventoActual.id,
-    pasajero_id: eventoActual.pasajero_id,
-    empresa_id: eventoActual.empresa_id,
-    convenio_id: eventoActual.convenio_id,
-    ciudad_origen,
-    ciudad_destino,
-    fecha_viaje,
-    hora_salida,
-    terminal_origen,
-    terminal_destino,
-    numero_asiento,
-    numero_ticket: numero_ticket || eventoActual.numero_ticket,
-    pnr: pnr || eventoActual.pnr,
-    tarifa_base,
-    porcentaje_descuento_aplicado: porcentajeDescuento,
-    monto_pagado: diferenciaMonto,
-    codigo_autorizacion,
-    token,
-    estado
-  });
-
-  return await this.obtenerEvento(evento.id);
-};
 
 /**
  * Crear devolución de evento
