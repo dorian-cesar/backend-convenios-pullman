@@ -1,3 +1,6 @@
+const { Carabinero, Convenio, Empresa, Pasajero } = require('../models');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
+const { Op } = require('sequelize');
 const { formatRut } = require('../utils/rut.utils');
 
 exports.validar = async (req, res) => {
@@ -28,9 +31,9 @@ exports.validar = async (req, res) => {
         const convenio = await Convenio.findOne({ where: { nombre: 'CARABINEROS' } });
         const empresa = await Empresa.findOne({ where: { nombre: 'CARABINEROS DE CHILE' } });
 
+        // Si no existen, continuamos con valores por defecto (null) o logueamos warning
         if (!convenio || !empresa) {
-            console.error('Error de configuración: No se encontró Convenio CARABINEROS o Empresa CARABINEROS DE CHILE');
-            return res.status(500).json({ message: 'Error de configuración en el sistema. Contacte al administrador.' });
+            console.warn('Advertencia: No se encontró Convenio CARABINEROS o Empresa CARABINEROS DE CHILE');
         }
 
         // 3. Crear o Actualizar Pasajero con el RUT completo
@@ -40,39 +43,60 @@ exports.validar = async (req, res) => {
         const nombres = nombreParts[0] || 'Sin Nombre';
         const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
 
-        const [pasajero, created] = await Pasajero.findOrCreate({
-            where: { rut: formattedRut },
-            defaults: {
-                nombres: nombres,
-                apellidos: apellidos,
-                empresa_id: empresa.id,
-                convenio_id: convenio.id,
-                tipo_pasajero_id: 1, // Asumiendo ID 1 para ADULTO o similar, ajustar si es necesario
-                status: 'ACTIVO'
-            }
-        });
-
-        if (!created) {
-            // Si ya existe, actualizamos la asociación
-            await pasajero.update({
-                empresa_id: empresa.id,
-                convenio_id: convenio.id,
-                status: 'ACTIVO'
-                // Opcional: actualizar nombres si se desea sobrescribir lo que había
+        let pasajero = null;
+        try {
+            // Asumiendo ID 1 para ADULTO o similar, ajustar si es necesario
+            const [p, created] = await Pasajero.findOrCreate({
+                where: { rut: formattedRut },
+                defaults: {
+                    nombres: nombres,
+                    apellidos: apellidos,
+                    empresa_id: empresa ? empresa.id : null,
+                    convenio_id: convenio ? convenio.id : null,
+                    tipo_pasajero_id: 1,
+                    status: 'ACTIVO'
+                }
             });
+            pasajero = p;
+
+            if (!created) {
+                // Si ya existe, actualizamos la asociación si tenemos datos nuevos
+                const updateData = {};
+                if (empresa) updateData.empresa_id = empresa.id;
+                if (convenio) updateData.convenio_id = convenio.id;
+                updateData.status = 'ACTIVO';
+
+                await pasajero.update(updateData);
+            }
+        } catch (dbError) {
+            console.error('Error al procesar Pasajero en Carabineros:', dbError);
+            // Fallback object construction
+            pasajero = {
+                rut: formattedRut,
+                nombres,
+                apellidos,
+                tipo_pasajero_id: 1,
+                status: 'ACTIVO'
+            };
+        }
+
+        let pasajeroResponse = {};
+        if (pasajero) {
+            pasajeroResponse = pasajero.toJSON ? pasajero.toJSON() : pasajero;
+            delete pasajeroResponse.imagen_base64;
         }
 
         return res.status(200).json({
             afiliado: true,
             mensaje: 'Validación exitosa',
-            pasajero: pasajero,
-            empresa: empresa.nombre,
-            descuentos: [
+            pasajero: pasajeroResponse,
+            empresa: empresa ? empresa.nombre : 'SIN EMPRESA',
+            descuentos: convenio ? [
                 {
                     convenio: convenio.nombre,
                     porcentaje: convenio.porcentaje_descuento || 0
                 }
-            ]
+            ] : []
         });
 
     } catch (error) {

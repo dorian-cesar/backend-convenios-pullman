@@ -10,6 +10,7 @@ const sequelize = new Sequelize(
     port: process.env.PORT_BD,
     dialect: 'mysql',
     logging: false,
+    timezone: '-04:00', // America/Santiago standard offset (adjust if needed or use named TZ if supported by driver)
   }
 );
 
