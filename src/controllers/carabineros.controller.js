@@ -13,9 +13,26 @@ exports.validar = async (req, res) => {
 
         const formattedRut = formatRut(rut);
 
-        // 1. Consultar tabla carabineros
+        // Extraer cuerpo para búsqueda amplia (si el input tiene guion, usalo como separador, si no, usa logic de formatRut)
+        let rutBody = null;
+        if (rut.includes('-')) {
+            const clean = rut.replace(/\./g, '').replace(/[^0-9kK\-]/g, '');
+            rutBody = clean.split('-')[0];
+        } else {
+            // Si no tiene guion, asumimos que formatRut hizo lo correcto separando el último dígito
+            rutBody = formattedRut.split('-')[0];
+        }
+
+        // 1. Consultar tabla carabineros (Búsqueda flexible)
+        // Buscamos exacto por formateado, o que empiece por el cuerpo (ignorando DV)
         const carabinero = await Carabinero.findOne({
-            where: { rut: formattedRut }
+            where: {
+                [Op.or]: [
+                    { rut: formattedRut }, // Match exacto estándar
+                    { rut: { [Op.like]: `${rutBody}-%` } }, // Match por cuerpo + cualquier DV
+                    { rut: rutBody } // Match por cuerpo exacto (si en BD está sin formato)
+                ]
+            }
         });
 
         if (!carabinero) {

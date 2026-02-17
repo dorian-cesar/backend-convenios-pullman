@@ -71,6 +71,10 @@ Evento.belongsTo(Convenio, { foreignKey: 'convenio_id', onDelete: 'NO ACTION' })
 Evento.belongsTo(Evento, { as: 'EventoOrigen', foreignKey: 'evento_origen_id', onDelete: 'NO ACTION' });
 Evento.hasMany(Evento, { as: 'EventosRelacionados', foreignKey: 'evento_origen_id', onDelete: 'NO ACTION' });
 
+// CARABINERO -> EMPRESA / CONVENIO
+Carabinero.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+Carabinero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
+
 
 module.exports = {
   sequelize,

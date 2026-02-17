@@ -12,6 +12,14 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: DataTypes.STRING,
             allowNull: true
+        },
+        empresa_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
+        convenio_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         }
     }, {
         tableName: 'carabineros',
