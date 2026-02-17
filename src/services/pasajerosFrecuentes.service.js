@@ -12,14 +12,14 @@ exports.obtenerPorRut = async (rut) => {
 };
 
 exports.listar = async (filters = {}) => {
-    const { page, limit, nombre, rut, status, codigo_frecuente } = filters;
+    const { page, limit, nombre, rut, status } = filters;
     const { offset, limit: limitVal } = getPagination(page, limit);
     const where = {};
 
     if (nombre) where.nombre = { [Op.like]: `%${nombre}%` };
     if (rut) where.rut = formatRut(rut);
     if (status) where.status = status;
-    if (codigo_frecuente) where.codigo_frecuente = codigo_frecuente;
+
 
     const data = await PasajeroFrecuente.findAndCountAll({
         where,

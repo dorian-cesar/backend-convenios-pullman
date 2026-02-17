@@ -1,4 +1,4 @@
-const { Evento, Usuario, Pasajero, Empresa, Convenio } = require('../models');
+const { Evento, Pasajero, Empresa, Convenio } = require('../models');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const ReglaDeNegocioError = require('../exceptions/ReglaDeNegocioError');

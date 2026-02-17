@@ -56,9 +56,7 @@ Convenio.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsult
 Empresa.hasMany(ApiConsulta, { foreignKey: 'empresa_id', as: 'apisConsulta', onDelete: 'NO ACTION' });
 ApiConsulta.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 'NO ACTION' });
 
-// RELACIONES DE EVENTOS (Registro de viajes)
-Usuario.hasMany(Evento, { foreignKey: 'usuario_id', onDelete: 'NO ACTION' });
-Evento.belongsTo(Usuario, { foreignKey: 'usuario_id', onDelete: 'NO ACTION' });
+
 
 Pasajero.hasMany(Evento, { foreignKey: 'pasajero_id', onDelete: 'NO ACTION' });
 Evento.belongsTo(Pasajero, { foreignKey: 'pasajero_id', onDelete: 'NO ACTION' });
