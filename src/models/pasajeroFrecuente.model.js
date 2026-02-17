@@ -43,7 +43,8 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'pasajeros_frecuentes',
-        timestamps: true
+        timestamps: true,
+        paranoid: true
     });
 
     return PasajeroFrecuente;

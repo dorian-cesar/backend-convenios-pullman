@@ -107,11 +107,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
 
-        // Soft delete lógico (no borres eventos)
-        is_deleted: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
+        // Sof delete lógico manejado por paranoid
 
         fecha_evento: {
             type: DataTypes.DATE,
@@ -133,7 +129,8 @@ module.exports = (sequelize, DataTypes) => {
 
     }, {
         tableName: 'eventos',
-        timestamps: false
+        timestamps: true,
+        paranoid: true
     });
 
     return Evento;

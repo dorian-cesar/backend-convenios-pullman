@@ -51,7 +51,8 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'estudiantes',
-        timestamps: true
+        timestamps: true,
+        paranoid: true
     });
 
     return Estudiante;

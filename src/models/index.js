@@ -24,53 +24,54 @@ const Carabinero = require('./carabinero.model')(sequelize, Sequelize.DataTypes)
  */
 
 // USUARIO - ROL
-Usuario.belongsToMany(Rol, { through: UsuarioRoles, foreignKey: 'usuario_id', otherKey: 'rol_id' });
-Rol.belongsToMany(Usuario, { through: UsuarioRoles, foreignKey: 'rol_id', otherKey: 'usuario_id' });
+// Para ManyToMany, onDelete aplica a la tabla intermedia.
+Usuario.belongsToMany(Rol, { through: UsuarioRoles, foreignKey: 'usuario_id', otherKey: 'rol_id', onDelete: 'NO ACTION' });
+Rol.belongsToMany(Usuario, { through: UsuarioRoles, foreignKey: 'rol_id', otherKey: 'usuario_id', onDelete: 'NO ACTION' });
 
 // EMPRESA -> USUARIO (1:N)
-Empresa.hasMany(Usuario, { foreignKey: 'empresa_id', as: 'usuarios' });
-Usuario.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+Empresa.hasMany(Usuario, { foreignKey: 'empresa_id', as: 'usuarios', onDelete: 'NO ACTION' });
+Usuario.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 'NO ACTION' });
 
 // EMPRESA -> CONVENIO (1:N)
-Empresa.hasMany(Convenio, { foreignKey: 'empresa_id', as: 'convenios' });
-Convenio.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+Empresa.hasMany(Convenio, { foreignKey: 'empresa_id', as: 'convenios', onDelete: 'NO ACTION' });
+Convenio.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 'NO ACTION' });
 
 // EMPRESA -> PASAJERO (1:N)
-Empresa.hasMany(Pasajero, { foreignKey: 'empresa_id', as: 'pasajeros' });
-Pasajero.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+Empresa.hasMany(Pasajero, { foreignKey: 'empresa_id', as: 'pasajeros', onDelete: 'NO ACTION' });
+Pasajero.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 'NO ACTION' });
 
 // TIPO_PASAJERO -> PASAJERO (1:N)
-TipoPasajero.hasMany(Pasajero, { foreignKey: 'tipo_pasajero_id', as: 'pasajeros' });
-Pasajero.belongsTo(TipoPasajero, { foreignKey: 'tipo_pasajero_id', as: 'tipoPasajero' });
+TipoPasajero.hasMany(Pasajero, { foreignKey: 'tipo_pasajero_id', as: 'pasajeros', onDelete: 'NO ACTION' });
+Pasajero.belongsTo(TipoPasajero, { foreignKey: 'tipo_pasajero_id', as: 'tipoPasajero', onDelete: 'NO ACTION' });
 
 // CONVENIO -> PASAJERO (1:N)
-Convenio.hasMany(Pasajero, { foreignKey: 'convenio_id', as: 'pasajeros' });
-Pasajero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
+Convenio.hasMany(Pasajero, { foreignKey: 'convenio_id', as: 'pasajeros', onDelete: 'NO ACTION' });
+Pasajero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio', onDelete: 'NO ACTION' });
 
 // API_CONSULTA -> CONVENIO (1:N)
-ApiConsulta.hasMany(Convenio, { foreignKey: 'api_consulta_id', as: 'convenios' });
-Convenio.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsulta' });
+ApiConsulta.hasMany(Convenio, { foreignKey: 'api_consulta_id', as: 'convenios', onDelete: 'NO ACTION' });
+Convenio.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsulta', onDelete: 'NO ACTION' });
 
 // EMPRESA -> API_CONSULTA (1:N)
-Empresa.hasMany(ApiConsulta, { foreignKey: 'empresa_id', as: 'apisConsulta' });
-ApiConsulta.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+Empresa.hasMany(ApiConsulta, { foreignKey: 'empresa_id', as: 'apisConsulta', onDelete: 'NO ACTION' });
+ApiConsulta.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 'NO ACTION' });
 
 // RELACIONES DE EVENTOS (Registro de viajes)
-Usuario.hasMany(Evento, { foreignKey: 'usuario_id' });
-Evento.belongsTo(Usuario, { foreignKey: 'usuario_id' });
+Usuario.hasMany(Evento, { foreignKey: 'usuario_id', onDelete: 'NO ACTION' });
+Evento.belongsTo(Usuario, { foreignKey: 'usuario_id', onDelete: 'NO ACTION' });
 
-Pasajero.hasMany(Evento, { foreignKey: 'pasajero_id' });
-Evento.belongsTo(Pasajero, { foreignKey: 'pasajero_id' });
+Pasajero.hasMany(Evento, { foreignKey: 'pasajero_id', onDelete: 'NO ACTION' });
+Evento.belongsTo(Pasajero, { foreignKey: 'pasajero_id', onDelete: 'NO ACTION' });
 
-Empresa.hasMany(Evento, { foreignKey: 'empresa_id' });
-Evento.belongsTo(Empresa, { foreignKey: 'empresa_id' });
+Empresa.hasMany(Evento, { foreignKey: 'empresa_id', onDelete: 'NO ACTION' });
+Evento.belongsTo(Empresa, { foreignKey: 'empresa_id', onDelete: 'NO ACTION' });
 
-Convenio.hasMany(Evento, { foreignKey: 'convenio_id' });
-Evento.belongsTo(Convenio, { foreignKey: 'convenio_id' });
+Convenio.hasMany(Evento, { foreignKey: 'convenio_id', onDelete: 'NO ACTION' });
+Evento.belongsTo(Convenio, { foreignKey: 'convenio_id', onDelete: 'NO ACTION' });
 
 // Auto-referencia para trazabilidad de eventos
-Evento.belongsTo(Evento, { as: 'EventoOrigen', foreignKey: 'evento_origen_id' });
-Evento.hasMany(Evento, { as: 'EventosRelacionados', foreignKey: 'evento_origen_id' });
+Evento.belongsTo(Evento, { as: 'EventoOrigen', foreignKey: 'evento_origen_id', onDelete: 'NO ACTION' });
+Evento.hasMany(Evento, { as: 'EventosRelacionados', foreignKey: 'evento_origen_id', onDelete: 'NO ACTION' });
 
 
 module.exports = {

@@ -53,7 +53,8 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'pasajeros',
-        timestamps: false
+        timestamps: true,
+        paranoid: true
     });
 
     return Pasajero;

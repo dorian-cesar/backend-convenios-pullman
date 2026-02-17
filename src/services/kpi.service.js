@@ -63,9 +63,7 @@ const getGranularitySQL = (granularidad, campoFecha = 'fecha_evento') => {
 
 const buildBaseWhere = (filters) => {
     const { empresa_id, fecha_inicio, fecha_fin } = filters;
-    const where = {
-        is_deleted: false
-    };
+    const where = {};
 
     if (empresa_id) {
         where.empresa_id = empresa_id;
@@ -208,21 +206,25 @@ exports.getPorTipoPasajero = async (params) => {
     const where = buildBaseWhere(params);
     where.tipo_evento = 'COMPRA';
 
-    // Ahora agrupamos por el nombre del Convenio, 
-    // tratando los nombres como categorías (Adulto Mayor, Estudiante, etc)
+    // Agrupar por el el modelo TipoPasajero a través de la relación Evento -> Pasajero -> TipoPasajero
     const rows = await Evento.findAll({
         attributes: [
-            [sequelize.col('Convenio.nombre'), 'tipo_pasajero_nombre'],
+            [sequelize.col('Pasajero->tipoPasajero.nombre'), 'tipo_pasajero_nombre'],
             [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'cantidad_pasajes'],
             [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total_monto']
         ],
         include: [{
-            model: Convenio,
+            model: Pasajero,
             attributes: [],
-            required: true
+            required: true,
+            include: [{
+                model: TipoPasajero,
+                as: 'tipoPasajero', // Alias definido en index.js
+                attributes: []
+            }]
         }],
         where: where,
-        group: [sequelize.col('Convenio.nombre')],
+        group: [sequelize.col('Pasajero->tipoPasajero.nombre')],
         order: [[sequelize.literal('cantidad_pasajes'), 'DESC']],
         raw: true
     });

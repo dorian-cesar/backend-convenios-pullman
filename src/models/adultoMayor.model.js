@@ -50,7 +50,8 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'adultos_mayores',
-        timestamps: true
+        timestamps: true,
+        paranoid: true
     });
 
     return AdultoMayor;

@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'carabineros',
-        timestamps: false
+        timestamps: true,
+        paranoid: true
     });
 
     return Carabinero;
