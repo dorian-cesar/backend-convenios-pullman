@@ -6,6 +6,7 @@ const EventoInvalidoError = require('../exceptions/EventoInvalidoError');
 const EventoYaDevueltoError = require('../exceptions/EventoYaDevueltoError');
 const convenioService = require('./convenio.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
+const { Op } = require('sequelize');
 
 /**
  * Calcular monto con descuento
@@ -14,6 +15,31 @@ const calcularMontoConDescuento = (tarifaBase, porcentajeDescuento) => {
   if (!porcentajeDescuento) return tarifaBase;
   const descuento = (tarifaBase * porcentajeDescuento) / 100;
   return Math.round(tarifaBase - descuento);
+};
+
+/**
+ * Helper: Find latest event by Ticket or PNR
+ */
+const findLatestEventByTicketOrPnr = async (numero_ticket, pnr) => {
+  if (!numero_ticket && !pnr) {
+    throw new BusinessError('Debe proporcionar numero_ticket o pnr para identificar el evento origen');
+  }
+
+  const where = {};
+  if (numero_ticket) where.numero_ticket = numero_ticket;
+  if (pnr) where.pnr = pnr;
+
+  // Find the most recent event matching these criteria
+  const evento = await Evento.findOne({
+    where,
+    order: [['fecha_evento', 'DESC'], ['id', 'DESC']]
+  });
+
+  if (!evento) {
+    throw new NotFoundError('No se encontró ningún evento con los datos proporcionados (Ticket/PNR)');
+  }
+
+  return evento;
 };
 
 /**
@@ -42,18 +68,10 @@ exports.obtenerHistorialEventos = async (eventoId) => {
     compraOriginal = await Evento.findByPk(compraOriginal.evento_origen_id);
   }
 
-  // Ahora buscamos todos los eventos que pertenezcan a esta cadena
-  // En este "event-sourcing light", todos los eventos de la cadena
-  // eventualmente apuntan hacia atrás hasta la compra original.
-  // Sin embargo, para simplificar la consulta, buscamos todos los eventos
-  // que tengan el mismo pasajero, empresa y convenio en un rango de tiempo cercano,
-  // pero lo más preciso es seguir la relación evento_origen_id.
-
   const cadena = [];
   let actual = await Evento.findOne({
     where: { evento_origen_id: null, id: compraOriginal.id },
     include: [
-      { model: Usuario, attributes: ['id', 'correo'] },
       { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
@@ -62,13 +80,12 @@ exports.obtenerHistorialEventos = async (eventoId) => {
 
   if (actual) cadena.push(actual);
 
-  // Buscamos descendientes recursivamente (CAMBIO -> CAMBIO -> DEVOLUCION)
+  // Buscamos descendientes
   let tieneDescendientes = true;
   while (tieneDescendientes) {
     const descendiente = await Evento.findOne({
       where: { evento_origen_id: actual.id },
       include: [
-        { model: Usuario, attributes: ['id', 'correo'] },
         { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
         { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
         { model: Convenio, attributes: ['id', 'nombre'] }
@@ -90,7 +107,6 @@ exports.obtenerHistorialEventos = async (eventoId) => {
  */
 exports.crearCompraEvento = async (data) => {
   const {
-    usuario_id,
     pasajero_id,
     empresa_id,
     convenio_id,
@@ -103,14 +119,11 @@ exports.crearCompraEvento = async (data) => {
     numero_asiento,
     numero_ticket,
     pnr,
-    tarifa_base
+    tarifa_base,
+    codigo_autorizacion,
+    token,
+    estado
   } = data;
-
-  // Verificar que existan las entidades relacionadas
-  if (usuario_id) {
-    const usuario = await Usuario.findByPk(usuario_id);
-    if (!usuario) throw new NotFoundError('Usuario no encontrado');
-  }
 
   const pasajero = await Pasajero.findByPk(pasajero_id);
   if (!pasajero) throw new NotFoundError('Pasajero no encontrado');
@@ -137,7 +150,6 @@ exports.crearCompraEvento = async (data) => {
   const evento = await Evento.create({
     tipo_evento: 'COMPRA',
     evento_origen_id: null,
-    usuario_id,
     pasajero_id,
     empresa_id,
     convenio_id,
@@ -152,7 +164,10 @@ exports.crearCompraEvento = async (data) => {
     pnr,
     tarifa_base,
     porcentaje_descuento_aplicado: porcentajeDescuento,
-    monto_pagado: montoPagado
+    monto_pagado: montoPagado,
+    codigo_autorizacion,
+    token,
+    estado
   });
 
   return await this.obtenerEvento(evento.id);
@@ -163,8 +178,7 @@ exports.crearCompraEvento = async (data) => {
  */
 exports.crearCambioEvento = async (data) => {
   const {
-    evento_origen_id,
-    usuario_id,
+    evento_origen_id: origenIdParam,
     ciudad_origen,
     ciudad_destino,
     fecha_viaje,
@@ -174,17 +188,27 @@ exports.crearCambioEvento = async (data) => {
     numero_asiento,
     numero_ticket,
     pnr,
-    tarifa_base
+    tarifa_base,
+    codigo_autorizacion,
+    token,
+    estado
   } = data;
 
+  // Automate origin detection if not provided
+  let eventoOrigenId = origenIdParam;
+  if (!eventoOrigenId) {
+    const latestEvent = await findLatestEventByTicketOrPnr(numero_ticket, pnr);
+    eventoOrigenId = latestEvent.id;
+  }
+
   // 1. Obtener el evento origen (debe ser el ÚLTIMO de la cadena y no ser una DEVOLUCION)
-  const eventoActual = await this.obtenerEventoActual(evento_origen_id);
+  const eventoActual = await this.obtenerEventoActual(eventoOrigenId);
 
   if (eventoActual.tipo_evento === 'DEVOLUCION') {
     throw new EventoInvalidoError('No se puede realizar un CAMBIO sobre un evento que ya ha sido devuelto');
   }
 
-  // 2. Validar que no haya sido ya cambiado (en nuestro modelo lineal, el evento_origen_id debe ser único en la tabla para nuevos eventos)
+  // 2. Validar que no haya sido ya cambiado
   const yaCambiado = await Evento.findOne({ where: { evento_origen_id: eventoActual.id } });
   if (yaCambiado) {
     throw new EventoInvalidoError('Este evento ya tiene una acción posterior vinculada');
@@ -193,16 +217,11 @@ exports.crearCambioEvento = async (data) => {
   // 3. Calcular montos
   const porcentajeDescuento = eventoActual.porcentaje_descuento_aplicado || 0;
   const nuevoMonto = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
-
-  // El monto pagado en este evento es la DIFERENCIA (si aplica)
-  // Pero para simplificar el reporte de "monto total pagado", algunos guardan el delta.
-  // Según el TOML: "Cada acción debe crear un nuevo evento".
   const diferenciaMonto = nuevoMonto - (eventoActual.monto_pagado || 0);
 
   const evento = await Evento.create({
     tipo_evento: 'CAMBIO',
     evento_origen_id: eventoActual.id,
-    usuario_id: usuario_id || eventoActual.usuario_id,
     pasajero_id: eventoActual.pasajero_id,
     empresa_id: eventoActual.empresa_id,
     convenio_id: eventoActual.convenio_id,
@@ -217,7 +236,10 @@ exports.crearCambioEvento = async (data) => {
     pnr: pnr || eventoActual.pnr,
     tarifa_base,
     porcentaje_descuento_aplicado: porcentajeDescuento,
-    monto_pagado: diferenciaMonto
+    monto_pagado: diferenciaMonto,
+    codigo_autorizacion,
+    token,
+    estado
   });
 
   return await this.obtenerEvento(evento.id);
@@ -227,10 +249,25 @@ exports.crearCambioEvento = async (data) => {
  * Crear devolución de evento
  */
 exports.crearDevolucionEvento = async (data) => {
-  const { evento_origen_id, usuario_id, monto_devolucion } = data;
+  const {
+    evento_origen_id: origenIdParam,
+    monto_devolucion,
+    numero_ticket,
+    pnr,
+    codigo_autorizacion,
+    token,
+    estado
+  } = data;
+
+  // Automate origin detection if not provided
+  let eventoOrigenId = origenIdParam;
+  if (!eventoOrigenId) {
+    const latestEvent = await findLatestEventByTicketOrPnr(numero_ticket, pnr);
+    eventoOrigenId = latestEvent.id;
+  }
 
   // 1. Obtener el evento actual (debe ser COMPRA o CAMBIO)
-  const eventoActual = await this.obtenerEventoActual(evento_origen_id);
+  const eventoActual = await this.obtenerEventoActual(eventoOrigenId);
 
   if (eventoActual.tipo_evento === 'DEVOLUCION') {
     throw new EventoYaDevueltoError('Este evento ya se encuentra devuelto');
@@ -245,7 +282,6 @@ exports.crearDevolucionEvento = async (data) => {
   const evento = await Evento.create({
     tipo_evento: 'DEVOLUCION',
     evento_origen_id: eventoActual.id,
-    usuario_id: usuario_id || eventoActual.usuario_id,
     pasajero_id: eventoActual.pasajero_id,
     empresa_id: eventoActual.empresa_id,
     convenio_id: eventoActual.convenio_id,
@@ -256,12 +292,15 @@ exports.crearDevolucionEvento = async (data) => {
     terminal_origen: eventoActual.terminal_origen,
     terminal_destino: eventoActual.terminal_destino,
     numero_asiento: eventoActual.numero_asiento,
-    numero_ticket: eventoActual.numero_ticket,
-    pnr: eventoActual.pnr,
+    numero_ticket: numero_ticket || eventoActual.numero_ticket,
+    pnr: pnr || eventoActual.pnr,
     tarifa_base: eventoActual.tarifa_base,
     porcentaje_descuento_aplicado: eventoActual.porcentaje_descuento_aplicado,
     monto_pagado: 0,
-    monto_devolucion: monto_devolucion
+    monto_devolucion: monto_devolucion,
+    codigo_autorizacion,
+    token,
+    estado
   });
 
   return await this.obtenerEvento(evento.id);
@@ -273,7 +312,6 @@ exports.crearDevolucionEvento = async (data) => {
 exports.listarEventos = async (filters = {}) => {
   const { page, limit, sortBy, order, ...otherFilters } = filters;
   const { offset, limit: limitVal } = getPagination(page, limit);
-  // Eliminamos is_deleted: false, Sequelize paranoid lo maneja
   const where = {};
 
   if (otherFilters.tipo_evento) where.tipo_evento = otherFilters.tipo_evento;
@@ -289,7 +327,6 @@ exports.listarEventos = async (filters = {}) => {
   const data = await Evento.findAndCountAll({
     where,
     include: [
-      { model: Usuario, attributes: ['id', 'correo'] },
       { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
@@ -308,7 +345,6 @@ exports.listarEventos = async (filters = {}) => {
 exports.obtenerEvento = async (id) => {
   const evento = await Evento.findByPk(id, {
     include: [
-      { model: Usuario, attributes: ['id', 'correo'] },
       { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] },
@@ -336,7 +372,6 @@ exports.eliminarEvento = async (id) => {
   const evento = await Evento.findByPk(id);
   if (!evento) throw new NotFoundError('Evento no encontrado');
 
-  // is_deleted = true y save() reemplazado por destroy()
   await evento.destroy();
   return evento;
 };
