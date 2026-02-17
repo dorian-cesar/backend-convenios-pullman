@@ -1,5 +1,6 @@
 const { Carabinero, Pasajero, Convenio, Empresa } = require('../models');
 const { Op } = require('sequelize');
+const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 exports.validar = async (req, res) => {
     try {
@@ -20,11 +21,17 @@ exports.validar = async (req, res) => {
         }
 
         const rutBody = parts[0];
-        const dv = parts[1];
+        // const dv = parts[1]; // No usado explícitamente pero extraído
 
-        // 1. Consultar tabla carabineros usando solo el cuerpo del RUT
+        // 1. Consultar tabla carabineros
+        // Buscamos exact match (con guión) O match solo por cuerpo (sin guión)
+        // Esto permite que la BD tenga '12345678' o '12345678-9' y funcione igual.
         const carabinero = await Carabinero.findOne({
-            where: { rut: rutBody }
+            where: {
+                rut: {
+                    [Op.or]: [rutBody, cleanRut]
+                }
+            }
         });
 
         if (!carabinero) {
@@ -89,6 +96,174 @@ exports.validar = async (req, res) => {
 
     } catch (error) {
         console.error('Error en validar carabinero:', error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+// CRUD Operations
+
+exports.getAll = async (req, res) => {
+    try {
+        const { page, limit } = req.query;
+        const { offset, limit: limitVal } = getPagination(page, limit);
+
+        const data = await Carabinero.findAndCountAll({
+            limit: limitVal,
+            offset: offset,
+            order: [['rut', 'ASC']]
+        });
+
+        const response = getPagingData(data, page, limitVal);
+        return res.status(200).json(response);
+    } catch (error) {
+        console.error('Error al obtener carabineros:', error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+exports.getOne = async (req, res) => {
+    try {
+        const { rut } = req.params;
+        // Normalizamos la búsqueda: intentamos buscar exacto, o si viene con guión, buscar sin guión, y viceversa si fuera necesario.
+        // Pero getOne por PK suele ser exacto. 
+        // Si el usuario pasa 12345678-9 y en la BD está 12345678, findByPk no lo hallará si la PK es string exacto.
+        // Haremos una búsqueda más flexible similar a validar.
+
+        const cleanRut = rut.replace(/\./g, '').toUpperCase();
+        const parts = cleanRut.split('-');
+        let rutBody = cleanRut;
+        if (parts.length === 2) {
+            rutBody = parts[0];
+        }
+
+        const carabinero = await Carabinero.findOne({
+            where: {
+                rut: {
+                    [Op.or]: [rutBody, cleanRut]
+                }
+            }
+        });
+
+        if (!carabinero) {
+            return res.status(404).json({ message: 'Carabinero no encontrado' });
+        }
+
+        return res.status(200).json(carabinero);
+    } catch (error) {
+        console.error('Error al obtener carabinero:', error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+exports.create = async (req, res) => {
+    try {
+        const { rut, nombre_completo, status } = req.body;
+
+        if (!rut) {
+            return res.status(400).json({ message: 'El RUT es requerido' });
+        }
+
+        // Permitimos guardar el RUT tal cual viene (solo limpiando puntos y mayúsculas),
+        // ya sea formato 12345678 o 12345678-K.
+        const cleanRut = rut.replace(/\./g, '').toUpperCase();
+
+        // Chequear si ya existe (en cualquiera de las dos formas para evitar duplicados lógicos)
+        const parts = cleanRut.split('-');
+        let rutBody = cleanRut;
+        if (parts.length === 2) {
+            rutBody = parts[0];
+        }
+
+        const existingCarabinero = await Carabinero.findOne({
+            where: {
+                rut: {
+                    [Op.or]: [rutBody, cleanRut]
+                }
+            }
+        });
+
+        if (existingCarabinero) {
+            return res.status(409).json({ message: 'El Carabinero ya existe (RUT o RUT base ya registrado)' });
+        }
+
+        const newCarabinero = await Carabinero.create({
+            rut: cleanRut, // Guardamos lo que envió el usuario (limpio)
+            nombre_completo,
+            status: status || 'ACTIVO'
+        });
+
+        return res.status(201).json(newCarabinero);
+    } catch (error) {
+        console.error('Error al crear carabinero:', error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+exports.update = async (req, res) => {
+    try {
+        const { rut } = req.params;
+        const { nombre_completo, status } = req.body;
+
+        // Búsqueda flexible para update
+        const cleanRut = rut.replace(/\./g, '').toUpperCase();
+        const parts = cleanRut.split('-');
+        let rutBody = cleanRut;
+        if (parts.length === 2) {
+            rutBody = parts[0];
+        }
+
+        const carabinero = await Carabinero.findOne({
+            where: {
+                rut: {
+                    [Op.or]: [rutBody, cleanRut]
+                }
+            }
+        });
+
+        if (!carabinero) {
+            return res.status(404).json({ message: 'Carabinero no encontrado' });
+        }
+
+        await carabinero.update({
+            nombre_completo: nombre_completo !== undefined ? nombre_completo : carabinero.nombre_completo,
+            status: status !== undefined ? status : carabinero.status
+        });
+
+        return res.status(200).json(carabinero);
+    } catch (error) {
+        console.error('Error al actualizar carabinero:', error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
+exports.delete = async (req, res) => {
+    try {
+        const { rut } = req.params;
+
+        // Búsqueda flexible para delete
+        const cleanRut = rut.replace(/\./g, '').toUpperCase();
+        const parts = cleanRut.split('-');
+        let rutBody = cleanRut;
+        if (parts.length === 2) {
+            rutBody = parts[0];
+        }
+
+        const carabinero = await Carabinero.findOne({
+            where: {
+                rut: {
+                    [Op.or]: [rutBody, cleanRut]
+                }
+            }
+        });
+
+        if (!carabinero) {
+            return res.status(404).json({ message: 'Carabinero no encontrado' });
+        }
+
+        await carabinero.destroy();
+        return res.status(200).json({ message: 'Carabinero eliminado correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar carabinero:', error);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
