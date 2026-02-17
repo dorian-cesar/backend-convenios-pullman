@@ -110,6 +110,16 @@ exports.validarRut = async (req, res, next) => {
         const empresaFinal = empresa;
         let pasajero = null;
 
+        if (convenio) {
+            const convenioService = require('../services/convenio.service');
+            await convenioService.verificarLimites(convenio.id, 0);
+        }
+
+        if (convenio) {
+            const convenioService = require('../services/convenio.service');
+            await convenioService.verificarLimites(convenio.id, 0);
+        }
+
         // if (empresaFinal || convenio) { // This block is removed as per the instruction's implied change
         const nombreCompleto = frecuente.nombre || '';
         const nombreParts = nombreCompleto.split(' ');

@@ -317,7 +317,7 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         ],
         where: {
             convenio_id: convenioId,
-            tipo_evento: ['COMPRA', 'CAMBIO']
+            tipo_evento: 'COMPRA' // Solo sumamos compras, ya no existen cambios
         },
         raw: true
     });
@@ -409,6 +409,9 @@ exports.validarVigencia = async (convenioId) => {
     // Verificar fecha término
     if (convenio.fecha_termino) {
         const fechaTermino = new Date(convenio.fecha_termino);
+        // Ajustar fecha de término al final del día (23:59:59) para incluir el día completo
+        fechaTermino.setHours(23, 59, 59, 999);
+
         const hoy = new Date();
 
         if (hoy > fechaTermino) {

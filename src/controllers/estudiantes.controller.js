@@ -108,6 +108,12 @@ exports.validarRut = async (req, res, next) => {
         // Si no existen, continuamos con valores por defecto (null)
         const empresaFinal = empresa;
 
+        if (convenio) {
+            const convenioService = require('../services/convenio.service');
+            // Validar topes (monto=0 para solo checkear stock disponible y si ya se excedió monto)
+            await convenioService.verificarLimites(convenio.id, 0);
+        }
+
         // 2. Crear/Actualizar Pasajero (Siempre intentamos registrarlo o buscarlo)
         let pasajero = null;
         const nombreCompleto = estudiante.nombre || '';

@@ -103,6 +103,11 @@ exports.validarRut = async (req, res, next) => {
 
         const empresaFinal = empresa;
 
+        if (convenio) {
+            const convenioService = require('../services/convenio.service');
+            await convenioService.verificarLimites(convenio.id, 0);
+        }
+
         let pasajero = null;
         const nombreCompleto = adulto.nombre || '';
         const nombreParts = nombreCompleto.split(' ');
