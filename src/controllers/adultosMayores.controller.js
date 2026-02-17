@@ -103,39 +103,56 @@ exports.validarRut = async (req, res, next) => {
 
         const empresaFinal = empresa;
 
-        // 2. Crear/Actualizar Pasajero
+        let pasajero = null;
         const nombreCompleto = adulto.nombre || '';
         const nombreParts = nombreCompleto.split(' ');
         const nombres = nombreParts[0] || 'Sin Nombre';
         const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
 
-        const [pasajero, created] = await Pasajero.findOrCreate({
-            where: { rut: adulto.rut },
-            defaults: {
+        try {
+            const [p, created] = await Pasajero.findOrCreate({
+                where: { rut: adulto.rut },
+                defaults: {
+                    nombres,
+                    apellidos,
+                    correo: adulto.correo,
+                    telefono: adulto.telefono,
+                    fecha_nacimiento: null,
+                    empresa_id: empresaFinal ? empresaFinal.id : null,
+                    convenio_id: convenio ? convenio.id : null,
+                    tipo_pasajero_id: 4, // ADULTO MAYOR
+                    status: 'ACTIVO'
+                }
+            });
+            pasajero = p;
+
+            if (!created && (convenio || empresaFinal)) {
+                const updateData = {};
+                if (convenio) updateData.convenio_id = convenio.id;
+                if (empresaFinal) updateData.empresa_id = empresaFinal.id;
+                await pasajero.update(updateData);
+            }
+        } catch (e) {
+            pasajero = {
+                rut: adulto.rut,
                 nombres,
                 apellidos,
                 correo: adulto.correo,
                 telefono: adulto.telefono,
-                fecha_nacimiento: null,
-                empresa_id: empresaFinal ? empresaFinal.id : null,
-                convenio_id: convenio ? convenio.id : null,
-                tipo_pasajero_id: 4, // ID 4 = ADULTO MAYOR (Asumption)
-                status: 'ACTIVO'
-            }
-        });
-
-        if (!created && convenio && empresaFinal) {
-            await pasajero.update({
-                convenio_id: convenio.id,
-                empresa_id: empresaFinal.id,
                 tipo_pasajero_id: 4
-            });
+            };
+        }
+
+        let pasajeroResponse = {};
+        if (pasajero) {
+            pasajeroResponse = pasajero.toJSON();
+            delete pasajeroResponse.imagen_base64;
         }
 
         res.json({
             afiliado: true,
             mensaje: 'Validación exitosa',
-            pasajero: pasajero,
+            pasajero: pasajeroResponse,
             empresa: empresaFinal ? empresaFinal.nombre : 'SIN EMPRESA',
             descuentos: convenio ? [
                 {

@@ -121,3 +121,28 @@ exports.listarPorRut = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Buscar eventos por payload (RUT y PNR)
+ */
+exports.buscar = async (req, res, next) => {
+  try {
+    const { rut, pnr } = req.body;
+    // Reuse listarEventos logic passing body as filters
+    // We Map body params to filter params expected by service
+    const filters = {
+      rut,
+      pnr,
+      ...req.query // Allow pagination query params too if needed
+    };
+
+    const result = await eventosService.listarEventos(filters);
+    const response = {
+      ...result,
+      rows: EventoDTO.fromArray(result.rows)
+    };
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -254,6 +254,9 @@ router.get('/:id/actual', eventosController.obtenerEventoActual);
  *       - in: query
  *         name: empresa_id
  *         schema: { type: integer }
+  *       - in: query
+ *         name: rut
+ *         schema: { type: string }
  *       - in: query
  *         name: pnr
  *         schema: { type: string }
@@ -318,5 +321,55 @@ router.delete('/:id', eventosController.eliminar);
  *         description: Pasajero no encontrado
  */
 router.get('/pasajero/:rut', eventosController.listarPorRut);
+
+/**
+ * @openapi
+ * /api/eventos/buscar:
+ *   post:
+ *     summary: Buscar eventos por filtros en payload (RUT, PNR)
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     tags: [Eventos]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *               - pnr
+ *             properties:
+ *               rut:
+ *                 type: string
+ *                 example: "12345678-9"
+ *               pnr:
+ *                 type: string
+ *                 example: "ABCDEF"
+ *     responses:
+ *       200:
+ *         description: Lista de eventos encontrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalItems: { type: integer }
+ *                 rows:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Evento'
+ *       401:
+ *         description: No autorizado
+ */
+router.post('/buscar', eventosController.buscar);
 
 module.exports = router;

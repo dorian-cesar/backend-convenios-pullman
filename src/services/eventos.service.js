@@ -314,6 +314,16 @@ exports.listarEventos = async (filters = {}) => {
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
 
+  if (otherFilters.rut) {
+    const pasajero = await Pasajero.findOne({ where: { rut: otherFilters.rut } });
+    if (pasajero) {
+      where.pasajero_id = pasajero.id;
+    } else {
+      // If filtering by a RUT that doesn't exist, return empty result immediately
+      return getPagingData({ count: 0, rows: [] }, page, limitVal);
+    }
+  }
+
   if (otherFilters.tipo_evento) where.tipo_evento = otherFilters.tipo_evento;
   if (otherFilters.empresa_id) where.empresa_id = otherFilters.empresa_id;
   if (otherFilters.pasajero_id) where.pasajero_id = otherFilters.pasajero_id;
