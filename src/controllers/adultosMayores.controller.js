@@ -95,17 +95,56 @@ exports.validarRut = async (req, res, next) => {
             return res.status(409).json({ message: 'El Adulto Mayor se encuentra INACTIVO' });
         }
 
-        res.json({
-            id: adulto.id,
-            nombre: adulto.nombre,
-            rut: adulto.rut,
-            telefono: adulto.telefono,
-            correo: adulto.correo,
-            direccion: adulto.direccion,
-            certificado: adulto.certificado, // Extra field
-            fecha_emision: adulto.fecha_emision,
-            status: adulto.status
+        // --- Lógica de Pasajero y Convenio ---
+        const { Pasajero, Convenio, Empresa } = require('../models');
+
+        const empresa = await Empresa.findOne({ where: { nombre: 'PULLMAN BUS' } });
+        const convenio = await Convenio.findOne({ where: { nombre: 'ADULTO MAYOR' } });
+
+        const empresaFinal = empresa;
+
+        // 2. Crear/Actualizar Pasajero
+        const nombreCompleto = adulto.nombre || '';
+        const nombreParts = nombreCompleto.split(' ');
+        const nombres = nombreParts[0] || 'Sin Nombre';
+        const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
+
+        const [pasajero, created] = await Pasajero.findOrCreate({
+            where: { rut: adulto.rut },
+            defaults: {
+                nombres,
+                apellidos,
+                correo: adulto.correo,
+                telefono: adulto.telefono,
+                fecha_nacimiento: null,
+                empresa_id: empresaFinal ? empresaFinal.id : null,
+                convenio_id: convenio ? convenio.id : null,
+                tipo_pasajero_id: 4, // ID 4 = ADULTO MAYOR (Asumption)
+                status: 'ACTIVO'
+            }
         });
+
+        if (!created && convenio && empresaFinal) {
+            await pasajero.update({
+                convenio_id: convenio.id,
+                empresa_id: empresaFinal.id,
+                tipo_pasajero_id: 4
+            });
+        }
+
+        res.json({
+            afiliado: true,
+            mensaje: 'Validación exitosa',
+            pasajero: pasajero,
+            empresa: empresaFinal ? empresaFinal.nombre : 'SIN EMPRESA',
+            descuentos: convenio ? [
+                {
+                    convenio: convenio.nombre,
+                    porcentaje: convenio.porcentaje_descuento || 0
+                }
+            ] : []
+        });
+
     } catch (error) {
         next(error);
     }

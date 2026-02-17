@@ -95,15 +95,56 @@ exports.validarRut = async (req, res, next) => {
             return res.status(409).json({ message: 'El Pasajero Frecuente se encuentra INACTIVO' });
         }
 
-        res.json({
-            id: frecuente.id,
-            nombre: frecuente.nombre,
-            rut: frecuente.rut,
-            telefono: frecuente.telefono,
-            correo: frecuente.correo,
-            direccion: frecuente.direccion,
-            status: frecuente.status
+        // --- Lógica de Pasajero y Convenio ---
+        const { Pasajero, Convenio, Empresa } = require('../models');
+
+        const empresa = await Empresa.findOne({ where: { nombre: 'PULLMAN BUS' } });
+        const convenio = await Convenio.findOne({ where: { nombre: 'PASAJERO FRECUENTE' } });
+
+        const empresaFinal = empresa;
+
+        // 2. Crear/Actualizar Pasajero
+        const nombreCompleto = frecuente.nombre || '';
+        const nombreParts = nombreCompleto.split(' ');
+        const nombres = nombreParts[0] || 'Sin Nombre';
+        const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
+
+        const [pasajero, created] = await Pasajero.findOrCreate({
+            where: { rut: frecuente.rut },
+            defaults: {
+                nombres,
+                apellidos,
+                correo: frecuente.correo,
+                telefono: frecuente.telefono,
+                fecha_nacimiento: null,
+                empresa_id: empresaFinal ? empresaFinal.id : null,
+                convenio_id: convenio ? convenio.id : null,
+                tipo_pasajero_id: 2, // ID 2 = FRECUENTE (Assumption)
+                status: 'ACTIVO'
+            }
         });
+
+        if (!created && convenio && empresaFinal) {
+            await pasajero.update({
+                convenio_id: convenio.id,
+                empresa_id: empresaFinal.id,
+                tipo_pasajero_id: 2
+            });
+        }
+
+        res.json({
+            afiliado: true,
+            mensaje: 'Validación exitosa',
+            pasajero: pasajero,
+            empresa: empresaFinal ? empresaFinal.nombre : 'SIN EMPRESA',
+            descuentos: convenio ? [
+                {
+                    convenio: convenio.nombre,
+                    porcentaje: convenio.porcentaje_descuento || 0
+                }
+            ] : []
+        });
+
     } catch (error) {
         next(error);
     }

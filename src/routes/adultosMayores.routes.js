@@ -199,6 +199,9 @@ router.delete('/:id', adultosMayoresController.eliminar);
  *   post:
  *     summary: Validar estado de Adulto Mayor por RUT
  *     tags: [Adultos Mayores]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:

@@ -47,5 +47,13 @@ module.exports = (sequelize, DataTypes) => {
         paranoid: true
     });
 
+    const { formatRut } = require('../utils/rut.utils');
+
+    PasajeroFrecuente.addHook('beforeValidate', (pasajero, options) => {
+        if (pasajero.rut) {
+            pasajero.rut = formatRut(pasajero.rut);
+        }
+    });
+
     return PasajeroFrecuente;
 };

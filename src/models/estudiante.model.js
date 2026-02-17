@@ -55,5 +55,13 @@ module.exports = (sequelize, DataTypes) => {
         paranoid: true
     });
 
+    const { formatRut } = require('../utils/rut.utils');
+
+    Estudiante.addHook('beforeValidate', (estudiante, options) => {
+        if (estudiante.rut) {
+            estudiante.rut = formatRut(estudiante.rut);
+        }
+    });
+
     return Estudiante;
 };

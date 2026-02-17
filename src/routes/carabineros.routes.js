@@ -214,6 +214,9 @@ router.delete('/:rut', authMiddleware, carabinerosController.delete);
  *               rut:
  *                 type: string
  *                 example: "12345678-9"
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     responses:
  *       200:
  *         description: Validación exitosa. Retorna el pasajero y los descuentos.
@@ -253,6 +256,6 @@ router.delete('/:rut', authMiddleware, carabinerosController.delete);
  *       500:
  *         description: Error interno o de configuración.
  */
-router.post('/validar', carabinerosController.validar);
+router.post('/validar', authMiddleware, carabinerosController.validar);
 
 module.exports = router;

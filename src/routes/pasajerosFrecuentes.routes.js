@@ -204,6 +204,9 @@ router.delete('/:id', pasajerosFrecuentesController.eliminar);
  *   post:
  *     summary: Validar estado de Pasajero Frecuente por RUT
  *     tags: [Pasajeros Frecuentes]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:

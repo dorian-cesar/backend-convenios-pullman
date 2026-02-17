@@ -54,5 +54,13 @@ module.exports = (sequelize, DataTypes) => {
         paranoid: true
     });
 
+    const { formatRut } = require('../utils/rut.utils');
+
+    AdultoMayor.addHook('beforeValidate', (adultoMayor, options) => {
+        if (adultoMayor.rut) {
+            adultoMayor.rut = formatRut(adultoMayor.rut);
+        }
+    });
+
     return AdultoMayor;
 };

@@ -19,5 +19,13 @@ module.exports = (sequelize, DataTypes) => {
         paranoid: true
     });
 
+    const { formatRut } = require('../utils/rut.utils');
+
+    Carabinero.addHook('beforeValidate', (carabinero, options) => {
+        if (carabinero.rut) {
+            carabinero.rut = formatRut(carabinero.rut);
+        }
+    });
+
     return Carabinero;
 };

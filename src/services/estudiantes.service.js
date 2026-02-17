@@ -1,5 +1,6 @@
 const { Estudiante } = require('../models');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
+const { formatRut } = require('../utils/rut.utils');
 const { Op } = require('sequelize');
 
 exports.crear = async (data) => {
@@ -7,7 +8,7 @@ exports.crear = async (data) => {
 };
 
 exports.obtenerPorRut = async (rut) => {
-    return await Estudiante.findOne({ where: { rut } });
+    return await Estudiante.findOne({ where: { rut: formatRut(rut) } });
 };
 
 exports.listar = async (filters = {}) => {
@@ -16,7 +17,7 @@ exports.listar = async (filters = {}) => {
     const where = {};
 
     if (nombre) where.nombre = { [Op.like]: `%${nombre}%` };
-    if (rut) where.rut = rut;
+    if (rut) where.rut = formatRut(rut);
     if (status) where.status = status;
 
     const data = await Estudiante.findAndCountAll({

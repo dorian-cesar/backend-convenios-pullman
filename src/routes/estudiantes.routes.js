@@ -199,6 +199,9 @@ router.delete('/:id', estudiantesController.eliminar);
  *   post:
  *     summary: Validar estado de Estudiante por RUT
  *     tags: [Estudiantes]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:

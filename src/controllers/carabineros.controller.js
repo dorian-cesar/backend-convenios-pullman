@@ -1,6 +1,4 @@
-const { Carabinero, Pasajero, Convenio, Empresa } = require('../models');
-const { Op } = require('sequelize');
-const { getPagination, getPagingData } = require('../utils/pagination.utils');
+const { formatRut } = require('../utils/rut.utils');
 
 exports.validar = async (req, res) => {
     try {
@@ -10,35 +8,18 @@ exports.validar = async (req, res) => {
             return res.status(400).json({ message: 'El RUT es requerido' });
         }
 
-        // Limpiar el RUT (quitar puntos) y asegurar mayúsculas
-        const cleanRut = rut.replace(/\./g, '').toUpperCase();
-
-        // Separar cuerpo y dígito verificador
-        // Asumimos formato XXXXXXXX-Y
-        const parts = cleanRut.split('-');
-        if (parts.length !== 2) {
-            return res.status(400).json({ message: 'Formato de RUT inválido. Debe ser 12345678-9' });
-        }
-
-        const rutBody = parts[0];
-        // const dv = parts[1]; // No usado explícitamente pero extraído
+        const formattedRut = formatRut(rut);
 
         // 1. Consultar tabla carabineros
-        // Buscamos exact match (con guión) O match solo por cuerpo (sin guión)
-        // Esto permite que la BD tenga '12345678' o '12345678-9' y funcione igual.
         const carabinero = await Carabinero.findOne({
-            where: {
-                rut: {
-                    [Op.or]: [rutBody, cleanRut]
-                }
-            }
+            where: { rut: formattedRut }
         });
 
         if (!carabinero) {
             return res.status(404).json({ message: 'RUT no encontrado en registros de Carabineros' });
         }
 
-        // Verificar estado (asumiendo que hay una columna status)
+        // Verificar estado
         if (!carabinero.status || carabinero.status.toUpperCase() !== 'ACTIVO') {
             return res.status(403).json({ message: 'El funcionario no se encuentra activo' });
         }
@@ -60,7 +41,7 @@ exports.validar = async (req, res) => {
         const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
 
         const [pasajero, created] = await Pasajero.findOrCreate({
-            where: { rut: cleanRut },
+            where: { rut: formattedRut },
             defaults: {
                 nombres: nombres,
                 apellidos: apellidos,
@@ -163,31 +144,16 @@ exports.create = async (req, res) => {
             return res.status(400).json({ message: 'El RUT es requerido' });
         }
 
-        // Permitimos guardar el RUT tal cual viene (solo limpiando puntos y mayúsculas),
-        // ya sea formato 12345678 o 12345678-K.
-        const cleanRut = rut.replace(/\./g, '').toUpperCase();
+        const formattedRut = formatRut(rut);
 
-        // Chequear si ya existe (en cualquiera de las dos formas para evitar duplicados lógicos)
-        const parts = cleanRut.split('-');
-        let rutBody = cleanRut;
-        if (parts.length === 2) {
-            rutBody = parts[0];
-        }
-
-        const existingCarabinero = await Carabinero.findOne({
-            where: {
-                rut: {
-                    [Op.or]: [rutBody, cleanRut]
-                }
-            }
-        });
+        const existingCarabinero = await Carabinero.findByPk(formattedRut);
 
         if (existingCarabinero) {
-            return res.status(409).json({ message: 'El Carabinero ya existe (RUT o RUT base ya registrado)' });
+            return res.status(409).json({ message: 'El Carabinero ya existe' });
         }
 
         const newCarabinero = await Carabinero.create({
-            rut: cleanRut, // Guardamos lo que envió el usuario (limpio)
+            rut: formattedRut,
             nombre_completo,
             status: status || 'ACTIVO'
         });

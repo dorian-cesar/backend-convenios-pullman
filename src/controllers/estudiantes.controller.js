@@ -95,17 +95,69 @@ exports.validarRut = async (req, res, next) => {
             return res.status(409).json({ message: 'El Estudiante se encuentra INACTIVO' });
         }
 
-        res.json({
-            id: estudiante.id,
-            nombre: estudiante.nombre,
-            rut: estudiante.rut,
-            telefono: estudiante.telefono,
-            correo: estudiante.correo,
-            direccion: estudiante.direccion,
-            carnet_estudiante: estudiante.carnet_estudiante, // Extra field for student
-            fecha_vencimiento: estudiante.fecha_vencimiento,
-            status: estudiante.status
+        // --- Lógica de Pasajero y Convenio ---
+        const { Pasajero, Convenio, Empresa } = require('../models'); // Lazy load models if needed or import at top
+
+        // 1. Buscar Empresa y Convenio (Asumimos nombres por defecto para Estudiantes)
+        // Puedes ajustar estos nombres según lo que tengas en BDD.
+        // Si no existen debería dar error 500 o crearlos? Por seguridad, error.
+        const empresa = await Empresa.findOne({ where: { nombre: 'PULLMAN BUS' } }); // O "ESTUDIANTES CHILE" si existe
+        // NOTA: Usaré 'PULLMAN BUS' como default si no hay una empresa específica de estudiantes,
+        // pero idealmente deberías tener una empresa asociada o usar la genérica.
+
+        // Mejor buscamos el convenio 'ESTUDIANTE' o 'TNE'
+        const convenio = await Convenio.findOne({ where: { nombre: 'ESTUDIANTE' } });
+
+        if (!convenio) {
+            // Fallback o Error
+            if (!empresa) return res.status(500).json({ message: 'Configuración de Empresa/Convenio no encontrada' });
+        }
+
+        // Si no tenemos empresa especifica, usamos la del convenio si tiene, o la default.
+        const empresaFinal = empresa; // Simplificación
+
+        // 2. Crear/Actualizar Pasajero
+        const nombreCompleto = estudiante.nombre || '';
+        const nombreParts = nombreCompleto.split(' ');
+        const nombres = nombreParts[0] || 'Sin Nombre';
+        const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
+
+        const [pasajero, created] = await Pasajero.findOrCreate({
+            where: { rut: estudiante.rut },
+            defaults: {
+                nombres,
+                apellidos,
+                correo: estudiante.correo,
+                telefono: estudiante.telefono,
+                fecha_nacimiento: null, // No lo tenemos
+                empresa_id: empresaFinal ? empresaFinal.id : null,
+                convenio_id: convenio ? convenio.id : null,
+                tipo_pasajero_id: 3, // ID 3 = ESTUDIANTE (Asumption)
+                status: 'ACTIVO'
+            }
         });
+
+        if (!created && convenio && empresaFinal) {
+            await pasajero.update({
+                convenio_id: convenio.id,
+                empresa_id: empresaFinal.id,
+                tipo_pasajero_id: 3
+            });
+        }
+
+        res.json({
+            afiliado: true,
+            mensaje: 'Validación exitosa',
+            pasajero: pasajero,
+            empresa: empresaFinal ? empresaFinal.nombre : 'SIN EMPRESA',
+            descuentos: convenio ? [
+                {
+                    convenio: convenio.nombre,
+                    porcentaje: convenio.porcentaje_descuento || 0
+                }
+            ] : []
+        });
+
     } catch (error) {
         next(error);
     }
