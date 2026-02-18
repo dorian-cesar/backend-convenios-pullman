@@ -20,7 +20,8 @@ const crearCompra = {
         tarifa_base: Joi.number().integer().min(0).required(),
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
-        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional()
+        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
+        evento_origen_id: Joi.number().integer().allow(null).optional()
     })
 };
 
