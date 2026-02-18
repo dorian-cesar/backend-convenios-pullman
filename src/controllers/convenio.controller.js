@@ -54,6 +54,18 @@ exports.listarActivos = async (req, res, next) => {
 };
 
 /**
+ * Listar convenios COMPLETAMENTE DISPONIBLES (status + fecha + stock + plata)
+ */
+exports.listarDisponibles = async (req, res, next) => {
+    try {
+        const convenios = await convenioService.listarDisponibles();
+        res.json(ConvenioDTO.fromArray(convenios));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Obtener convenio por ID
  */
 exports.obtener = async (req, res, next) => {
@@ -105,6 +117,25 @@ exports.validarPorCodigo = async (req, res, next) => {
     try {
         const { codigo } = req.params;
         const convenio = await convenioService.validarPorCodigo(codigo);
+        res.json(new ConvenioDTO(convenio));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Actualizar consumo de un convenio manualmente
+ */
+exports.actualizarConsumo = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { consumo_tickets, consumo_monto_descuento } = req.body;
+
+        const convenio = await convenioService.actualizarConsumo(id, {
+            consumo_tickets,
+            consumo_monto_descuento
+        });
+
         res.json(new ConvenioDTO(convenio));
     } catch (error) {
         next(error);

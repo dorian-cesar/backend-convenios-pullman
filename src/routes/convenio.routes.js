@@ -73,7 +73,28 @@ router.get('/validar/:codigo', convenioController.validarPorCodigo);
  *               items:
  *                 $ref: '#/components/schemas/Convenio'
  */
+// Endpoint público para listar convenios ACTIVOS (solo status)
 router.get('/activos', convenioController.listarActivos);
+
+/**
+ * @openapi
+ * /api/convenios/disponibles:
+ *   get:
+ *     summary: Listar convenios DISPONIBLES (Vigentes + Cupo + Monto)
+ *     description: Retorna convenios que están ACTIVOS, dentro de rango de fechas, y tienen cupo/monto disponible.
+ *     tags:
+ *       - Convenios
+ *     responses:
+ *       200:
+ *         description: Lista de convenios disponibles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Convenio'
+ */
+router.get('/disponibles', convenioController.listarDisponibles);
 
 // Rutas protegidas
 router.use(authMiddleware);
@@ -338,5 +359,44 @@ router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
  *         description: Convenio eliminado exitosamente
  */
 router.delete('/:id', convenioController.eliminar);
+
+/**
+ * @openapi
+ * /api/convenios/{id}/consumo:
+ *   patch:
+ *     summary: Actualizar acumulado de consumo manualmente
+ *     description: Permite setear manualmente los valores de consumo_tickets y consumo_monto_descuento.
+ *     tags:
+ *       - Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               consumo_tickets:
+ *                 type: integer
+ *                 example: 10
+ *               consumo_monto_descuento:
+ *                 type: integer
+ *                 example: 50000
+ *     responses:
+ *       200:
+ *         description: Consumo actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Convenio'
+ */
+router.patch('/:id/consumo', authMiddleware, convenioController.actualizarConsumo);
 
 module.exports = router;
