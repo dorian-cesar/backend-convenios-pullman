@@ -187,8 +187,11 @@ exports.crearDevolucionEvento = async (data) => {
     pnr,
     codigo_autorizacion,
     token,
-    estado
+    estado,
+    status
   } = data;
+
+  const finalEstado = estado || status;
 
   // Automate origin detection if not provided
   let eventoOrigenId = origenIdParam;
@@ -231,7 +234,7 @@ exports.crearDevolucionEvento = async (data) => {
     monto_devolucion: monto_devolucion,
     codigo_autorizacion,
     token,
-    estado
+    estado: finalEstado
   });
 
   return await this.obtenerEvento(evento.id);
