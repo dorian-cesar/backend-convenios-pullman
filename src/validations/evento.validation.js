@@ -28,12 +28,14 @@ const crearCompra = {
 
 const crearDevolucion = {
     body: Joi.object().keys({
-        evento_origen_id: Joi.number().integer().required(),
+        evento_origen_id: Joi.number().integer().optional(),
+        numero_ticket: Joi.string().optional(),
+        pnr: Joi.string().optional(),
         usuario_id: Joi.number().integer().optional(),
         monto_devolucion: Joi.number().integer().min(0).optional(),
         estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
         status: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional()
-    })
+    }).or('evento_origen_id', 'numero_ticket', 'pnr')
 };
 
 module.exports = {
