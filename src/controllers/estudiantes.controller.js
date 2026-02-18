@@ -1,4 +1,5 @@
 const estudiantesService = require('../services/estudiantes.service');
+const pasajerosService = require('../services/pasajeros.service');
 
 exports.crear = async (req, res, next) => {
     try {
@@ -95,90 +96,23 @@ exports.validarRut = async (req, res, next) => {
             return res.status(409).json({ message: 'El Estudiante se encuentra INACTIVO' });
         }
 
-        // --- Lógica de Pasajero y Convenio ---
-        const { Pasajero, Convenio, Empresa } = require('../models'); // Lazy load models if needed or import at top
-
-        // 1. Buscar Empresa y Convenio (Asumimos nombres por defecto para Estudiantes)
-        // Puedes ajustar estos nombres según lo que tengas en BDD.
-        // 1. Buscar Empresa y Convenio
-        // Usamos nombres por defecto o genéricos
-        const empresa = await Empresa.findOne({ where: { nombre: 'PULLMAN BUS' } });
-        const convenio = await Convenio.findOne({ where: { nombre: 'ESTUDIANTE' } });
-
-        // Si no existen, continuamos con valores por defecto (null)
-        const empresaFinal = empresa;
-
-        if (convenio) {
-            const convenioService = require('../services/convenio.service');
-            // Validar topes (monto=0 para solo checkear stock disponible y si ya se excedió monto)
-            await convenioService.verificarLimites(convenio.id, 0);
-        }
-
-        // 2. Crear/Actualizar Pasajero (Siempre intentamos registrarlo o buscarlo)
-        let pasajero = null;
         const nombreCompleto = estudiante.nombre || '';
         const nombreParts = nombreCompleto.split(' ');
         const nombres = nombreParts[0] || 'Sin Nombre';
         const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
 
-        try {
-            const [p, created] = await Pasajero.findOrCreate({
-                where: { rut: estudiante.rut },
-                defaults: {
-                    nombres,
-                    apellidos,
-                    correo: estudiante.correo,
-                    telefono: estudiante.telefono,
-                    fecha_nacimiento: null,
-                    empresa_id: empresaFinal ? empresaFinal.id : null,
-                    convenio_id: convenio ? convenio.id : null,
-                    tipo_pasajero_id: 3, // ESTUDIANTE
-                    status: 'ACTIVO'
-                }
-            });
-            pasajero = p;
-
-            // Si ya existía y encontramos info nueva de convenio/empresa, actualizamos
-            if (!created && (convenio || empresaFinal)) {
-                const updateData = {};
-                if (convenio) updateData.convenio_id = convenio.id;
-                if (empresaFinal) updateData.empresa_id = empresaFinal.id;
-                // updateData.tipo_pasajero_id = 3; // Opcional: forzar tipo si se desea
-                await pasajero.update(updateData);
-            }
-        } catch (error) {
-            console.error('Error al procesar Pasajero en Estudiantes:', error);
-            // Si falla la BDD, podemos fallar o devolver un objeto dummy
-            // Preferimos devolver un objeto construido con los datos que tenemos
-            pasajero = {
-                rut: estudiante.rut,
-                nombres,
-                apellidos,
-                correo: estudiante.correo,
-                telefono: estudiante.telefono,
-                tipo_pasajero_id: 3
-            };
-        }
-
-        let pasajeroResponse = {};
-        if (pasajero) {
-            pasajeroResponse = pasajero.toJSON();
-            delete pasajeroResponse.imagen_base64;
-        }
-
-        // Retornar formato estandarizado
-        res.json({
-            afiliado: true,
-            mensaje: 'Validación exitosa',
-            pasajero: pasajeroResponse,
-            empresa: empresaFinal ? empresaFinal.nombre : 'SIN EMPRESA',
-            descuentos: convenio ? [
-                {
-                    convenio: convenio.nombre,
-                    porcentaje: convenio.porcentaje_descuento || 0
-                }
-            ] : []
+        const result = await pasajerosService.validarYRegistrarPasajero({
+            rut: estudiante.rut,
+            nombres,
+            apellidos,
+            correo: estudiante.correo,
+            telefono: estudiante.telefono,
+            tipo_pasajero_id: 3, // ESTUDIANTE
+            empresa_nombre_defecto: 'PULLMAN BUS',
+            convenio_nombre_defecto: 'ESTUDIANTE'
         });
+
+        res.json(result);
 
     } catch (error) {
         next(error);

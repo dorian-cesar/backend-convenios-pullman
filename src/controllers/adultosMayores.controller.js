@@ -1,4 +1,5 @@
 const adultosMayoresService = require('../services/adultosMayores.service');
+const pasajerosService = require('../services/pasajeros.service');
 
 exports.crear = async (req, res, next) => {
     try {
@@ -95,77 +96,23 @@ exports.validarRut = async (req, res, next) => {
             return res.status(409).json({ message: 'El Adulto Mayor se encuentra INACTIVO' });
         }
 
-        // --- Lógica de Pasajero y Convenio ---
-        const { Pasajero, Convenio, Empresa } = require('../models');
-
-        const empresa = await Empresa.findOne({ where: { nombre: 'PULLMAN BUS' } });
-        const convenio = await Convenio.findOne({ where: { nombre: 'ADULTO MAYOR' } });
-
-        const empresaFinal = empresa;
-
-        if (convenio) {
-            const convenioService = require('../services/convenio.service');
-            await convenioService.verificarLimites(convenio.id, 0);
-        }
-
-        let pasajero = null;
         const nombreCompleto = adulto.nombre || '';
         const nombreParts = nombreCompleto.split(' ');
         const nombres = nombreParts[0] || 'Sin Nombre';
         const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
 
-        try {
-            const [p, created] = await Pasajero.findOrCreate({
-                where: { rut: adulto.rut },
-                defaults: {
-                    nombres,
-                    apellidos,
-                    correo: adulto.correo,
-                    telefono: adulto.telefono,
-                    fecha_nacimiento: null,
-                    empresa_id: empresaFinal ? empresaFinal.id : null,
-                    convenio_id: convenio ? convenio.id : null,
-                    tipo_pasajero_id: 4, // ADULTO MAYOR
-                    status: 'ACTIVO'
-                }
-            });
-            pasajero = p;
-
-            if (!created && (convenio || empresaFinal)) {
-                const updateData = {};
-                if (convenio) updateData.convenio_id = convenio.id;
-                if (empresaFinal) updateData.empresa_id = empresaFinal.id;
-                await pasajero.update(updateData);
-            }
-        } catch (e) {
-            pasajero = {
-                rut: adulto.rut,
-                nombres,
-                apellidos,
-                correo: adulto.correo,
-                telefono: adulto.telefono,
-                tipo_pasajero_id: 4
-            };
-        }
-
-        let pasajeroResponse = {};
-        if (pasajero) {
-            pasajeroResponse = pasajero.toJSON();
-            delete pasajeroResponse.imagen_base64;
-        }
-
-        res.json({
-            afiliado: true,
-            mensaje: 'Validación exitosa',
-            pasajero: pasajeroResponse,
-            empresa: empresaFinal ? empresaFinal.nombre : 'SIN EMPRESA',
-            descuentos: convenio ? [
-                {
-                    convenio: convenio.nombre,
-                    porcentaje: convenio.porcentaje_descuento || 0
-                }
-            ] : []
+        const result = await pasajerosService.validarYRegistrarPasajero({
+            rut: adulto.rut,
+            nombres,
+            apellidos,
+            correo: adulto.correo,
+            telefono: adulto.telefono,
+            tipo_pasajero_id: 4, // ADULTO MAYOR
+            empresa_nombre_defecto: 'PULLMAN BUS',
+            convenio_nombre_defecto: 'ADULTO MAYOR'
         });
+
+        res.json(result);
 
     } catch (error) {
         next(error);

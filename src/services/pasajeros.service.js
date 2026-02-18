@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
+const convenioService = require('./convenio.service');
 
 /**
  * Calcular edad desde fecha de nacimiento
@@ -355,4 +356,92 @@ exports.asociarPasajeroAEventos = async (data) => {
       { model: Evento, attributes: ['id', 'tipo_evento', 'fecha_viaje', 'ciudad_origen', 'ciudad_destino'] } // Incluir eventos asociados
     ]
   });
+};
+
+/**
+ * Validar y Registrar Pasajero (Lógica Unificada para validaciones de RUT)
+ * Busca/Crea pasajero, asigna empresa/convenio y verifica topes.
+ */
+exports.validarYRegistrarPasajero = async ({ rut, nombres, apellidos, correo, telefono, fecha_nacimiento, tipo_pasajero_id, empresa_nombre_defecto, convenio_nombre_defecto }) => {
+  if (!rut) {
+    throw new BusinessError('El RUT es obligatorio');
+  }
+
+  // 1. Buscar o Identificar Empresa y Convenio
+  let empresa = null;
+  let convenio = null;
+
+  if (empresa_nombre_defecto) {
+    empresa = await Empresa.findOne({ where: { nombre: empresa_nombre_defecto } });
+  }
+
+  if (convenio_nombre_defecto) {
+    convenio = await Convenio.findOne({ where: { nombre: convenio_nombre_defecto } });
+  }
+
+  // 2. Verificar Límites del Convenio (si existe)
+  if (convenio) {
+    // Verificar si ya excedió límites (monto 0 para verificar estado actual)
+    await convenioService.verificarLimites(convenio.id, 0);
+  }
+
+  // 3. Buscar Pasajero Existente
+  let pasajero = await Pasajero.findOne({ where: { rut } });
+
+  // Datos para creación/actualización
+  const defaultNombres = nombres || 'Sin Nombre';
+  const defaultApellidos = apellidos || 'Sin Apellido';
+  let defaultTipo = tipo_pasajero_id;
+
+  if (!defaultTipo && fecha_nacimiento) {
+    // Si no viene tipo, intentamos deducirlo por edad
+    defaultTipo = await determinarTipoPasajero(fecha_nacimiento);
+  }
+
+  if (!pasajero) {
+    // CREAR
+    pasajero = await Pasajero.create({
+      rut,
+      nombres: defaultNombres,
+      apellidos: defaultApellidos,
+      correo: correo || null,
+      telefono: telefono || null,
+      fecha_nacimiento: fecha_nacimiento || null,
+      tipo_pasajero_id: defaultTipo || 1, // Default a GENERAL (1) si falla todo
+      empresa_id: empresa ? empresa.id : null,
+      convenio_id: convenio ? convenio.id : null,
+      status: 'ACTIVO'
+    });
+  } else {
+    // ACTUALIZAR (Solo si es necesario para reactivar o asignar convenio)
+    const updateData = {};
+    if (convenio) updateData.convenio_id = convenio.id;
+    if (empresa) updateData.empresa_id = empresa.id;
+    if (nombres && nombres !== 'Sin Nombre') updateData.nombres = nombres;
+    if (apellidos && apellidos !== 'Sin Apellido') updateData.apellidos = apellidos;
+
+    // Reactivar si estaba inactivo
+    if (pasajero.status !== 'ACTIVO') updateData.status = 'ACTIVO';
+
+    if (Object.keys(updateData).length > 0) {
+      await pasajero.update(updateData);
+    }
+  }
+
+  // 4. Construir Respuesta
+  let pasajeroResponse = pasajero.toJSON ? pasajero.toJSON() : pasajero;
+  if (pasajeroResponse.imagen_base64) delete pasajeroResponse.imagen_base64;
+
+  return {
+    afiliado: true,
+    mensaje: 'Validación exitosa',
+    pasajero: pasajeroResponse,
+    empresa: empresa ? empresa.nombre : (pasajero.empresa ? pasajero.empresa.nombre : 'SIN EMPRESA'),
+    descuentos: convenio ? [
+      {
+        convenio: convenio.nombre,
+        porcentaje: convenio.porcentaje_descuento || 0
+      }
+    ] : []
+  };
 };

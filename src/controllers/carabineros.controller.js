@@ -1,4 +1,5 @@
 const { Carabinero, Convenio, Empresa, Pasajero } = require('../models');
+const pasajerosService = require('../services/pasajeros.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 const { Op } = require('sequelize');
 const { formatRut } = require('../utils/rut.utils');
@@ -44,84 +45,33 @@ exports.validar = async (req, res) => {
             return res.status(403).json({ message: 'El funcionario no se encuentra activo' });
         }
 
-        // 2. Buscar IDs de Convenio y Empresa dinámicamente
-        const convenio = await Convenio.findOne({ where: { nombre: 'CARABINEROS' } });
-        const empresa = await Empresa.findOne({ where: { nombre: 'CARABINEROS DE CHILE' } });
-
-        // Si no existen, continuamos con valores por defecto (null) o logueamos warning
-        if (!convenio || !empresa) {
-            console.warn('Advertencia: No se encontró Convenio CARABINEROS o Empresa CARABINEROS DE CHILE');
-        }
-
-        // 3. Crear o Actualizar Pasajero con el RUT completo
+        // 3. Crear o Actualizar Pasajero usando servicio compartido
         const nombreCompleto = carabinero.nombre_completo || '';
-        // Intento básico de separar nombre y apellido
         const nombreParts = nombreCompleto.split(' ');
         const nombres = nombreParts[0] || 'Sin Nombre';
         const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
 
-        let pasajero = null;
-        try {
-            // Validar stock/monto (pasa 0 para verificar si YA se alcanzó el límite)
-            if (convenio) {
-                await convenioService.verificarLimites(convenio.id, 0);
-            }
-            // Asumiendo ID 1 para ADULTO o similar, ajustar si es necesario
-            const [p, created] = await Pasajero.findOrCreate({
-                where: { rut: formattedRut },
-                defaults: {
-                    nombres: nombres,
-                    apellidos: apellidos,
-                    empresa_id: empresa ? empresa.id : null,
-                    convenio_id: convenio ? convenio.id : null,
-                    tipo_pasajero_id: 1,
-                    status: 'ACTIVO'
-                }
-            });
-            pasajero = p;
-
-            if (!created) {
-                // Si ya existe, actualizamos la asociación si tenemos datos nuevos
-                const updateData = {};
-                if (empresa) updateData.empresa_id = empresa.id;
-                if (convenio) updateData.convenio_id = convenio.id;
-                updateData.status = 'ACTIVO';
-
-                await pasajero.update(updateData);
-            }
-        } catch (dbError) {
-            console.error('Error al procesar Pasajero en Carabineros:', dbError);
-            // Fallback object construction
-            pasajero = {
-                rut: formattedRut,
-                nombres,
-                apellidos,
-                tipo_pasajero_id: 1,
-                status: 'ACTIVO'
-            };
-        }
-
-        let pasajeroResponse = {};
-        if (pasajero) {
-            pasajeroResponse = pasajero.toJSON ? pasajero.toJSON() : pasajero;
-            delete pasajeroResponse.imagen_base64;
-        }
-
-        return res.status(200).json({
-            afiliado: true,
-            mensaje: 'Validación exitosa',
-            pasajero: pasajeroResponse,
-            empresa: empresa ? empresa.nombre : 'SIN EMPRESA',
-            descuentos: convenio ? [
-                {
-                    convenio: convenio.nombre,
-                    porcentaje: convenio.porcentaje_descuento || 0
-                }
-            ] : []
+        const result = await pasajerosService.validarYRegistrarPasajero({
+            rut: formattedRut,
+            nombres,
+            apellidos,
+            tipo_pasajero_id: 1, // Default ID (ajustar si es necesario)
+            empresa_nombre_defecto: 'CARABINEROS DE CHILE',
+            convenio_nombre_defecto: 'CARABINEROS'
         });
+
+        return res.status(200).json(result);
 
     } catch (error) {
         console.error('Error en validar carabinero:', error);
+        // Si el error es de negocio, devolver 400 o 409 según corresponda, o dejar que el middleware de error lo maneje si existiera.
+        // Por compatibilidad con estructura actual:
+        if (error.name === 'BusinessError') {
+            return res.status(400).json({ message: error.message });
+        }
+        if (error.name === 'NotFoundError') {
+            return res.status(404).json({ message: error.message });
+        }
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
