@@ -1,4 +1,5 @@
 const araucanaService = require('../services/araucana.service');
+const convenioService = require('../services/convenio.service');
 const { Pasajero, Empresa, Convenio, ApiConsulta } = require('../models');
 const { Op } = require('sequelize');
 
@@ -74,13 +75,33 @@ exports.validar = async (req, res, next) => {
 
                 if (convenioApi) {
                     pasajero.convenio_id = convenioApi.id;
+
+                    // Validar Vigencia (Fechas)
+                    const vigente = await convenioService.validarVigencia(convenioApi.id);
+                    if (!vigente) {
+                        return res.status(409).json({ message: 'El convenio La Araucana no se encuentra vigente por fecha.' });
+                    }
+                    // Validar Límites (Stock y Monto)
+                    await convenioService.verificarLimites(convenioApi.id, 0);
+
                 } else {
                     // Fallback: Si no hay uno específico de API, buscar cualquier activo para poblar descuentos
                     const conveniosActivos = await Convenio.findAll({
                         where: { empresa_id: empresa.id, status: 'ACTIVO' }
                     });
-                    if (conveniosActivos.length > 0 && !pasajero.convenio_id) {
-                        pasajero.convenio_id = conveniosActivos[0].id;
+                    if (conveniosActivos.length > 0) {
+                        const conv = conveniosActivos[0];
+                        pasajero.convenio_id = conv.id;
+
+                        // Validar Vigencia (Fechas)
+                        const vigente = await convenioService.validarVigencia(conv.id);
+                        if (!vigente) {
+                            // Si el fallback tampoco es vigente, podríamos fallar o dejarlo pasar pero sin asignarlo?
+                            // El requerimiento dice "que me valide". Si falla, fallamos.
+                            return res.status(409).json({ message: 'El convenio La Araucana no se encuentra vigente por fecha.' });
+                        }
+                        // Validar Límites
+                        await convenioService.verificarLimites(conv.id, 0);
                     }
                 }
 
