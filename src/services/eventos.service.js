@@ -122,7 +122,8 @@ exports.crearCompraEvento = async (data) => {
     tarifa_base,
     codigo_autorizacion,
     token,
-    estado
+    estado,
+    evento_origen_id
   } = data;
 
   const pasajero = await Pasajero.findByPk(pasajero_id);
@@ -150,7 +151,7 @@ exports.crearCompraEvento = async (data) => {
 
   const evento = await Evento.create({
     tipo_evento: 'COMPRA',
-    evento_origen_id: null,
+    evento_origen_id: evento_origen_id || null,
     pasajero_id,
     empresa_id,
     convenio_id,
@@ -171,10 +172,21 @@ exports.crearCompraEvento = async (data) => {
     estado
   });
 
+  // -- RE-PARSING --
+  // Actualizar contadores del convenio si corresponde
+  if (convenio_id && estado === 'confirmado') {
+    const convenio = await Convenio.findByPk(convenio_id);
+    if (convenio) {
+      const descuento = (tarifa_base || 0) - (montoPagado !== null ? montoPagado : 0);
+      await convenio.increment({
+        'consumo_tickets': 1,
+        'consumo_monto_descuento': descuento
+      });
+    }
+  }
+
   return await this.obtenerEvento(evento.id);
 };
-
-
 
 /**
  * Crear devolución de evento
@@ -236,6 +248,18 @@ exports.crearDevolucionEvento = async (data) => {
     token,
     estado: finalEstado
   });
+
+  // Actualizar contadores del convenio si corresponde (Reversar consumo)
+  if (evento.convenio_id && finalEstado === 'confirmado') {
+    const convenio = await Convenio.findByPk(evento.convenio_id);
+    if (convenio) {
+      const descuentoOriginal = (eventoActual.tarifa_base || 0) - (eventoActual.monto_pagado !== null ? eventoActual.monto_pagado : 0);
+      await convenio.decrement({
+        'consumo_tickets': 1,
+        'consumo_monto_descuento': descuentoOriginal
+      });
+    }
+  }
 
   return await this.obtenerEvento(evento.id);
 };

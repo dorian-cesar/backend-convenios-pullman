@@ -375,81 +375,22 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         return true;
     }
 
-    // 1. Calcular Monto Acumulado de DESCUENTOS (lo que la empresa "subsidia")
-    // Fórmula: Suma(tarifa_base - monto_pagado) de COMPRAS activas.
-    // Para manejar devoluciones, restamos el descuento que se "liberó" al devolver el pasaje.
+    const { consumo_monto_descuento, consumo_tickets, tope_monto_descuento, tope_cantidad_tickets } = convenio;
 
-    // A. Obtener todas las COMPRAS asociadas al convenio
-    const compras = await Evento.findAll({
-        attributes: ['id', 'tarifa_base', 'monto_pagado'],
-        where: {
-            convenio_id: convenioId,
-            tipo_evento: 'COMPRA',
-            estado: 'confirmado' // Solo confirmados cuentan
-        },
-        raw: true
-    });
-
-    // B. Obtener todas las DEVOLUCIONES asociadas al convenio para saber qué compras se anularon/devolvieron
-    // Las devoluciones "revierten" el consumo del cupo.
-    const devoluciones = await Evento.findAll({
-        attributes: ['evento_origen_id'],
-        where: {
-            convenio_id: convenioId,
-            tipo_evento: 'DEVOLUCION'
-        },
-        raw: true
-    });
-
-    const idsDevueltos = new Set(devoluciones.map(d => d.evento_origen_id));
-
-    let montoDescuentoAcumulado = 0;
-    let cantidadTicketsAcumulado = 0;
-
-    compras.forEach(compra => {
-        // Si la compra fue devuelta, NO cuenta para el límite (ni monto ni stock)
-        // Nota: Esto asume devolución total. Si hay parciales, la lógica sería más compleja.
-        // Asumiremos devolución total "libera" el cupo.
-        if (!idsDevueltos.has(compra.id)) {
-            // Calcular descuento de esta compra
-            // Si monto_pagado es null (raro en compra confirmada), asumimos 0 pagado -> todo es descuento
-            const pagado = compra.monto_pagado !== null ? compra.monto_pagado : 0;
-            const descuento = (compra.tarifa_base || 0) - pagado;
-
-            montoDescuentoAcumulado += descuento;
-            cantidadTicketsAcumulado += 1;
-        }
-    });
-
-    // NOTA PARA LOGIC: montoNuevo que llega aquí es usualmente el "monto a pagar".
-    // Pero si estamos limitando por "Monto de Descuento", montoNuevo debería ser el "descuento nuevo".
-    // El sistema llama a esto desde crearCompraEvento -> montoPagado.
-    // Debemos ajustar la llamada o calcular aquí el descuento nuevo?
-    // En crearCompraEvento: await convenioService.verificarLimites(convenio_id, montoPagado);
-    // Ahí está pasando el monto a pagar. ERROR en la integración si cambiamos la semántica.
-    // CORRECCIÓN: verificarLimites debe recibir (convenioId, descuentoNuevo, isQuantityCheck?).
-    // Sin embargo, para no romper la firma, asumiremos que montoNuevo es el valor que suma al criterio.
-    // SI el criterio es MONTO DE VENTA -> montoNuevo es precio venta.
-    // SI el criterio es MONTO DESCUENTO -> montoNuevo debería ser el descuento.
-    // DADO QUE EL USUARIO PIDIÓ "cambiemos el tope por monto tiene que ser el tope por el desceunto total permitido",
-    // Necesitamos asegurarnos que quien llame a esta función pase el DESCUENTO, no el pagado.
-    // Voy a cambiar la firma ligeramente para ser explícito o calcularlo si puedo, pero aquí solo recibo un número.
-    // Asumiré que el caller se actualiza o que este número representa el "valor a acumular".
-    // Voy a loguear esto.
-
-    console.log(`[Convenio Check] ID: ${convenioId} | Descuento Acumulado: ${montoDescuentoAcumulado} + Nuevo: ${montoNuevo} vs Tope: ${convenio.tope_monto_descuento}`);
-    console.log(`[Convenio Check] ID: ${convenioId} | Tickets Acumulados: ${cantidadTicketsAcumulado} + 1 vs Tope: ${convenio.tope_cantidad_tickets}`);
+    console.log(`[Convenio Check] ID: ${convenioId} | Descuento Acumulado: ${consumo_monto_descuento} + Nuevo: ${montoNuevo} vs Tope: ${tope_monto_descuento}`);
+    console.log(`[Convenio Check] ID: ${convenioId} | Tickets Acumulados: ${consumo_tickets} + 1 vs Tope: ${tope_cantidad_tickets}`);
 
     // 3. Verificaciones
-    if (convenio.limitar_por_monto && convenio.tope_monto_descuento) {
-        if ((montoDescuentoAcumulado + montoNuevo) > convenio.tope_monto_descuento) {
-            throw new BusinessError(`Límite de monto de descuento excedido. Tope: $${convenio.tope_monto_descuento}, Usado: $${montoDescuentoAcumulado}, Intento: $${montoNuevo}`);
+    if (convenio.limitar_por_monto && tope_monto_descuento) {
+        // Validación estricta: Si ya excedió, o si con este nuevo excede.
+        if ((consumo_monto_descuento + montoNuevo) > tope_monto_descuento) {
+            throw new BusinessError(`Límite de monto de descuento excedido. Tope: $${tope_monto_descuento}, Usado: $${consumo_monto_descuento}, Intento: $${montoNuevo}`);
         }
     }
 
-    if (convenio.limitar_por_stock && convenio.tope_cantidad_tickets) {
-        if ((cantidadTicketsAcumulado + 1) > convenio.tope_cantidad_tickets) {
-            throw new BusinessError(`Límite de cantidad de tickets excedido. Tope: ${convenio.tope_cantidad_tickets}, Actual: ${cantidadTicketsAcumulado}`);
+    if (convenio.limitar_por_stock && tope_cantidad_tickets) {
+        if ((consumo_tickets + 1) > tope_cantidad_tickets) {
+            throw new BusinessError(`Límite de cantidad de tickets excedido. Tope: ${tope_cantidad_tickets}, Actual: ${consumo_tickets}`);
         }
     }
 
@@ -471,6 +412,30 @@ exports.validarPorCodigo = async (codigo) => {
 
     if (!convenio) {
         throw new NotFoundError('Código de descuento no válido o inactivo');
+    }
+
+    const hoy = new Date();
+
+    // 1. Validar Fechas
+    if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) {
+        throw new BusinessError('El convenio aún no comienza su vigencia'); // Opcional: o NotFound para no dar pistas
+    }
+    if (convenio.fecha_termino) {
+        const termino = new Date(convenio.fecha_termino);
+        termino.setHours(23, 59, 59, 999);
+        if (hoy > termino) {
+            throw new BusinessError('El convenio ha expirado');
+        }
+    }
+
+    // 2. Validar Monto (Si tiene tope y ya lo alcanzó o superó)
+    if (convenio.tope_monto_descuento !== null && convenio.consumo_monto_descuento >= convenio.tope_monto_descuento) {
+        throw new BusinessError('El convenio ha agotado su fondo de descuentos');
+    }
+
+    // 3. Validar Stock (Si tiene tope y ya lo alcanzó o superó)
+    if (convenio.tope_cantidad_tickets !== null && convenio.consumo_tickets >= convenio.tope_cantidad_tickets) {
+        throw new BusinessError('El convenio ha agotado su stock de uso');
     }
 
     return convenio;
@@ -558,4 +523,71 @@ exports.desactivarConveniosVencidos = async () => {
         }
     }
     return result;
+};
+
+/**
+ * Listar convenios DISPONIBLES (Vigentes + Cupo + Monto)
+ */
+exports.listarDisponibles = async () => {
+    const hoy = new Date();
+
+    // Buscar convenios que cumplan todas las condiciones
+    const convenios = await Convenio.findAll({
+        where: {
+            status: 'ACTIVO',
+            // 1. Vigencia por fecha
+            fecha_inicio: { [Op.lte]: hoy },
+            fecha_termino: { [Op.gte]: hoy },
+            // 2. Disponibilidad de Monto (Monto consumido < Tope OR Tope es NULL)
+            [Op.and]: [
+                {
+                    [Op.or]: [
+                        { tope_monto_descuento: null },
+                        {
+                            [Op.and]: [
+                                { tope_monto_descuento: { [Op.ne]: null } },
+                                sequelize.where(sequelize.col('consumo_monto_descuento'), '<', sequelize.col('tope_monto_descuento'))
+                            ]
+                        }
+                    ]
+                },
+                // 3. Disponibilidad de Stock (Tickets consumidos < Tope OR Tope es NULL)
+                {
+                    [Op.or]: [
+                        { tope_cantidad_tickets: null },
+                        {
+                            [Op.and]: [
+                                { tope_cantidad_tickets: { [Op.ne]: null } },
+                                sequelize.where(sequelize.col('consumo_tickets'), '<', sequelize.col('tope_cantidad_tickets'))
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        include: [{
+            model: Empresa,
+            as: 'empresa',
+            attributes: ['id', 'nombre']
+        }]
+    });
+
+    return convenios;
+};
+
+/**
+ * Actualizar consumo de un convenio manualmente
+ */
+exports.actualizarConsumo = async (id, { consumo_tickets, consumo_monto_descuento }) => {
+    const convenio = await Convenio.findByPk(id);
+    if (!convenio) {
+        throw new NotFoundError('Convenio no encontrado');
+    }
+
+    const updateData = {};
+    if (consumo_tickets !== undefined) updateData.consumo_tickets = consumo_tickets;
+    if (consumo_monto_descuento !== undefined) updateData.consumo_monto_descuento = consumo_monto_descuento;
+
+    await convenio.update(updateData);
+    return convenio;
 };

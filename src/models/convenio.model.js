@@ -65,6 +65,18 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false,
             comment: 'Si es true, valida tope_monto_descuento'
         },
+        consumo_tickets: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull: false,
+            comment: 'Total de tickets vendidos con este convenio'
+        },
+        consumo_monto_descuento: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull: false,
+            comment: 'Total de descuento entregado con este convenio'
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'
