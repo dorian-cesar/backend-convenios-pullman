@@ -144,7 +144,8 @@ exports.crearCompraEvento = async (data) => {
 
   // Verificar topes de convenio
   if (convenio_id) {
-    await convenioService.verificarLimites(convenio_id, montoPagado);
+    const montoDescuento = (tarifa_base - montoPagado);
+    await convenioService.verificarLimites(convenio_id, montoDescuento);
   }
 
   const evento = await Evento.create({

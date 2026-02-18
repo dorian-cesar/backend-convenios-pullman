@@ -34,10 +34,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true
         },
-        tope_monto_ventas: {
+        tope_monto_descuento: {
             type: DataTypes.INTEGER,
             allowNull: true,
-            comment: 'Monto máximo acumulado de ventas permitido'
+            comment: 'Monto máximo acumulado de descuentos permitido'
         },
         tope_cantidad_tickets: {
             type: DataTypes.INTEGER,
@@ -63,7 +63,7 @@ module.exports = (sequelize, DataTypes) => {
         limitar_por_monto: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
-            comment: 'Si es true, valida tope_monto_ventas'
+            comment: 'Si es true, valida tope_monto_descuento'
         },
         status: {
             type: DataTypes.STRING,

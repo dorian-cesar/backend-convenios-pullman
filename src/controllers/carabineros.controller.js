@@ -62,6 +62,10 @@ exports.validar = async (req, res) => {
 
         let pasajero = null;
         try {
+            // Validar stock/monto (pasa 0 para verificar si YA se alcanzó el límite)
+            if (convenio) {
+                await convenioService.verificarLimites(convenio.id, 0);
+            }
             // Asumiendo ID 1 para ADULTO o similar, ajustar si es necesario
             const [p, created] = await Pasajero.findOrCreate({
                 where: { rut: formattedRut },

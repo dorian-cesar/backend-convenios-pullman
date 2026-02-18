@@ -18,7 +18,7 @@ class ConvenioDTO {
 
         this.fecha_inicio = convenio.fecha_inicio;
         this.fecha_termino = convenio.fecha_termino;
-        this.tope_monto_ventas = convenio.tope_monto_ventas;
+        this.tope_monto_descuento = convenio.tope_monto_descuento;
         this.tope_cantidad_tickets = convenio.tope_cantidad_tickets;
 
         // Nuevos campos directos

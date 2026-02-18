@@ -113,7 +113,7 @@ const options = {
             endpoint: { type: 'string', example: '/api/integraciones/araucana/validar', description: 'Ruta relativa del endpoint' },
             fecha_inicio: { type: 'string', format: 'date-time', example: '2026-01-01T00:00:00Z' },
             fecha_termino: { type: 'string', format: 'date-time', example: '2026-12-31T23:59:59Z' },
-            tope_monto_ventas: { type: 'integer', example: 1000000 },
+            tope_monto_descuento: { type: 'integer', example: 1000000, description: 'Monto máximo acumulado de descuentos' },
             tope_cantidad_tickets: { type: 'integer', example: 50 },
             porcentaje_descuento: { type: 'integer', example: 15 },
             codigo: { type: 'string', example: 'PROMO2026' },

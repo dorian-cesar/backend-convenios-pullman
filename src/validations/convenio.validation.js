@@ -15,7 +15,7 @@ const crearConvenio = {
             then: Joi.optional(), // Now optional if api_consulta_id is provided
             otherwise: Joi.optional()
         }),
-        tope_monto_ventas: Joi.number().integer().min(0).allow(null),
+        tope_monto_descuento: Joi.number().integer().min(0).allow(null),
         tope_cantidad_tickets: Joi.number().integer().min(0).allow(null),
         porcentaje_descuento: Joi.number().integer().min(0).max(100).default(0),
         codigo: Joi.when('tipo_consulta', {
@@ -45,7 +45,7 @@ const actualizarConvenio = {
         api_url_id: Joi.number().integer().allow(null),
         api_consulta_id: Joi.number().integer().allow(null),
         endpoint: Joi.string().allow(null, ''),
-        tope_monto_ventas: Joi.number().integer().min(0).allow(null),
+        tope_monto_descuento: Joi.number().integer().min(0).allow(null),
         tope_cantidad_tickets: Joi.number().integer().min(0).allow(null),
         porcentaje_descuento: Joi.number().integer().min(0).max(100),
         codigo: Joi.string().allow(null, ''),

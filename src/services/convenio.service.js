@@ -6,7 +6,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -68,7 +68,7 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         empresa_id,
         tipo: tipo || 'CODIGO_DESCUENTO',
         api_consulta_id: finalApiConsultaId,
-        tope_monto_ventas,
+        tope_monto_descuento,
         tope_cantidad_tickets,
         porcentaje_descuento: porcentaje_descuento || 0,
         codigo: finalCodigo,
@@ -221,7 +221,7 @@ exports.actualizarConvenio = async (id, datos) => {
     const {
         nombre, status, empresa_id, porcentaje_descuento, codigo,
         limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
-        tipo, api_consulta_id, tope_monto_ventas, tope_cantidad_tickets
+        tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets
     } = datos;
 
     if (nombre) convenio.nombre = nombre;
@@ -242,7 +242,7 @@ exports.actualizarConvenio = async (id, datos) => {
         }
         convenio.api_consulta_id = api_consulta_id;
     }
-    if (tope_monto_ventas !== undefined) convenio.tope_monto_ventas = tope_monto_ventas;
+    if (tope_monto_descuento !== undefined) convenio.tope_monto_descuento = tope_monto_descuento;
     if (tope_cantidad_tickets !== undefined) convenio.tope_cantidad_tickets = tope_cantidad_tickets;
 
     if (empresa_id) {
@@ -308,25 +308,25 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         return true;
     }
 
-    // 1. Calcular Monto Acumulado Neto (Ventas + Cambios - Devoluciones)
-    // Sumar montos pagados (COMPRA + CAMBIO)
-    // Nota: Sequelize ignora registros con deletedAt por defecto (paranoid: true)
-    const totalVentasData = await Evento.findAll({
-        attributes: [
-            [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total']
-        ],
+    // 1. Calcular Monto Acumulado de DESCUENTOS (lo que la empresa "subsidia")
+    // Fórmula: Suma(tarifa_base - monto_pagado) de COMPRAS activas.
+    // Para manejar devoluciones, restamos el descuento que se "liberó" al devolver el pasaje.
+
+    // A. Obtener todas las COMPRAS asociadas al convenio
+    const compras = await Evento.findAll({
+        attributes: ['id', 'tarifa_base', 'monto_pagado'],
         where: {
             convenio_id: convenioId,
-            tipo_evento: 'COMPRA' // Solo sumamos compras, ya no existen cambios
+            tipo_evento: 'COMPRA',
+            estado: 'confirmado' // Solo confirmados cuentan
         },
         raw: true
     });
 
-    // Sumar devoluciones
-    const totalDevolucionesData = await Evento.findAll({
-        attributes: [
-            [sequelize.fn('SUM', sequelize.col('monto_devolucion')), 'total']
-        ],
+    // B. Obtener todas las DEVOLUCIONES asociadas al convenio para saber qué compras se anularon/devolvieron
+    // Las devoluciones "revierten" el consumo del cupo.
+    const devoluciones = await Evento.findAll({
+        attributes: ['evento_origen_id'],
         where: {
             convenio_id: convenioId,
             tipo_evento: 'DEVOLUCION'
@@ -334,41 +334,55 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
         raw: true
     });
 
-    const totalVentas = parseInt(totalVentasData[0].total || 0, 10);
-    const totalDevoluciones = parseInt(totalDevolucionesData[0].total || 0, 10);
-    const montoAcumuladoActual = totalVentas - totalDevoluciones;
+    const idsDevueltos = new Set(devoluciones.map(d => d.evento_origen_id));
 
-    // 2. Calcular Cantidad de Tickets Neto (Compras - Devoluciones)
-    const cantidadCompras = await Evento.count({
-        where: {
-            convenio_id: convenioId,
-            tipo_evento: 'COMPRA'
+    let montoDescuentoAcumulado = 0;
+    let cantidadTicketsAcumulado = 0;
+
+    compras.forEach(compra => {
+        // Si la compra fue devuelta, NO cuenta para el límite (ni monto ni stock)
+        // Nota: Esto asume devolución total. Si hay parciales, la lógica sería más compleja.
+        // Asumiremos devolución total "libera" el cupo.
+        if (!idsDevueltos.has(compra.id)) {
+            // Calcular descuento de esta compra
+            // Si monto_pagado es null (raro en compra confirmada), asumimos 0 pagado -> todo es descuento
+            const pagado = compra.monto_pagado !== null ? compra.monto_pagado : 0;
+            const descuento = (compra.tarifa_base || 0) - pagado;
+
+            montoDescuentoAcumulado += descuento;
+            cantidadTicketsAcumulado += 1;
         }
     });
 
-    const cantidadDevoluciones = await Evento.count({
-        where: {
-            convenio_id: convenioId,
-            tipo_evento: 'DEVOLUCION'
-        }
-    });
+    // NOTA PARA LOGIC: montoNuevo que llega aquí es usualmente el "monto a pagar".
+    // Pero si estamos limitando por "Monto de Descuento", montoNuevo debería ser el "descuento nuevo".
+    // El sistema llama a esto desde crearCompraEvento -> montoPagado.
+    // Debemos ajustar la llamada o calcular aquí el descuento nuevo?
+    // En crearCompraEvento: await convenioService.verificarLimites(convenio_id, montoPagado);
+    // Ahí está pasando el monto a pagar. ERROR en la integración si cambiamos la semántica.
+    // CORRECCIÓN: verificarLimites debe recibir (convenioId, descuentoNuevo, isQuantityCheck?).
+    // Sin embargo, para no romper la firma, asumiremos que montoNuevo es el valor que suma al criterio.
+    // SI el criterio es MONTO DE VENTA -> montoNuevo es precio venta.
+    // SI el criterio es MONTO DESCUENTO -> montoNuevo debería ser el descuento.
+    // DADO QUE EL USUARIO PIDIÓ "cambiemos el tope por monto tiene que ser el tope por el desceunto total permitido",
+    // Necesitamos asegurarnos que quien llame a esta función pase el DESCUENTO, no el pagado.
+    // Voy a cambiar la firma ligeramente para ser explícito o calcularlo si puedo, pero aquí solo recibo un número.
+    // Asumiré que el caller se actualiza o que este número representa el "valor a acumular".
+    // Voy a loguear esto.
 
-    const cantidadTicketsActual = cantidadCompras - cantidadDevoluciones;
-
-    console.log(`[Convenio Check] ID: ${convenioId} | Monto: ${montoAcumuladoActual} + ${montoNuevo} vs Tope: ${convenio.tope_monto_ventas}`);
-    console.log(`[Convenio Check] ID: ${convenioId} | Cantidad: ${cantidadTicketsActual} + 1 vs Tope: ${convenio.tope_cantidad_tickets}`);
+    console.log(`[Convenio Check] ID: ${convenioId} | Descuento Acumulado: ${montoDescuentoAcumulado} + Nuevo: ${montoNuevo} vs Tope: ${convenio.tope_monto_descuento}`);
+    console.log(`[Convenio Check] ID: ${convenioId} | Tickets Acumulados: ${cantidadTicketsAcumulado} + 1 vs Tope: ${convenio.tope_cantidad_tickets}`);
 
     // 3. Verificaciones
-    if (convenio.limitar_por_monto && convenio.tope_monto_ventas) {
-        if ((montoAcumuladoActual + montoNuevo) > convenio.tope_monto_ventas) {
-            throw new BusinessError(`El convenio ha alcanzado su límite de monto de ventas. Tope: $${convenio.tope_monto_ventas}, Actual: $${montoAcumuladoActual}, Intento: $${montoNuevo}`);
+    if (convenio.limitar_por_monto && convenio.tope_monto_descuento) {
+        if ((montoDescuentoAcumulado + montoNuevo) > convenio.tope_monto_descuento) {
+            throw new BusinessError(`Límite de monto de descuento excedido. Tope: $${convenio.tope_monto_descuento}, Usado: $${montoDescuentoAcumulado}, Intento: $${montoNuevo}`);
         }
     }
 
     if (convenio.limitar_por_stock && convenio.tope_cantidad_tickets) {
-        // Asumimos que esta llamada es para agregar 1 ticket (una compra)
-        if ((cantidadTicketsActual + 1) > convenio.tope_cantidad_tickets) {
-            throw new BusinessError(`El convenio ha alcanzado su límite de cantidad de tickets. Tope: ${convenio.tope_cantidad_tickets}, Actual: ${cantidadTicketsActual}`);
+        if ((cantidadTicketsAcumulado + 1) > convenio.tope_cantidad_tickets) {
+            throw new BusinessError(`Límite de cantidad de tickets excedido. Tope: ${convenio.tope_cantidad_tickets}, Actual: ${cantidadTicketsAcumulado}`);
         }
     }
 

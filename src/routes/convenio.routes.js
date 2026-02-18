@@ -172,7 +172,7 @@ router.use(authMiddleware);
  *                 type: string
  *                 description: "Ruta del servicio (Solo para API_EXTERNA)"
  *                 example: "/api/integraciones/araucana/validar"
- *               tope_monto_ventas:
+ *               tope_monto_descuento:
  *                 type: integer
  *                 example: 1000000
  *               tope_cantidad_tickets:
@@ -202,7 +202,7 @@ router.use(authMiddleware);
  *                 tipo_consulta: "CODIGO_DESCUENTO"
  *                 codigo: "VERANO2026"
  *                 porcentaje_descuento: 10
- *                 tope_monto_ventas: 1000000
+ *                 tope_monto_descuento: 1000000
  *                 tope_cantidad_tickets: 50
  *             ApiExterna:
  *               summary: Convenio con API Externa
