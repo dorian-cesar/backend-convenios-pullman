@@ -1,4 +1,5 @@
 const { Convenio, Empresa, ApiConsulta, Evento, sequelize } = require('../models');
+const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
@@ -168,15 +169,15 @@ exports.listarActivos = async (filters = {}) => {
     const hoy = new Date();
     const where = {
         status: 'ACTIVO',
-        [sequelize.Op.or]: [
-            { fecha_inicio: { [sequelize.Op.eq]: null } },
-            { fecha_inicio: { [sequelize.Op.lte]: hoy } }
+        [Op.or]: [
+            { fecha_inicio: { [Op.eq]: null } },
+            { fecha_inicio: { [Op.lte]: hoy } }
         ],
-        [sequelize.Op.and]: [
+        [Op.and]: [
             {
-                [sequelize.Op.or]: [
-                    { fecha_termino: { [sequelize.Op.eq]: null } },
-                    { fecha_termino: { [sequelize.Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) } } // Comparar con inicio del día o fin?
+                [Op.or]: [
+                    { fecha_termino: { [Op.eq]: null } },
+                    { fecha_termino: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) } } // Comparar con inicio del día o fin?
                     // Si hoy es 18, y termino es 17 -> hoy > termino.
                     // Si termino es 18 -> hoy <= termino (si termino incluye hora 23:59:59).
                     // Para query segura: fecha_termino >= HOY (inicio dia)
@@ -531,11 +532,11 @@ exports.desactivarConveniosVencidos = async () => {
     const convenios = await Convenio.findAll({
         where: {
             status: 'ACTIVO',
-            [sequelize.Op.or]: [
+            [Op.or]: [
                 // Inicio futuro > hoy
-                { fecha_inicio: { [sequelize.Op.gt]: hoy } },
+                { fecha_inicio: { [Op.gt]: hoy } },
                 // Termino pasado (ayer) -> fecha_termino < inicioHoy
-                { fecha_termino: { [sequelize.Op.lt]: inicioHoy } }
+                { fecha_termino: { [Op.lt]: inicioHoy } }
             ]
         }
     });
