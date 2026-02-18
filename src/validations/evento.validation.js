@@ -30,7 +30,8 @@ const crearDevolucion = {
     body: Joi.object().keys({
         evento_origen_id: Joi.number().integer().required(),
         usuario_id: Joi.number().integer().optional(),
-        monto_devolucion: Joi.number().integer().min(0).required()
+        monto_devolucion: Joi.number().integer().min(0).required(),
+        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional()
     })
 };
 

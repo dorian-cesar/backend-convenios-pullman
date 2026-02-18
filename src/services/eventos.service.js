@@ -250,8 +250,8 @@ exports.listarEventos = async (filters = {}) => {
     if (pasajero) {
       where.pasajero_id = pasajero.id;
     } else {
-      // If filtering by a RUT that doesn't exist, return empty result immediately
-      return getPagingData({ count: 0, rows: [] }, page, limitVal);
+      // If filtering by a RUT that doesn't exist, throw 404 as requested
+      throw new NotFoundError(`No se encontró el pasajero con RUT: ${otherFilters.rut}`);
     }
   }
 
