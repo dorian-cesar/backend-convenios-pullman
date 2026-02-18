@@ -27,6 +27,10 @@ class ConvenioDTO {
         this.limitar_por_stock = !!convenio.limitar_por_stock;
         this.limitar_por_monto = !!convenio.limitar_por_monto;
 
+        // Consumo acumulado
+        this.consumo_tickets = convenio.consumo_tickets || 0;
+        this.consumo_monto_descuento = convenio.consumo_monto_descuento || 0;
+
         // Si incluye la empresa relacionada
         if (convenio.empresa) {
             this.empresa = {
