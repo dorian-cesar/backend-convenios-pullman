@@ -63,6 +63,19 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         }
     }
 
+    // Lógica de Estado Inicial basado en fechas
+    let statusInicial = 'ACTIVO';
+    const hoy = new Date();
+    if (fecha_inicio) {
+        const inicio = new Date(fecha_inicio);
+        if (hoy < inicio) statusInicial = 'INACTIVO';
+    }
+    if (fecha_termino) {
+        const termino = new Date(fecha_termino);
+        termino.setHours(23, 59, 59, 999);
+        if (hoy > termino) statusInicial = 'INACTIVO';
+    }
+
     const convenio = await Convenio.create({
         nombre,
         empresa_id,
@@ -76,7 +89,7 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         limitar_por_monto: limitar_por_monto || false,
         fecha_inicio,
         fecha_termino,
-        status: 'ACTIVO'
+        status: statusInicial
     });
 
     return await Convenio.findByPk(convenio.id, {
@@ -251,6 +264,39 @@ exports.actualizarConvenio = async (id, datos) => {
             throw new NotFoundError('Empresa no encontrada');
         }
         convenio.empresa_id = empresa_id;
+    }
+
+    const fInicio = fecha_inicio !== undefined ? fecha_inicio : convenio.fecha_inicio;
+    const fTermino = fecha_termino !== undefined ? fecha_termino : convenio.fecha_termino;
+
+    // Validar fechas para forzar INACTIVO si corresponde
+    const hoy = new Date();
+    let forzarInactivo = false;
+
+    if (fInicio) {
+        const inicio = new Date(fInicio);
+        if (hoy < inicio) forzarInactivo = true;
+    }
+    if (fTermino) {
+        const termino = new Date(fTermino);
+        termino.setHours(23, 59, 59, 999);
+        if (hoy > termino) forzarInactivo = true;
+    }
+
+    // Aplicar lógica: Si fechas obligan INACTIVO, se setea INACTIVO.
+    // Si fechas permiten ACTIVO, se respeta el status que venga en 'datos' o se mantiene el actual si no viene.
+    // PERO si el usuario intenta poner ACTIVO explicitamente y las fechas no dan, ganan las fechas?
+    // User requeriment: "tiene que en status estar inactivo si esta fuera de fechas" -> Ganan las fechas.
+
+    if (forzarInactivo) {
+        convenio.status = 'INACTIVO';
+    } else {
+        // Si fechas ok, revisamos si el usuario mandó status explícito
+        if (status) {
+            convenio.status = status;
+        }
+        // Si no mandó status, mantenemos el que tenía (salvo que antes fuera inactivo por fechas y ahora fechas ok? 
+        // No auto-activamos salvo que lógica de negocio lo pida. Dejamos el que está).
     }
 
     await convenio.save();
@@ -432,6 +478,18 @@ exports.validarVigencia = async (convenioId) => {
             convenio.status = 'INACTIVO';
             await convenio.save();
 
+            return false;
+        }
+    }
+
+    // Verificar fecha inicio (nuevo requerimiento)
+    if (convenio.fecha_inicio) {
+        const fechaInicio = new Date(convenio.fecha_inicio);
+        const hoy = new Date();
+        // Si hoy es ANTES de inicio, no está vigente
+        if (hoy < fechaInicio) {
+            convenio.status = 'INACTIVO';
+            await convenio.save();
             return false;
         }
     }
