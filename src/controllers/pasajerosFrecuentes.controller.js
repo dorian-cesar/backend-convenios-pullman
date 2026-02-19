@@ -103,7 +103,7 @@ exports.validarRut = async (req, res, next) => {
 
         if (!empresa && !convenio) {
             const frecuenteJSON = frecuente.toJSON();
-            delete frecuenteJSON.imagen_base64;
+            delete frecuenteJSON.imagen_cedula_identidad;
             return res.json(frecuenteJSON);
         }
 
@@ -165,7 +165,7 @@ exports.validarRut = async (req, res, next) => {
         let pasajeroResponse = {};
         if (pasajero) {
             pasajeroResponse = pasajero.toJSON();
-            delete pasajeroResponse.imagen_base64;
+            delete pasajeroResponse.imagen_cedula_identidad;
         }
 
         res.json({

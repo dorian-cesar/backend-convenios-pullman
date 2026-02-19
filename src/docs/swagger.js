@@ -149,7 +149,8 @@ const options = {
             direccion: { type: 'string', example: 'Av. Universidad 123' },
             carnet_estudiante: { type: 'string', example: 'TNE-2026' },
             fecha_vencimiento: { type: 'string', format: 'date', example: '2026-12-31' },
-            imagen_base64: { type: 'string', description: 'Imagen en base64' },
+            imagen_cedula_identidad: { type: 'string', description: 'Imagen de la cédula de identidad en base64' },
+            imagen_certificado_alumno_regular: { type: 'string', description: 'Certificado de alumno regular en base64' },
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
@@ -164,7 +165,8 @@ const options = {
             direccion: { type: 'string', example: 'Calle Mayor 456' },
             certificado: { type: 'string', example: 'CERT-SENAMA-001' },
             fecha_emision: { type: 'string', format: 'date', example: '2025-01-01' },
-            imagen_base64: { type: 'string', description: 'Imagen en base64' },
+            imagen_cedula_identidad: { type: 'string', description: 'Imagen de la cédula de identidad en base64' },
+            imagen_certificado_residencia: { type: 'string', description: 'Certificado de residencia en base64' },
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
@@ -177,7 +179,7 @@ const options = {
             telefono: { type: 'string', example: '+56933333333' },
             correo: { type: 'string', example: 'pedro@test.com' },
             direccion: { type: 'string', example: 'Av. Viajes 789' },
-            imagen_base64: { type: 'string', description: 'Imagen en base64' },
+            imagen_cedula_identidad: { type: 'string', description: 'Imagen de la cédula de identidad en base64' },
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
