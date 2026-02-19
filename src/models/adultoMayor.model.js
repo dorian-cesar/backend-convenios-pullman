@@ -40,7 +40,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATEONLY,
             allowNull: false
         },
-        imagen_base64: {
+        imagen_cedula_identidad: {
+            type: DataTypes.TEXT('long'),
+            allowNull: true
+        },
+        imagen_certificado_residencia: {
             type: DataTypes.TEXT('long'),
             allowNull: true
         },
