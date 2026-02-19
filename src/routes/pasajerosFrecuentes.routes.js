@@ -189,14 +189,17 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *       404:
  *         description: Pasajero frecuente no encontrado
  */
+const { crearPasajeroFrecuente, actualizarPasajeroFrecuente, getPasajeroFrecuente, getPorRut } = require('../validations/pasajeroFrecuente.validation');
+const validate = require('../middlewares/validate.middleware');
+
 router.use(authMiddleware);
-router.post('/', pasajerosFrecuentesController.crear);
+router.post('/', validate(crearPasajeroFrecuente), pasajerosFrecuentesController.crear);
 router.get('/', pasajerosFrecuentesController.listar);
-router.get('/:id', pasajerosFrecuentesController.obtener);
-router.get('/rut/:rut', pasajerosFrecuentesController.obtenerPorRut);
-router.put('/:id', pasajerosFrecuentesController.actualizar);
-router.patch('/activar/:id', pasajerosFrecuentesController.activar);
-router.delete('/:id', pasajerosFrecuentesController.eliminar);
+router.get('/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController.obtener);
+router.get('/rut/:rut', validate(getPorRut), pasajerosFrecuentesController.obtenerPorRut);
+router.put('/:id', validate(actualizarPasajeroFrecuente), pasajerosFrecuentesController.actualizar);
+router.patch('/activar/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController.activar);
+router.delete('/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController.eliminar);
 
 /**
  * @swagger

@@ -112,7 +112,7 @@ describe('KPI API Implementation', () => {
             ciudad_origen: 'Santiago',
             ciudad_destino: 'Valparaiso',
             fecha_viaje: '2026-03-01',
-            evento_origen_id: compra1.id
+            fecha_viaje: '2026-03-01'
         });
 
         // Empresa 2: 1 Venta. Total Ventas: 50000.

@@ -184,14 +184,17 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *       404:
  *         description: Estudiante no encontrado
  */
+const { crearEstudiante, actualizarEstudiante, getEstudiante, getPorRut } = require('../validations/estudiante.validation');
+const validate = require('../middlewares/validate.middleware');
+
 router.use(authMiddleware);
-router.post('/', estudiantesController.crear);
+router.post('/', validate(crearEstudiante), estudiantesController.crear);
 router.get('/', estudiantesController.listar);
-router.get('/:id', estudiantesController.obtener);
-router.get('/rut/:rut', estudiantesController.obtenerPorRut);
-router.put('/:id', estudiantesController.actualizar);
-router.patch('/activar/:id', estudiantesController.activar);
-router.delete('/:id', estudiantesController.eliminar);
+router.get('/:id', validate(getEstudiante), estudiantesController.obtener);
+router.get('/rut/:rut', validate(getPorRut), estudiantesController.obtenerPorRut);
+router.put('/:id', validate(actualizarEstudiante), estudiantesController.actualizar);
+router.patch('/activar/:id', validate(getEstudiante), estudiantesController.activar);
+router.delete('/:id', validate(getEstudiante), estudiantesController.eliminar);
 
 /**
  * @swagger

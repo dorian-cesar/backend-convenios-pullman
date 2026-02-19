@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT('long'),
             allowNull: true
         },
+        imagen_certificado: {
+            type: DataTypes.TEXT('long'),
+            allowNull: true
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'INACTIVO'

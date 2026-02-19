@@ -7,7 +7,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -90,7 +90,9 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         limitar_por_monto: limitar_por_monto || false,
         fecha_inicio,
         fecha_termino,
-        status: statusInicial
+        status: statusInicial,
+        beneficio: beneficio || false,
+        imagenes: imagenes || []
     });
 
     return await Convenio.findByPk(convenio.id, {
@@ -255,7 +257,8 @@ exports.actualizarConvenio = async (id, datos) => {
     const {
         nombre, status, empresa_id, porcentaje_descuento, codigo,
         limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
-        tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets
+        tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets,
+        beneficio, imagenes
     } = datos;
 
     if (nombre) convenio.nombre = nombre;
@@ -264,6 +267,8 @@ exports.actualizarConvenio = async (id, datos) => {
     if (codigo !== undefined) convenio.codigo = codigo;
     if (limitar_por_stock !== undefined) convenio.limitar_por_stock = limitar_por_stock;
     if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
+    if (beneficio !== undefined) convenio.beneficio = beneficio;
+    if (imagenes !== undefined) convenio.imagenes = imagenes;
 
     // Nuevos campos para actualización
     if (fecha_inicio !== undefined) convenio.fecha_inicio = fecha_inicio;

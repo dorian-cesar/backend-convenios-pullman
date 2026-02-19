@@ -77,6 +77,15 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             comment: 'Total de descuento entregado con este convenio'
         },
+        beneficio: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: true
+        },
+        imagenes: {
+            type: DataTypes.JSON, // Array of strings
+            allowNull: true
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'

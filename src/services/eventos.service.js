@@ -89,7 +89,14 @@ exports.obtenerHistorialEventos = async (identifier) => {
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
     ],
-    order: [['fecha_evento', 'ASC'], ['id', 'ASC']]
+    order: [['fecha_evento', 'ASC'], ['id', 'ASC']],
+    attributes: [
+      'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
+      'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
+      'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
+      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_devolucion', 'fecha_evento',
+      'codigo_autorizacion', 'token', 'estado', 'createdAt', 'updatedAt'
+    ]
   });
 
   return eventos;
@@ -293,7 +300,16 @@ exports.listarEventos = async (filters = {}) => {
     ],
     order: [[sortField, sortOrder]],
     limit: limitVal,
-    offset
+    order: [[sortField, sortOrder]],
+    limit: limitVal,
+    offset,
+    attributes: [
+      'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
+      'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
+      'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
+      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_devolucion', 'fecha_evento',
+      'codigo_autorizacion', 'token', 'estado', 'createdAt', 'updatedAt'
+    ]
   });
 
   return getPagingData(data, page, limitVal);

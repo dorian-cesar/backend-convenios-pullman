@@ -184,14 +184,17 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *       404:
  *         description: Adulto mayor no encontrado
  */
+const { crearAdultoMayor, actualizarAdultoMayor, getAdultoMayor, getPorRut } = require('../validations/adultoMayor.validation');
+const validate = require('../middlewares/validate.middleware');
+
 router.use(authMiddleware);
-router.post('/', adultosMayoresController.crear);
+router.post('/', validate(crearAdultoMayor), adultosMayoresController.crear);
 router.get('/', adultosMayoresController.listar);
-router.get('/:id', adultosMayoresController.obtener);
-router.get('/rut/:rut', adultosMayoresController.obtenerPorRut);
-router.put('/:id', adultosMayoresController.actualizar);
-router.patch('/activar/:id', adultosMayoresController.activar);
-router.delete('/:id', adultosMayoresController.eliminar);
+router.get('/:id', validate(getAdultoMayor), adultosMayoresController.obtener);
+router.get('/rut/:rut', validate(getPorRut), adultosMayoresController.obtenerPorRut);
+router.put('/:id', validate(actualizarAdultoMayor), adultosMayoresController.actualizar);
+router.patch('/activar/:id', validate(getAdultoMayor), adultosMayoresController.activar);
+router.delete('/:id', validate(getAdultoMayor), adultosMayoresController.eliminar);
 
 /**
  * @swagger

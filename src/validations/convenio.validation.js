@@ -30,7 +30,10 @@ const crearConvenio = {
         limitar_por_monto: Joi.boolean().default(false),
         status: Joi.string().valid('ACTIVO', 'INACTIVO').default('ACTIVO'),
         fecha_inicio: Joi.date().iso().allow(null),
-        fecha_termino: Joi.date().iso().allow(null)
+        fecha_inicio: Joi.date().iso().allow(null),
+        fecha_termino: Joi.date().iso().allow(null),
+        beneficio: Joi.boolean().default(false),
+        imagenes: Joi.array().items(Joi.string()).allow(null)
     }),
 };
 
@@ -53,7 +56,10 @@ const actualizarConvenio = {
         limitar_por_monto: Joi.boolean(),
         status: Joi.string().valid('ACTIVO', 'INACTIVO'),
         fecha_inicio: Joi.date().iso().allow(null),
-        fecha_termino: Joi.date().iso().allow(null)
+        fecha_inicio: Joi.date().iso().allow(null),
+        fecha_termino: Joi.date().iso().allow(null),
+        beneficio: Joi.boolean(),
+        imagenes: Joi.array().items(Joi.string()).allow(null)
     }).min(1),
 };
 
