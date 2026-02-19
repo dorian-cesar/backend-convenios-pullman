@@ -23,7 +23,7 @@ exports.listar = async (filters = {}) => {
 
     const data = await PasajeroFrecuente.findAndCountAll({
         where,
-        attributes: { exclude: ['imagen_base64'] },
+        attributes: { exclude: ['imagen_cedula_identidad'] },
         limit: limitVal,
         offset,
         order: [['id', 'DESC']]

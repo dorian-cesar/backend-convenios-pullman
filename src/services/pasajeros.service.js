@@ -430,7 +430,7 @@ exports.validarYRegistrarPasajero = async ({ rut, nombres, apellidos, correo, te
 
   // 4. Construir Respuesta
   let pasajeroResponse = pasajero.toJSON ? pasajero.toJSON() : pasajero;
-  if (pasajeroResponse.imagen_base64) delete pasajeroResponse.imagen_base64;
+  if (pasajeroResponse.imagen_cedula_identidad) delete pasajeroResponse.imagen_cedula_identidad;
 
   return {
     afiliado: true,

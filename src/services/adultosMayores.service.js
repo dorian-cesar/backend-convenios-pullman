@@ -22,7 +22,7 @@ exports.listar = async (filters = {}) => {
 
     const data = await AdultoMayor.findAndCountAll({
         where,
-        attributes: { exclude: ['imagen_base64'] },
+        attributes: { exclude: ['imagen_cedula_identidad', 'imagen_certificado_residencia'] },
         limit: limitVal,
         offset,
         order: [['id', 'DESC']]
