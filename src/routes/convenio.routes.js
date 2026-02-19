@@ -6,6 +6,9 @@ const { crearConvenio, actualizarConvenio } = require('../validations/convenio.v
 
 const router = Router();
 
+// Todas las rutas requieren autenticación (JWT o API Key)
+router.use(authMiddleware);
+
 
 
 
@@ -96,8 +99,7 @@ router.get('/activos', convenioController.listarActivos);
  */
 router.get('/disponibles', convenioController.listarDisponibles);
 
-// Rutas protegidas
-router.use(authMiddleware);
+// Rutas protegidas (Ya lo son todas)
 
 /**
  * @openapi

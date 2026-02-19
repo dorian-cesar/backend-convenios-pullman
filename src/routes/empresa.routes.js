@@ -5,6 +5,8 @@ const roles = require('../middlewares/roles.middleware');
 
 const router = Router();
 
+router.use(auth);
+
 /**
  * @openapi
  * /api/empresas/reportes/descuentos:
@@ -136,7 +138,7 @@ router.get('/reportes/descuentos', controller.listarConDescuentos);
  *                 status:
  *                   type: string
  */
-router.get('/', auth, controller.listar);
+router.get('/', controller.listar);
 
 /**
  * @openapi

@@ -4,6 +4,9 @@ const authMiddleware = require('../middlewares/auth.middleware');
 
 const router = Router();
 
+// Todas las rutas requieren autenticación (JWT o API Key)
+router.use(authMiddleware);
+
 /**
  * @openapi
  * tags:
@@ -157,7 +160,6 @@ router.get('/rut/:rut', pasajerosController.buscarPorRut);
 router.put('/:id', pasajerosController.actualizar);
 
 // Todas las rutas requieren autenticación
-router.use(authMiddleware);
 
 /**
  * @openapi
