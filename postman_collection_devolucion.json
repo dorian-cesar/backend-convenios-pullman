@@ -1,0 +1,75 @@
+{
+    "info": {
+        "_postman_id": "e4a1a6b0-1234-5678-9abc-def123456789",
+        "name": "API Convenios Pullman - Devoluciones",
+        "description": "Colección para probar el endpoint de devoluciones (Actualizado: Requiere Ticket o PNR)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Crear Devolución (por Ticket)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"numero_ticket\": \"T-12345\",\n    \"monto_devolucion\": 5000,\n    \"estado\": \"confirmado\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/eventos/devolucion",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "eventos",
+                        "devolucion"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Crear Devolución (por PNR)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"pnr\": \"PNR-XYZ\",\n    \"monto_devolucion\": 5000,\n    \"estado\": \"confirmado\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/eventos/devolucion",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "eventos",
+                        "devolucion"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        }
+    ]
+}

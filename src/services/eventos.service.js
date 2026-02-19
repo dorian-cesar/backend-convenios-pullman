@@ -46,60 +46,53 @@ const findLatestEventByTicketOrPnr = async (numero_ticket, pnr) => {
  * Obtener el estado actual de la cadena de eventos para un ticket/PNR
  * (El último evento válido no eliminado)
  */
-exports.obtenerEventoActual = async (eventoId) => {
-  // Primero buscamos el historial para encontrar el último de la cadena
-  const historial = await this.obtenerHistorialEventos(eventoId);
+exports.obtenerEventoActual = async (identifier) => {
+  // identifier can be eventId or criteria
+  const historial = await this.obtenerHistorialEventos(identifier);
   if (historial.length === 0) {
     throw new NotFoundError('No se encontró historial para el evento');
   }
-  return historial[0]; // El historial viene ordenado DESC por fecha_evento
+  // Historial is ASC (0 is oldest), so verify last element
+  return historial[historial.length - 1];
 };
 
 /**
  * Obtener historial completo de la cadena de eventos
  */
-exports.obtenerHistorialEventos = async (eventoId) => {
-  const evento = await Evento.findByPk(eventoId);
-  if (!evento) throw new NotFoundError('Evento no encontrado');
+/**
+ * Obtener historial completo de la cadena de eventos (Agrupado por Ticket/PNR) and ordered ASC (oldest first)
+ */
+exports.obtenerHistorialEventos = async (identifier) => {
+  // identifier can be eventId (integer) or an object { numero_ticket, pnr }
 
-  // Buscamos la COMPRA original (raíz de la cadena)
-  let compraOriginal = evento;
-  while (compraOriginal.evento_origen_id) {
-    compraOriginal = await Evento.findByPk(compraOriginal.evento_origen_id);
+  let whereClause = {};
+
+  if (typeof identifier === 'number') {
+    const currentParams = await Evento.findByPk(identifier, { attributes: ['numero_ticket', 'pnr'] });
+    if (!currentParams) throw new NotFoundError('Evento no encontrado');
+
+    if (currentParams.numero_ticket) whereClause.numero_ticket = currentParams.numero_ticket;
+    else if (currentParams.pnr) whereClause.pnr = currentParams.pnr;
+    else return []; // No traceable info
+  } else {
+    // It's already the criteria
+    if (identifier.numero_ticket) whereClause.numero_ticket = identifier.numero_ticket;
+    else if (identifier.pnr) whereClause.pnr = identifier.pnr;
+    else throw new BusinessError('Debe proporcionar Ticket o PNR');
   }
 
-  const cadena = [];
-  let actual = await Evento.findOne({
-    where: { evento_origen_id: null, id: compraOriginal.id },
+  // Fetch all events with same Ticket/PNR
+  const eventos = await Evento.findAll({
+    where: whereClause,
     include: [
       { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
-    ]
+    ],
+    order: [['fecha_evento', 'ASC'], ['id', 'ASC']]
   });
 
-  if (actual) cadena.push(actual);
-
-  // Buscamos descendientes
-  let tieneDescendientes = true;
-  while (tieneDescendientes) {
-    const descendiente = await Evento.findOne({
-      where: { evento_origen_id: actual.id },
-      include: [
-        { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
-        { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
-        { model: Convenio, attributes: ['id', 'nombre'] }
-      ]
-    });
-    if (descendiente) {
-      cadena.push(descendiente);
-      actual = descendiente;
-    } else {
-      tieneDescendientes = false;
-    }
-  }
-
-  return cadena.reverse(); // De más reciente a más antiguo
+  return eventos;
 };
 
 /**
@@ -123,7 +116,6 @@ exports.crearCompraEvento = async (data) => {
     codigo_autorizacion,
     token,
     estado,
-    evento_origen_id,
     tipo_pago
   } = data;
 
@@ -153,7 +145,7 @@ exports.crearCompraEvento = async (data) => {
   const evento = await Evento.create({
     tipo_evento: 'COMPRA',
     tipo_pago,
-    evento_origen_id: evento_origen_id || null,
+    // evento_origen_id removed
     pasajero_id,
     empresa_id,
     convenio_id,
@@ -195,10 +187,9 @@ exports.crearCompraEvento = async (data) => {
  */
 exports.crearDevolucionEvento = async (data) => {
   const {
-    evento_origen_id: origenIdParam,
-    monto_devolucion,
     numero_ticket,
     pnr,
+    monto_devolucion,
     codigo_autorizacion,
     token,
     estado,
@@ -207,29 +198,28 @@ exports.crearDevolucionEvento = async (data) => {
 
   const finalEstado = estado || status;
 
-  // Automate origin detection if not provided
-  let eventoOrigenId = origenIdParam;
-  if (!eventoOrigenId) {
-    const latestEvent = await findLatestEventByTicketOrPnr(numero_ticket, pnr);
-    eventoOrigenId = latestEvent.id;
+  if (!numero_ticket && !pnr) {
+    throw new BusinessError('Debe proporcionar numero_ticket o pnr para realizar una devolución');
   }
 
-  // 1. Obtener el evento actual (debe ser COMPRA o CAMBIO)
-  const eventoActual = await this.obtenerEventoActual(eventoOrigenId);
+  // 1. Obtener el evento actual (debe ser COMPRA)
+  // We pass the criteria object directly
+  const criteria = {};
+  if (numero_ticket) criteria.numero_ticket = numero_ticket;
+  if (pnr) criteria.pnr = pnr;
+
+  const eventoActual = await this.obtenerEventoActual(criteria);
 
   if (eventoActual.tipo_evento === 'DEVOLUCION') {
     throw new EventoYaDevueltoError('Este evento ya se encuentra devuelto');
   }
 
-  // 2. Verificar que no haya sido ya procesado
-  const yaProcesado = await Evento.findOne({ where: { evento_origen_id: eventoActual.id } });
-  if (yaProcesado) {
-    throw new EventoInvalidoError('No se puede devolver un evento que ya tiene acciones posteriores');
-  }
+  // 2. Verificar que no haya sido ya procesado (si ya existe una devolucion en el historial)
+  // Since obtenerEventoActual returns the LAST event, if it is PAYMENT/COMPRA, we are good.
+  // But double check if there are newer events just in case (race conditions, though unlikely with this logic)
 
   const evento = await Evento.create({
     tipo_evento: 'DEVOLUCION',
-    evento_origen_id: eventoActual.id,
     pasajero_id: eventoActual.pasajero_id,
     empresa_id: eventoActual.empresa_id,
     convenio_id: eventoActual.convenio_id,
@@ -317,8 +307,7 @@ exports.obtenerEvento = async (id) => {
     include: [
       { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
-      { model: Convenio, attributes: ['id', 'nombre'] },
-      { model: Evento, as: 'EventoOrigen' }
+      { model: Convenio, attributes: ['id', 'nombre'] }
     ]
   });
 

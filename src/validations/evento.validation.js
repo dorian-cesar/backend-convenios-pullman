@@ -21,7 +21,7 @@ const crearCompra = {
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
         estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
-        evento_origen_id: Joi.number().integer().allow(null).optional(),
+        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
         tipo_pago: Joi.string().valid('EFECTIVO', 'DEBITO', 'CREDITO', 'WEBPAY', 'TRANSFERENCIA').allow(null).optional()
     })
 };
@@ -30,14 +30,13 @@ const crearCompra = {
 
 const crearDevolucion = {
     body: Joi.object().keys({
-        evento_origen_id: Joi.number().integer().optional(),
         numero_ticket: Joi.string().optional(),
         pnr: Joi.string().optional(),
         usuario_id: Joi.number().integer().optional(),
         monto_devolucion: Joi.number().integer().min(0).optional(),
         estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
         status: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional()
-    }).or('evento_origen_id', 'numero_ticket', 'pnr')
+    }).or('numero_ticket', 'pnr') // Se elimina evento_origen_id, ticket o pnr referencian la compra original
 };
 
 module.exports = {

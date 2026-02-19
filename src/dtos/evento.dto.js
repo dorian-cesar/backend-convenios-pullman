@@ -2,7 +2,7 @@ class EventoDTO {
     constructor(evento) {
         this.id = evento.id;
         this.tipo_evento = evento.tipo_evento;
-        this.evento_origen_id = evento.evento_origen_id;
+        // evento_origen_id removed;
         this.pasajero_id = evento.pasajero_id;
         this.empresa_id = evento.empresa_id;
         this.convenio_id = evento.convenio_id;
@@ -51,16 +51,7 @@ class EventoDTO {
             };
         }
 
-        // Evento origen (para DEVOLUCION)
-        if (evento.EventoOrigen) {
-            this.evento_origen = {
-                id: evento.EventoOrigen.id,
-                tipo_evento: evento.EventoOrigen.tipo_evento,
-                fecha_viaje: evento.EventoOrigen.fecha_viaje,
-                ciudad_origen: evento.EventoOrigen.ciudad_origen,
-                ciudad_destino: evento.EventoOrigen.ciudad_destino
-            };
-        }
+        // Evento origen logic removed because evento_origen_id was deleted
     }
 
     static fromArray(eventos) {

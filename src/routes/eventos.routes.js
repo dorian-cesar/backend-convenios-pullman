@@ -126,12 +126,14 @@ router.post('/compra', validate(eventoValidation.crearCompra), eventosController
  *           schema:
  *             type: object
  *             required:
- *               - evento_origen_id
  *               - monto_devolucion
  *             properties:
- *               evento_origen_id:
- *                 type: integer
- *                 example: 100
+ *               numero_ticket:
+ *                 type: string
+ *                 example: "T-12345"
+ *               pnr:
+ *                 type: string
+ *                 example: "PNR-XYZ"
  *               monto_devolucion:
  *                 type: integer
  *                 example: 20000

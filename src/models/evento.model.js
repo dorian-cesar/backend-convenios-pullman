@@ -17,15 +17,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
 
-        // 🔗 TRAZABILIDAD
-        evento_origen_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            references: {
-                model: 'eventos',
-                key: 'id'
-            }
-        },
+        // 🔗 TRAZABILIDAD (Eliminada referencia directa, se usa Ticket/PNR)
 
         // usuario_id removed
 
