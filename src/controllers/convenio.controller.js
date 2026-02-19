@@ -43,7 +43,6 @@ exports.listar = async (req, res, next) => {
 exports.listarActivos = async (req, res, next) => {
     try {
         const result = await convenioService.listarActivos(req.query);
-        const result = await convenioService.listarActivos(req.query);
         res.json(ConvenioDTO.fromArray(result.rows));
     } catch (error) {
         next(error);
