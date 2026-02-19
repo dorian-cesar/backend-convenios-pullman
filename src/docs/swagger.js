@@ -189,6 +189,7 @@ const options = {
           properties: {
             id: { type: 'integer', example: 1 },
             tipo_evento: { type: 'string', enum: ['COMPRA', 'CAMBIO', 'DEVOLUCION'] },
+            tipo_pago: { type: 'string', enum: ['EFECTIVO', 'DEBITO', 'CREDITO', 'WEBPAY', 'TRANSFERENCIA'], example: 'WEBPAY' },
             ciudad_origen: { type: 'string', example: 'Santiago' },
             ciudad_destino: { type: 'string', example: 'Valparaíso' },
             fecha_viaje: { type: 'string', format: 'date', example: '2026-02-15' },

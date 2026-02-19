@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
 
+        tipo_pago: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+
         // 🔗 TRAZABILIDAD
         evento_origen_id: {
             type: DataTypes.INTEGER,

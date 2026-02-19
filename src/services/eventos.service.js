@@ -123,7 +123,8 @@ exports.crearCompraEvento = async (data) => {
     codigo_autorizacion,
     token,
     estado,
-    evento_origen_id
+    evento_origen_id,
+    tipo_pago
   } = data;
 
   const pasajero = await Pasajero.findByPk(pasajero_id);
@@ -151,6 +152,7 @@ exports.crearCompraEvento = async (data) => {
 
   const evento = await Evento.create({
     tipo_evento: 'COMPRA',
+    tipo_pago,
     evento_origen_id: evento_origen_id || null,
     pasajero_id,
     empresa_id,
