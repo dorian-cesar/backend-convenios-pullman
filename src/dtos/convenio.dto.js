@@ -26,6 +26,8 @@ class ConvenioDTO {
         this.codigo = convenio.codigo;
         this.limitar_por_stock = !!convenio.limitar_por_stock;
         this.limitar_por_monto = !!convenio.limitar_por_monto;
+        this.beneficio = convenio.beneficio !== undefined ? convenio.beneficio : null;
+        this.imagenes = convenio.imagenes || null;
 
         // Consumo acumulado
         this.consumo_tickets = convenio.consumo_tickets || 0;

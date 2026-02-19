@@ -119,6 +119,12 @@ const options = {
             codigo: { type: 'string', example: 'PROMO2026' },
             limitar_por_stock: { type: 'boolean', example: false },
             limitar_por_monto: { type: 'boolean', example: false },
+            beneficio: { type: 'boolean', example: false },
+            imagenes: {
+              type: 'array',
+              items: { type: 'string' },
+              example: ['https://img1.com', 'https://img2.com']
+            },
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
