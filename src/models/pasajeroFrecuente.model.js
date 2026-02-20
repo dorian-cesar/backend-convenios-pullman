@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT('long'),
             allowNull: true
         },
+        razon_rechazo: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'INACTIVO'

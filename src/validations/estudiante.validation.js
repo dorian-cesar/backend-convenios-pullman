@@ -19,6 +19,7 @@ const crearEstudiante = {
         fecha_vencimiento: Joi.date().iso().required(),
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado_alumno_regular: Joi.string().allow(null, ''),
+        razon_rechazo: Joi.string().allow(null, ''),
         status: Joi.string().valid('ACTIVO', 'INACTIVO').default('INACTIVO')
     })
 };
@@ -37,6 +38,7 @@ const actualizarEstudiante = {
         fecha_vencimiento: Joi.date().iso(),
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado_alumno_regular: Joi.string().allow(null, ''),
+        razon_rechazo: Joi.string().allow(null, ''),
         status: Joi.string().valid('ACTIVO', 'INACTIVO')
     }).min(1)
 };

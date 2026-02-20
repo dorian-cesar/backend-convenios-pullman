@@ -19,6 +19,7 @@ const crearAdultoMayor = {
         fecha_emision: Joi.date().iso().required(),
         imagen_cedula_identidad: Joi.string().allow(null, ''), // Base64 or URL
         imagen_certificado_residencia: Joi.string().allow(null, ''), // Base64 or URL
+        razon_rechazo: Joi.string().allow(null, ''),
         status: Joi.string().valid('ACTIVO', 'INACTIVO').default('INACTIVO')
     })
 };
@@ -37,6 +38,7 @@ const actualizarAdultoMayor = {
         fecha_emision: Joi.date().iso(),
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado_residencia: Joi.string().allow(null, ''),
+        razon_rechazo: Joi.string().allow(null, ''),
         status: Joi.string().valid('ACTIVO', 'INACTIVO')
     }).min(1)
 };
