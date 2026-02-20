@@ -14,7 +14,7 @@ const crearAdultoMayor = {
         nombre: Joi.string().required(),
         rut: Joi.string().required().custom(rutValidation),
         telefono: Joi.string().required(),
-        correo: Joi.string().email({ tlds: { allow: false } }).required(),
+        correo: Joi.string().email({ tlds: { allow: false } }).allow(null, '').optional(),
         direccion: Joi.string().required(),
         certificado: Joi.string().allow(null, '').optional(), // Número/Código del certificado
         imagen_cedula_identidad: Joi.string().allow(null, ''), // Base64 or URL
