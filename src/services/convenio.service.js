@@ -547,47 +547,59 @@ exports.verificarDisponibilidadPorId = async (id) => {
 
     const hoy = new Date();
 
-    // 1. Validaciones absolutas de fechas
+    let response = {
+        valido: true,
+        nombre: convenio.nombre,
+        empresa: convenio.empresa ? convenio.empresa.nombre : null,
+        tickets_disponibles: null, // null representa ilimitado
+        monto_disponible: null,    // null representa ilimitado
+        mensaje: "El convenio tiene disponibilidad y está activo"
+    };
+
+    // 1. Validaciones absolutas de estado y fechas
     if (convenio.status === 'INACTIVO') {
-        throw new BusinessError('El convenio ya se encuentra inactivo');
+        response.valido = false;
+        response.mensaje = 'El convenio se encuentra inactivo';
+        return response;
     }
 
     if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) {
-        throw new BusinessError('El convenio aún no comienza su vigencia');
+        response.valido = false;
+        response.mensaje = 'El convenio aún no comienza su vigencia';
+        return response;
     }
 
     if (convenio.fecha_termino) {
         const termino = new Date(convenio.fecha_termino);
         termino.setHours(23, 59, 59, 999);
         if (hoy > termino) {
-            throw new BusinessError('El convenio ha expirado');
+            response.valido = false;
+            response.mensaje = 'El convenio ha expirado';
+            return response;
         }
     }
 
     // 2. Cálculos de disponibilidad
-    let response = {
-        valido: true,
-        nombre: convenio.nombre,
-        empresa: convenio.empresa ? convenio.empresa.nombre : null,
-        tickets_disponibles: null, // null representa ilimitado si limitar_por_stock = false o tope = null
-        monto_disponible: null     // null representa ilimitado si limitar_por_monto = false o tope = null
-    };
-
     if (convenio.limitar_por_stock && convenio.tope_cantidad_tickets !== null) {
         const restantes = convenio.tope_cantidad_tickets - convenio.consumo_tickets;
+        response.tickets_disponibles = restantes > 0 ? restantes : 0;
+
         if (restantes <= 0) {
-            throw new BusinessError('No queda disponibilidad de tickets para este convenio');
+            response.valido = false;
+            response.mensaje = 'No queda disponibilidad de tickets para este convenio';
+            return response; // Podemos retornar inmediato o seguir calculando monto? Mejor retornar.
         }
-        response.tickets_disponibles = restantes;
     }
 
     if (convenio.limitar_por_monto && convenio.tope_monto_descuento !== null) {
         const restanteMonto = convenio.tope_monto_descuento - convenio.consumo_monto_descuento;
+        response.monto_disponible = restanteMonto > 0 ? Math.floor(restanteMonto) : 0;
+
         if (restanteMonto <= 0) {
-            throw new BusinessError('El convenio ha agotado su fondo monetario de descuentos');
+            response.valido = false;
+            response.mensaje = 'El convenio ha agotado su fondo monetario de descuentos';
+            return response;
         }
-        // Rounding down just in case of decimals, though they are stored as integers
-        response.monto_disponible = Math.floor(restanteMonto);
     }
 
     return response;
