@@ -132,7 +132,11 @@ exports.actualizarConsumo = async (req, res, next) => {
             consumo_monto_descuento
         });
 
-        res.json(new ConvenioDTO(convenio));
+        res.json({
+            mensaje: "actualizado satisfactoriamente",
+            consumo_tickets: convenio.consumo_tickets,
+            consumo_monto_descuento: convenio.consumo_monto_descuento
+        });
     } catch (error) {
         next(error);
     }

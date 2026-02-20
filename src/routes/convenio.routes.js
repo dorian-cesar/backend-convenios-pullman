@@ -488,7 +488,17 @@ router.delete('/:id', convenioController.eliminar);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Convenio'
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   example: "actualizado satisfactoriamente"
+ *                 consumo_tickets:
+ *                   type: integer
+ *                   example: 40
+ *                 consumo_monto_descuento:
+ *                   type: integer
+ *                   example: 250000
  */
 router.patch('/:id/consumo', authMiddleware, convenioController.actualizarConsumo);
 
