@@ -10,6 +10,7 @@ const rutValidation = (value, helpers) => {
 
 const crearPasajeroFrecuente = {
     body: Joi.object().keys({
+        id: Joi.any().strip(),
         nombre: Joi.string().required(),
         rut: Joi.string().required().custom(rutValidation),
         telefono: Joi.string().required(),

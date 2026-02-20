@@ -30,8 +30,8 @@ const formatRut = (rut) => {
 const validateRut = (rut) => {
     if (typeof rut !== 'string' || !rut) return false;
 
-    // Remove dots and hyphens, convert to uppercase
-    const cleanRut = rut.replace(/[.\-]/g, '').toUpperCase();
+    // Remove dots, convert to uppercase (keep hyphens)
+    const cleanRut = rut.replace(/\./g, '').toUpperCase();
 
     // Verify format allows numbers, and ends in number, K, k, X, or x
     return /^[0-9]+-[0-9kKxX]$/.test(cleanRut);

@@ -10,6 +10,7 @@ const rutValidation = (value, helpers) => {
 
 const crearAdultoMayor = {
     body: Joi.object().keys({
+        id: Joi.any().strip(), // Ignorar ID si viene en el body
         nombre: Joi.string().required(),
         rut: Joi.string().required().custom(rutValidation),
         telefono: Joi.string().required(),
