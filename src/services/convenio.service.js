@@ -548,7 +548,7 @@ exports.verificarDisponibilidadPorId = async (id) => {
             empresa: null,
             tickets_disponibles: null,
             monto_disponible: null,
-            mensaje: 'Convenio no encontrado'
+            msj: 'Convenio no encontrado'
         };
     }
 
@@ -560,19 +560,19 @@ exports.verificarDisponibilidadPorId = async (id) => {
         empresa: convenio.empresa ? convenio.empresa.nombre : null,
         tickets_disponibles: null, // null representa ilimitado
         monto_disponible: null,    // null representa ilimitado
-        mensaje: "El convenio tiene disponibilidad y está activo"
+        msj: "hay disponibilidad y el convenio está activo"
     };
 
     // 1. Validaciones absolutas de estado y fechas
     if (convenio.status === 'INACTIVO') {
         response.valido = false;
-        response.mensaje = 'El convenio se encuentra inactivo';
+        response.msj = 'El convenio se encuentra inactivo';
         return response;
     }
 
     if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) {
         response.valido = false;
-        response.mensaje = 'El convenio aún no comienza su vigencia';
+        response.msj = 'El convenio aún no comienza su vigencia';
         return response;
     }
 
@@ -581,7 +581,7 @@ exports.verificarDisponibilidadPorId = async (id) => {
         termino.setHours(23, 59, 59, 999);
         if (hoy > termino) {
             response.valido = false;
-            response.mensaje = 'El convenio ha expirado';
+            response.msj = 'El convenio ha expirado';
             return response;
         }
     }
@@ -593,8 +593,8 @@ exports.verificarDisponibilidadPorId = async (id) => {
 
         if (restantes <= 0) {
             response.valido = false;
-            response.mensaje = 'No queda disponibilidad de tickets para este convenio';
-            return response; // Podemos retornar inmediato o seguir calculando monto? Mejor retornar.
+            response.msj = 'No queda disponibilidad de tickets para este convenio';
+            return response;
         }
     }
 
@@ -604,7 +604,7 @@ exports.verificarDisponibilidadPorId = async (id) => {
 
         if (restanteMonto <= 0) {
             response.valido = false;
-            response.mensaje = 'El convenio ha agotado su fondo monetario de descuentos';
+            response.msj = 'El convenio ha agotado su fondo monetario de descuentos';
             return response;
         }
     }

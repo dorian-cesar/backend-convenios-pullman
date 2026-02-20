@@ -150,21 +150,21 @@ exports.validarCodigoPorConvenio = async (req, res, next) => {
         if (!targetId) {
             return res.json({
                 valido: false,
-                mensaje: "Se requiere un 'convenio_id' en el cuerpo de la petición (body)."
+                msj: "Se requiere un 'convenio_id' en el cuerpo de la petición (body)."
             });
         }
 
         const convenio = await convenioService.validarCodigoPorConvenio(targetId, codigo);
         res.json({
             valido: true,
-            mensaje: `El código está activo y pertenece al convenio ${convenio.nombre}`,
+            msj: `El código está activo y pertenece al convenio ${convenio.nombre}`,
             convenio: new ConvenioDTO(convenio)
         });
     } catch (error) {
         if (error.name === 'BusinessError' || error.name === 'NotFoundError') {
             res.json({
                 valido: false,
-                mensaje: error.message
+                msj: error.message
             });
         } else {
             next(error);
@@ -184,7 +184,7 @@ exports.verificarDisponibilidad = async (req, res, next) => {
         if (error.name === 'BusinessError' || error.name === 'NotFoundError') {
             res.json({
                 valido: false,
-                mensaje: error.message
+                msj: error.message
             });
         } else {
             next(error);
