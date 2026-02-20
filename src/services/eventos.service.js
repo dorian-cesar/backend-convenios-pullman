@@ -176,8 +176,12 @@ exports.crearCompraEvento = async (data) => {
     const convenio = await Convenio.findByPk(convenio_id);
     if (convenio) {
       const descuento = (tarifa_base || 0) - (montoPagado !== null ? montoPagado : 0);
+      // Si tarifa_base es negativa, estamos frente a una devolución por esta misma vía
+      // Por ende, sumamos -1 al consumo de tickets (dando 1 ticket de vuelta disponible)
+      const ticketsASumar = (tarifa_base < 0) ? -1 : 1;
+
       await convenio.increment({
-        'consumo_tickets': 1,
+        'consumo_tickets': ticketsASumar,
         'consumo_monto_descuento': descuento
       });
     }

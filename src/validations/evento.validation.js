@@ -17,10 +17,9 @@ const crearCompra = {
         pnr: Joi.string().allow(null, '').optional(),
         terminal_origen: Joi.string().allow(null, '').optional(),
         terminal_destino: Joi.string().allow(null, '').optional(),
-        tarifa_base: Joi.number().integer().min(0).required(),
+        tarifa_base: Joi.number().integer().required(),
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
-        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
         estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
         tipo_pago: Joi.string().valid('EFECTIVO', 'DEBITO', 'CREDITO', 'WEBPAY', 'TRANSFERENCIA').allow(null).optional()
     })
