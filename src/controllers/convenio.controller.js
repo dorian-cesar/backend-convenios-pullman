@@ -148,16 +148,27 @@ exports.validarCodigoPorConvenio = async (req, res, next) => {
         const targetId = convenio_id || id;
 
         if (!targetId) {
-            return res.status(400).json({ error: "VALIDATION_ERROR", message: "Se requiere un 'convenio_id' en el cuerpo de la petición (body)." });
+            return res.json({
+                valido: false,
+                mensaje: "Se requiere un 'convenio_id' en el cuerpo de la petición (body)."
+            });
         }
 
         const convenio = await convenioService.validarCodigoPorConvenio(targetId, codigo);
         res.json({
-            message: `El código está activo y pertenece al convenio ${convenio.nombre}`,
+            valido: true,
+            mensaje: `El código está activo y pertenece al convenio ${convenio.nombre}`,
             convenio: new ConvenioDTO(convenio)
         });
     } catch (error) {
-        next(error);
+        if (error.name === 'BusinessError' || error.name === 'NotFoundError') {
+            res.json({
+                valido: false,
+                mensaje: error.message
+            });
+        } else {
+            next(error);
+        }
     }
 };
 
@@ -170,6 +181,13 @@ exports.verificarDisponibilidad = async (req, res, next) => {
         const disponibilidad = await convenioService.verificarDisponibilidadPorId(id);
         res.json(disponibilidad);
     } catch (error) {
-        next(error);
+        if (error.name === 'BusinessError' || error.name === 'NotFoundError') {
+            res.json({
+                valido: false,
+                mensaje: error.message
+            });
+        } else {
+            next(error);
+        }
     }
 };

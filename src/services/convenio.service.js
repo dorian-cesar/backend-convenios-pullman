@@ -542,7 +542,14 @@ exports.verificarDisponibilidadPorId = async (id) => {
     });
 
     if (!convenio) {
-        throw new NotFoundError('Convenio no encontrado');
+        return {
+            valido: false,
+            nombre: null,
+            empresa: null,
+            tickets_disponibles: null,
+            monto_disponible: null,
+            mensaje: 'Convenio no encontrado'
+        };
     }
 
     const hoy = new Date();
