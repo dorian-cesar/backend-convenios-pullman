@@ -52,4 +52,4 @@ full_spec.json
 *.bat
 
 # Internal Scripts
-scripts/postman_collection*.json
+postman_collection*.json
