@@ -231,8 +231,6 @@ router.delete('/:id', validate(getEstudiante), estudiantesController.eliminar);
  *                 telefono: { type: string }
  *                 correo: { type: string }
  *                 direccion: { type: string }
- *                 carnet_estudiante: { type: string }
- *                 fecha_vencimiento: { type: string }
  *                 status: { type: string }
  *       404:
  *         description: Estudiante no encontrado
