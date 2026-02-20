@@ -8,8 +8,8 @@
 const formatRut = (rut) => {
     if (!rut) return rut;
 
-    // 1. Remove everything that is not a number or k/K
-    const cleanRut = rut.replace(/[^0-9kK]/g, '');
+    // 1. Remove everything that is not a number or k/K/x/X
+    const cleanRut = rut.replace(/[^0-9kKxX]/g, '');
 
     // 2. Check length (min 2 chars for body+dv)
     if (cleanRut.length < 2) return rut;

@@ -13,7 +13,7 @@ const crearPasajeroFrecuente = {
         nombre: Joi.string().required(),
         rut: Joi.string().required().custom(rutValidation),
         telefono: Joi.string().required(),
-        correo: Joi.string().email().required(),
+        correo: Joi.string().email({ tlds: { allow: false } }).required(),
         direccion: Joi.string().required(),
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado: Joi.string().allow(null, ''), // Nuevo campo
@@ -30,7 +30,7 @@ const actualizarPasajeroFrecuente = {
         nombre: Joi.string(),
         rut: Joi.string().custom(rutValidation),
         telefono: Joi.string(),
-        correo: Joi.string().email(),
+        correo: Joi.string().email({ tlds: { allow: false } }),
         direccion: Joi.string(),
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado: Joi.string().allow(null, ''), // Nuevo campo

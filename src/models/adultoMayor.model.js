@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true,
             validate: {
-                is: /^[0-9]+-[0-9kK]$/
+                is: /^[0-9]+-[0-9kKxX]$/
             }
         },
         telefono: {
@@ -34,10 +34,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         certificado: {
             type: DataTypes.STRING,
-            allowNull: false
-        },
-        fecha_emision: {
-            type: DataTypes.DATEONLY,
             allowNull: false
         },
         imagen_cedula_identidad: {

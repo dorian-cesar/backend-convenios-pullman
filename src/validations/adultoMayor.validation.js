@@ -13,10 +13,9 @@ const crearAdultoMayor = {
         nombre: Joi.string().required(),
         rut: Joi.string().required().custom(rutValidation),
         telefono: Joi.string().required(),
-        correo: Joi.string().email().required(),
+        correo: Joi.string().email({ tlds: { allow: false } }).required(),
         direccion: Joi.string().required(),
         certificado: Joi.string().required(), // Número/Código del certificado
-        fecha_emision: Joi.date().iso().required(),
         imagen_cedula_identidad: Joi.string().allow(null, ''), // Base64 or URL
         imagen_certificado_residencia: Joi.string().allow(null, ''), // Base64 or URL
         razon_rechazo: Joi.string().allow(null, ''),
@@ -32,10 +31,9 @@ const actualizarAdultoMayor = {
         nombre: Joi.string(),
         rut: Joi.string().custom(rutValidation),
         telefono: Joi.string(),
-        correo: Joi.string().email(),
+        correo: Joi.string().email({ tlds: { allow: false } }),
         direccion: Joi.string(),
         certificado: Joi.string(),
-        fecha_emision: Joi.date().iso(),
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado_residencia: Joi.string().allow(null, ''),
         razon_rechazo: Joi.string().allow(null, ''),

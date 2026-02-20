@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true,
             validate: {
-                is: /^[0-9]+-[0-9kK]$/
+                is: /^[0-9]+-[0-9kKxX]$/
             }
         },
         telefono: {

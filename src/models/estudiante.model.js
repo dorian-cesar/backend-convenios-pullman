@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
             validate: {
                 // Simple regex validation, can be improved
-                is: /^[0-9]+-[0-9kK]$/
+                is: /^[0-9]+-[0-9kKxX]$/
             }
         },
         telefono: {
@@ -31,14 +31,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         direccion: {
             type: DataTypes.STRING,
-            allowNull: false
-        },
-        carnet_estudiante: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        fecha_vencimiento: {
-            type: DataTypes.DATEONLY,
             allowNull: false
         },
         imagen_cedula_identidad: {
