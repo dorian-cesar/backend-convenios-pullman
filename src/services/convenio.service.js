@@ -705,7 +705,7 @@ exports.listarDisponibles = async () => {
 };
 
 /**
- * Actualizar consumo de un convenio manualmente
+ * Actualizar consumo de un convenio manualmente (acumulativo)
  */
 exports.actualizarConsumo = async (id, { consumo_tickets, consumo_monto_descuento }) => {
     const convenio = await Convenio.findByPk(id);
@@ -713,10 +713,19 @@ exports.actualizarConsumo = async (id, { consumo_tickets, consumo_monto_descuent
         throw new NotFoundError('Convenio no encontrado');
     }
 
-    const updateData = {};
-    if (consumo_tickets !== undefined) updateData.consumo_tickets = consumo_tickets;
-    if (consumo_monto_descuento !== undefined) updateData.consumo_monto_descuento = consumo_monto_descuento;
+    const incrementData = {};
+    if (consumo_tickets !== undefined && consumo_tickets !== null) {
+        incrementData.consumo_tickets = consumo_tickets;
+    }
+    if (consumo_monto_descuento !== undefined && consumo_monto_descuento !== null) {
+        incrementData.consumo_monto_descuento = consumo_monto_descuento;
+    }
 
-    await convenio.update(updateData);
+    if (Object.keys(incrementData).length > 0) {
+        await convenio.increment(incrementData);
+        // Volvemos a cargarlo tras el increment para retornar la data real actualizada
+        await convenio.reload();
+    }
+
     return convenio;
 };
