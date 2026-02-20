@@ -138,7 +138,11 @@ exports.actualizarConsumo = async (req, res, next) => {
             consumo_monto_descuento: convenio.consumo_monto_descuento
         });
     } catch (error) {
-        next(error);
+        res.json({
+            mensaje: error.message || "Error interno del servidor",
+            consumo_tickets: null,
+            consumo_monto_descuento: null
+        });
     }
 };
 
