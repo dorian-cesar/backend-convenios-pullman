@@ -125,7 +125,7 @@ exports.validarPorCodigo = async (req, res, next) => {
 exports.actualizarConsumo = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { consumo_tickets, consumo_monto_descuento } = req.body;
+        const { consumo_tickets, consumo_monto_descuento } = req.body || {};
 
         const convenio = await convenioService.actualizarConsumo(id, {
             consumo_tickets,
