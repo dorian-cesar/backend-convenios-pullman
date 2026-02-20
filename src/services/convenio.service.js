@@ -446,6 +446,47 @@ exports.validarPorCodigo = async (codigo) => {
     return convenio;
 };
 
+/**
+ * Validar si un código específico pertenece a un convenio por su ID
+ */
+exports.validarCodigoPorConvenio = async (convenioId, codigo) => {
+    const convenio = await Convenio.findOne({
+        where: { id: convenioId, codigo, status: 'ACTIVO' },
+        include: [{
+            model: Empresa,
+            as: 'empresa',
+            attributes: ['id', 'nombre', 'rut_empresa']
+        }]
+    });
+
+    if (!convenio) {
+        throw new BusinessError('El código ingresado no pertenece a este convenio, o se encuentra inactivo');
+    }
+
+    const hoy = new Date();
+
+    if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) {
+        throw new BusinessError('El convenio aún no comienza su vigencia');
+    }
+    if (convenio.fecha_termino) {
+        const termino = new Date(convenio.fecha_termino);
+        termino.setHours(23, 59, 59, 999);
+        if (hoy > termino) {
+            throw new BusinessError('El convenio ha expirado');
+        }
+    }
+
+    if (convenio.tope_monto_descuento !== null && convenio.consumo_monto_descuento >= convenio.tope_monto_descuento) {
+        throw new BusinessError('El convenio ha agotado su fondo de descuentos');
+    }
+
+    if (convenio.tope_cantidad_tickets !== null && convenio.consumo_tickets >= convenio.tope_cantidad_tickets) {
+        throw new BusinessError('El convenio ha agotado su stock de uso');
+    }
+
+    return convenio;
+};
+
 
 /**
  * Verificar vigencia del convenio

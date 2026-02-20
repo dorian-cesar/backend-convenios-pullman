@@ -2,7 +2,7 @@ const { Router } = require('express');
 const convenioController = require('../controllers/convenio.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
-const { crearConvenio, actualizarConvenio } = require('../validations/convenio.validation');
+const { crearConvenio, actualizarConvenio, validarCodigoConvenio } = require('../validations/convenio.validation');
 
 const router = Router();
 
@@ -48,6 +48,46 @@ router.get('/', convenioController.listar);
  *         description: Código inválido o inactivo
  */
 router.get('/validar/:codigo', convenioController.validarPorCodigo);
+
+/**
+ * @openapi
+ * /api/convenios/validar/{codigo}:
+ *   post:
+ *     summary: Validar si un código pertenece a un Convenio específico
+ *     description: Verifica que el código ingresado exista, esté activo y pertenezca al ID de convenio enviado en el body.
+ *     tags:
+ *       - Convenios
+ *     parameters:
+ *       - in: path
+ *         name: codigo
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Código de descuento a validar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               convenio_id:
+ *                 type: integer
+ *                 example: 3
+ *                 description: ID del convenio al cual debe pertenecer el código
+ *     responses:
+ *       200:
+ *         description: Convenio y código válidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Convenio'
+ *       400:
+ *         description: No se proporcionó convenio_id
+ *       404:
+ *         description: Código no válido para el convenio solicitado
+ */
+router.post('/validar/:codigo', validate(validarCodigoConvenio), convenioController.validarCodigoPorConvenio);
 
 /**
  * @openapi

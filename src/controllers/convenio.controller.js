@@ -137,3 +137,23 @@ exports.actualizarConsumo = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Validar si un código específico pertenece a un convenio por su ID
+ */
+exports.validarCodigoPorConvenio = async (req, res, next) => {
+    try {
+        const { codigo } = req.params;
+        const { id, convenio_id } = req.body;
+        const targetId = convenio_id || id;
+
+        if (!targetId) {
+            return res.status(400).json({ error: "VALIDATION_ERROR", message: "Se requiere un 'convenio_id' en el cuerpo de la petición (body)." });
+        }
+
+        const convenio = await convenioService.validarCodigoPorConvenio(targetId, codigo);
+        res.json(new ConvenioDTO(convenio));
+    } catch (error) {
+        next(error);
+    }
+};
