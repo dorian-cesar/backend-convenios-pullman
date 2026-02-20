@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         certificado: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         imagen_cedula_identidad: {
             type: DataTypes.TEXT('long'),
