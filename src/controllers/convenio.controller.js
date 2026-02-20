@@ -152,7 +152,10 @@ exports.validarCodigoPorConvenio = async (req, res, next) => {
         }
 
         const convenio = await convenioService.validarCodigoPorConvenio(targetId, codigo);
-        res.json(new ConvenioDTO(convenio));
+        res.json({
+            message: `El código está activo y pertenece al convenio ${convenio.nombre}`,
+            convenio: new ConvenioDTO(convenio)
+        });
     } catch (error) {
         next(error);
     }
