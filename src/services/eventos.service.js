@@ -143,11 +143,8 @@ exports.crearCompraEvento = async (data) => {
 
   const montoPagado = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
 
-  // Verificar topes de convenio
-  if (convenio_id) {
-    const montoDescuento = (tarifa_base - montoPagado);
-    await convenioService.verificarLimites(convenio_id, montoDescuento);
-  }
+  // (REMOVED) Verificar topes de convenio: A petición del negocio ya no se valida stock/monto al comprar,
+  // solo se registra el consumo posteriormente.
 
   const evento = await Evento.create({
     tipo_evento: 'COMPRA',
