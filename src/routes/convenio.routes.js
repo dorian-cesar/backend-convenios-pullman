@@ -288,6 +288,56 @@ router.post('/', validate(crearConvenio), convenioController.crear);
 
 /**
  * @openapi
+ * /api/convenios/{id}/disponibilidad:
+ *   get:
+ *     summary: Verificar disponibilidad de un convenio
+ *     description: Valida fechas, tickets y montos restantes. Si no hay disponibilidad, devuelve error descriptivo.
+ *     tags:
+ *       - Convenios
+ *     security:
+ *       - ApiKeyAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del convenio a verificar
+ *     responses:
+ *       200:
+ *         description: Estado de disponibilidad del convenio
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valido:
+ *                   type: boolean
+ *                   example: true
+ *                 nombre:
+ *                   type: string
+ *                   example: "Convenio Promo"
+ *                 empresa:
+ *                   type: string
+ *                   example: "Empresa S.A."
+ *                 tickets_disponibles:
+ *                   type: integer
+ *                   example: 10
+ *                   nullable: true
+ *                 monto_disponible:
+ *                   type: integer
+ *                   example: 450000
+ *                   nullable: true
+ *       400:
+ *         description: El convenio está inactivo, caducado o sin fondos/tickets
+ *       404:
+ *         description: Convenio no encontrado
+ */
+router.get('/:id/disponibilidad', convenioController.verificarDisponibilidad);
+
+/**
+ * @openapi
  * /api/convenios/{id}:
  *   get:
  *     summary: Obtener convenio por ID

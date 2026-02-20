@@ -530,6 +530,70 @@ exports.validarVigencia = async (convenioId) => {
 };
 
 /**
+ * Verificar disponibilidad explícita por ID (Stock, Fechas, Montos)
+ */
+exports.verificarDisponibilidadPorId = async (id) => {
+    const convenio = await Convenio.findByPk(id, {
+        include: [{
+            model: Empresa,
+            as: 'empresa',
+            attributes: ['id', 'nombre', 'rut_empresa']
+        }]
+    });
+
+    if (!convenio) {
+        throw new NotFoundError('Convenio no encontrado');
+    }
+
+    const hoy = new Date();
+
+    // 1. Validaciones absolutas de fechas
+    if (convenio.status === 'INACTIVO') {
+        throw new BusinessError('El convenio ya se encuentra inactivo');
+    }
+
+    if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) {
+        throw new BusinessError('El convenio aún no comienza su vigencia');
+    }
+
+    if (convenio.fecha_termino) {
+        const termino = new Date(convenio.fecha_termino);
+        termino.setHours(23, 59, 59, 999);
+        if (hoy > termino) {
+            throw new BusinessError('El convenio ha expirado');
+        }
+    }
+
+    // 2. Cálculos de disponibilidad
+    let response = {
+        valido: true,
+        nombre: convenio.nombre,
+        empresa: convenio.empresa ? convenio.empresa.nombre : null,
+        tickets_disponibles: null, // null representa ilimitado si limitar_por_stock = false o tope = null
+        monto_disponible: null     // null representa ilimitado si limitar_por_monto = false o tope = null
+    };
+
+    if (convenio.limitar_por_stock && convenio.tope_cantidad_tickets !== null) {
+        const restantes = convenio.tope_cantidad_tickets - convenio.consumo_tickets;
+        if (restantes <= 0) {
+            throw new BusinessError('No queda disponibilidad de tickets para este convenio');
+        }
+        response.tickets_disponibles = restantes;
+    }
+
+    if (convenio.limitar_por_monto && convenio.tope_monto_descuento !== null) {
+        const restanteMonto = convenio.tope_monto_descuento - convenio.consumo_monto_descuento;
+        if (restanteMonto <= 0) {
+            throw new BusinessError('El convenio ha agotado su fondo monetario de descuentos');
+        }
+        // Rounding down just in case of decimals, though they are stored as integers
+        response.monto_disponible = Math.floor(restanteMonto);
+    }
+
+    return response;
+};
+
+/**
  * Desactivar convenios vencidos (Batch Job)
  */
 exports.desactivarConveniosVencidos = async () => {

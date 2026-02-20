@@ -157,3 +157,16 @@ exports.validarCodigoPorConvenio = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Verificar disponibilidad completa por ID de convenio
+ */
+exports.verificarDisponibilidad = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const disponibilidad = await convenioService.verificarDisponibilidadPorId(id);
+        res.json(disponibilidad);
+    } catch (error) {
+        next(error);
+    }
+};
