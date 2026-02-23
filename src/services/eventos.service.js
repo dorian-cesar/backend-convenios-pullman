@@ -203,7 +203,8 @@ exports.crearDevolucionEvento = async (data) => {
     codigo_autorizacion,
     token,
     estado,
-    status
+    status,
+    tipo_pago
   } = data;
 
   const finalEstado = estado || status;
@@ -220,15 +221,27 @@ exports.crearDevolucionEvento = async (data) => {
 
   const eventoActual = await this.obtenerEventoActual(criteria);
 
+  // Get the complete history to find the original COMPRA
+  const historial = await this.obtenerHistorialEventos(criteria);
+  const eventoCompra = historial.find(e => e.tipo_evento === 'COMPRA') || eventoActual;
+
   if (eventoActual.tipo_evento === 'DEVOLUCION') {
     // Si ya existe un evento de devolución, lo actualizamos (comportamiento PATCH)
-    if (monto_devolucion !== undefined) eventoActual.monto_devolucion = monto_devolucion;
-    if (codigo_autorizacion) eventoActual.codigo_autorizacion = codigo_autorizacion;
-    if (token) eventoActual.token = token;
-    if (finalEstado) eventoActual.estado = finalEstado;
+    const devolucionGuardada = await Evento.findByPk(eventoActual.id);
+    if (monto_devolucion !== undefined) devolucionGuardada.monto_devolucion = monto_devolucion;
+    if (codigo_autorizacion !== undefined) devolucionGuardada.codigo_autorizacion = codigo_autorizacion;
+    if (token !== undefined) devolucionGuardada.token = token;
+    if (finalEstado !== undefined) devolucionGuardada.estado = finalEstado;
+    if (tipo_pago !== undefined) devolucionGuardada.tipo_pago = tipo_pago;
 
-    await eventoActual.save();
-    return await this.obtenerEvento(eventoActual.id);
+    // Restaurar los campos faltantes de la compra original si es que se habían puesto en nulo
+    if (!devolucionGuardada.tipo_pago) devolucionGuardada.tipo_pago = eventoCompra.tipo_pago;
+    if (!devolucionGuardada.codigo_autorizacion) devolucionGuardada.codigo_autorizacion = eventoCompra.codigo_autorizacion;
+    if (!devolucionGuardada.token) devolucionGuardada.token = eventoCompra.token;
+    if (!devolucionGuardada.estado) devolucionGuardada.estado = eventoCompra.estado;
+
+    await devolucionGuardada.save();
+    return await this.obtenerEvento(devolucionGuardada.id);
   }
 
   // 2. Verificar que no haya sido ya procesado (si ya existe una devolucion en el historial)
@@ -253,9 +266,10 @@ exports.crearDevolucionEvento = async (data) => {
     porcentaje_descuento_aplicado: eventoActual.porcentaje_descuento_aplicado,
     monto_pagado: 0,
     monto_devolucion: monto_devolucion,
-    codigo_autorizacion,
-    token,
-    estado: finalEstado
+    tipo_pago: tipo_pago !== undefined ? tipo_pago : (eventoActual.tipo_pago || eventoCompra.tipo_pago),
+    codigo_autorizacion: codigo_autorizacion !== undefined ? codigo_autorizacion : (eventoActual.codigo_autorizacion || eventoCompra.codigo_autorizacion),
+    token: token !== undefined ? token : (eventoActual.token || eventoCompra.token),
+    estado: finalEstado !== undefined ? finalEstado : (eventoActual.estado || eventoCompra.estado)
   });
 
   /* 

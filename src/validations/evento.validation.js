@@ -34,7 +34,10 @@ const crearDevolucion = {
         usuario_id: Joi.number().integer().optional(),
         monto_devolucion: Joi.number().integer().min(0).optional(),
         estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
-        status: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional()
+        status: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
+        codigo_autorizacion: Joi.string().allow(null, '').optional(),
+        token: Joi.string().allow(null, '').optional(),
+        tipo_pago: Joi.string().allow(null, '').optional()
     }).or('numero_ticket', 'pnr') // Se elimina evento_origen_id, ticket o pnr referencian la compra original
 };
 
