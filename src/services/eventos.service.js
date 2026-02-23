@@ -221,7 +221,14 @@ exports.crearDevolucionEvento = async (data) => {
   const eventoActual = await this.obtenerEventoActual(criteria);
 
   if (eventoActual.tipo_evento === 'DEVOLUCION') {
-    throw new EventoYaDevueltoError('Este evento ya se encuentra devuelto');
+    // Si ya existe un evento de devolución, lo actualizamos (comportamiento PATCH)
+    if (monto_devolucion !== undefined) eventoActual.monto_devolucion = monto_devolucion;
+    if (codigo_autorizacion) eventoActual.codigo_autorizacion = codigo_autorizacion;
+    if (token) eventoActual.token = token;
+    if (finalEstado) eventoActual.estado = finalEstado;
+
+    await eventoActual.save();
+    return await this.obtenerEvento(eventoActual.id);
   }
 
   // 2. Verificar que no haya sido ya procesado (si ya existe una devolucion en el historial)
