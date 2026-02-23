@@ -19,7 +19,7 @@ const crearEstudiante = {
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado_alumno_regular: Joi.string().allow(null, ''),
         razon_rechazo: Joi.string().allow(null, ''),
-        status: Joi.string().valid('ACTIVO', 'INACTIVO').default('INACTIVO')
+        status: Joi.string().valid('ACTIVO', 'INACTIVO', 'RECHAZADO').default('INACTIVO')
     })
 };
 
@@ -36,7 +36,7 @@ const actualizarEstudiante = {
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado_alumno_regular: Joi.string().allow(null, ''),
         razon_rechazo: Joi.string().allow(null, ''),
-        status: Joi.string().valid('ACTIVO', 'INACTIVO')
+        status: Joi.string().valid('ACTIVO', 'INACTIVO', 'RECHAZADO')
     }).min(1)
 };
 

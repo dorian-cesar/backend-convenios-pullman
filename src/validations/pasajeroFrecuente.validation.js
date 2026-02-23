@@ -19,7 +19,7 @@ const crearPasajeroFrecuente = {
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado: Joi.string().allow(null, ''), // Nuevo campo
         razon_rechazo: Joi.string().allow(null, ''),
-        status: Joi.string().valid('ACTIVO', 'INACTIVO').default('INACTIVO')
+        status: Joi.string().valid('ACTIVO', 'INACTIVO', 'RECHAZADO').default('INACTIVO')
     })
 };
 
@@ -36,7 +36,7 @@ const actualizarPasajeroFrecuente = {
         imagen_cedula_identidad: Joi.string().allow(null, ''),
         imagen_certificado: Joi.string().allow(null, ''), // Nuevo campo
         razon_rechazo: Joi.string().allow(null, ''),
-        status: Joi.string().valid('ACTIVO', 'INACTIVO')
+        status: Joi.string().valid('ACTIVO', 'INACTIVO', 'RECHAZADO')
     }).min(1)
 };
 

@@ -89,7 +89,7 @@ exports.rechazar = async (req, res, next) => {
         }
 
         const adulto = await adultosMayoresService.actualizar(id, {
-            status: 'INACTIVO',
+            status: 'RECHAZADO',
             razon_rechazo
         });
 

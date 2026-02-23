@@ -89,7 +89,7 @@ exports.rechazar = async (req, res, next) => {
         }
 
         const estudiante = await estudiantesService.actualizar(id, {
-            status: 'INACTIVO',
+            status: 'RECHAZADO',
             razon_rechazo
         });
 

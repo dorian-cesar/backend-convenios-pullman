@@ -21,7 +21,7 @@ const crearCompra = {
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
         estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
-        tipo_pago: Joi.string().valid('EFECTIVO', 'DEBITO', 'CREDITO', 'WEBPAY', 'TRANSFERENCIA').allow(null).optional()
+        tipo_pago: Joi.string().allow(null, '').optional()
     })
 };
 

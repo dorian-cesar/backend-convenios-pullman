@@ -88,7 +88,7 @@ exports.rechazar = async (req, res, next) => {
         }
 
         const frecuente = await pasajerosFrecuentesService.actualizar(id, {
-            status: 'INACTIVO',
+            status: 'RECHAZADO',
             razon_rechazo
         });
 

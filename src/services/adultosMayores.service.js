@@ -40,8 +40,8 @@ exports.actualizar = async (id, data) => {
     const adulto = await AdultoMayor.findByPk(id);
     if (!adulto) return null;
 
-    // Si se está cambiando el estado a INACTIVO y se proporciona una razón
-    if (data.status === 'INACTIVO' && data.razon_rechazo && data.razon_rechazo !== adulto.razon_rechazo) {
+    // Si se está cambiando el estado a RECHAZADO y se proporciona una razón
+    if (data.status === 'RECHAZADO' && data.razon_rechazo && data.razon_rechazo !== adulto.razon_rechazo) {
         emailService.enviarCorreoRechazo(adulto.correo, adulto.nombre, data.razon_rechazo, 'Adulto Mayor').catch(console.error);
     }
 
