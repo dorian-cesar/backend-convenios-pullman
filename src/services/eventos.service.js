@@ -221,56 +221,17 @@ exports.crearDevolucionEvento = async (data) => {
 
   const eventoActual = await this.obtenerEventoActual(criteria);
 
-  // Get the complete history to find the original COMPRA
-  const historial = await this.obtenerHistorialEventos(criteria);
-  const eventoCompra = historial.find(e => e.tipo_evento === 'COMPRA') || eventoActual;
+  // En lugar de crear un nuevo evento, actualizamos el evento original encontrado
+  const eventoGuardado = await Evento.findByPk(eventoActual.id);
 
-  if (eventoActual.tipo_evento === 'DEVOLUCION') {
-    // Si ya existe un evento de devolución, lo actualizamos (comportamiento PATCH)
-    const devolucionGuardada = await Evento.findByPk(eventoActual.id);
-    if (monto_devolucion !== undefined) devolucionGuardada.monto_devolucion = monto_devolucion;
-    if (codigo_autorizacion !== undefined) devolucionGuardada.codigo_autorizacion = codigo_autorizacion;
-    if (token !== undefined) devolucionGuardada.token = token;
-    if (finalEstado !== undefined) devolucionGuardada.estado = finalEstado;
-    if (tipo_pago !== undefined) devolucionGuardada.tipo_pago = tipo_pago;
+  if (monto_devolucion !== undefined) eventoGuardado.monto_devolucion = monto_devolucion;
+  if (codigo_autorizacion !== undefined) eventoGuardado.codigo_autorizacion = codigo_autorizacion;
+  if (token !== undefined) eventoGuardado.token = token;
+  if (finalEstado !== undefined) eventoGuardado.estado = finalEstado;
+  if (tipo_pago !== undefined) eventoGuardado.tipo_pago = tipo_pago;
 
-    // Restaurar los campos faltantes de la compra original si es que se habían puesto en nulo
-    if (!devolucionGuardada.tipo_pago) devolucionGuardada.tipo_pago = eventoCompra.tipo_pago;
-    if (!devolucionGuardada.codigo_autorizacion) devolucionGuardada.codigo_autorizacion = eventoCompra.codigo_autorizacion;
-    if (!devolucionGuardada.token) devolucionGuardada.token = eventoCompra.token;
-    if (!devolucionGuardada.estado) devolucionGuardada.estado = eventoCompra.estado;
-
-    await devolucionGuardada.save();
-    return await this.obtenerEvento(devolucionGuardada.id);
-  }
-
-  // 2. Verificar que no haya sido ya procesado (si ya existe una devolucion en el historial)
-  // Since obtenerEventoActual returns the LAST event, if it is PAYMENT/COMPRA, we are good.
-  // But double check if there are newer events just in case (race conditions, though unlikely with this logic)
-
-  const evento = await Evento.create({
-    tipo_evento: 'DEVOLUCION',
-    pasajero_id: eventoActual.pasajero_id,
-    empresa_id: eventoActual.empresa_id,
-    convenio_id: eventoActual.convenio_id,
-    ciudad_origen: eventoActual.ciudad_origen,
-    ciudad_destino: eventoActual.ciudad_destino,
-    fecha_viaje: eventoActual.fecha_viaje,
-    hora_salida: eventoActual.hora_salida,
-    terminal_origen: eventoActual.terminal_origen,
-    terminal_destino: eventoActual.terminal_destino,
-    numero_asiento: eventoActual.numero_asiento,
-    numero_ticket: numero_ticket || eventoActual.numero_ticket,
-    pnr: pnr || eventoActual.pnr,
-    tarifa_base: eventoActual.tarifa_base,
-    porcentaje_descuento_aplicado: eventoActual.porcentaje_descuento_aplicado,
-    monto_pagado: 0,
-    monto_devolucion: monto_devolucion,
-    tipo_pago: tipo_pago !== undefined ? tipo_pago : (eventoActual.tipo_pago || eventoCompra.tipo_pago),
-    codigo_autorizacion: codigo_autorizacion !== undefined ? codigo_autorizacion : (eventoActual.codigo_autorizacion || eventoCompra.codigo_autorizacion),
-    token: token !== undefined ? token : (eventoActual.token || eventoCompra.token),
-    estado: finalEstado !== undefined ? finalEstado : (eventoActual.estado || eventoCompra.estado)
-  });
+  await eventoGuardado.save();
+  return await this.obtenerEvento(eventoGuardado.id);
 
   /* 
   // Actualizar contadores del convenio si corresponde (Reversar consumo)
