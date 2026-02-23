@@ -170,6 +170,7 @@ exports.crearCompraEvento = async (data) => {
     estado
   });
 
+  /* 
   // -- RE-PARSING --
   // Actualizar contadores del convenio si corresponde
   if (convenio_id && estado === 'confirmado') {
@@ -186,6 +187,7 @@ exports.crearCompraEvento = async (data) => {
       });
     }
   }
+  */
 
   return await this.obtenerEvento(evento.id);
 };
@@ -249,6 +251,7 @@ exports.crearDevolucionEvento = async (data) => {
     estado: finalEstado
   });
 
+  /* 
   // Actualizar contadores del convenio si corresponde (Reversar consumo)
   if (evento.convenio_id && finalEstado === 'confirmado') {
     const convenio = await Convenio.findByPk(evento.convenio_id);
@@ -260,6 +263,7 @@ exports.crearDevolucionEvento = async (data) => {
       });
     }
   }
+  */
 
   return await this.obtenerEvento(evento.id);
 };
