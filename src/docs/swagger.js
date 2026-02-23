@@ -108,6 +108,8 @@ const options = {
             id: { type: 'integer', example: 1 },
             nombre: { type: 'string', example: 'Convenio ABC' },
             empresa_id: { type: 'integer', example: 1 },
+            empresa_nombre: { type: 'string', example: 'Empresa ABC', description: 'Nombre de la empresa (primer nivel)' },
+            empresa_rut: { type: 'string', example: '76.000.000-1', description: 'RUT de la empresa (primer nivel)' },
             tipo_consulta: { type: 'string', example: 'API_EXTERNA' },
             api_url_id: { type: 'integer', example: 1 },
             endpoint: { type: 'string', example: '/api/integraciones/araucana/validar', description: 'Ruta relativa del endpoint' },
@@ -208,7 +210,7 @@ const options = {
             pnr: { type: 'string', example: 'PNR-XYZ' },
             codigo_autorizacion: { type: 'string', example: '123456' },
             token: { type: 'string', example: 'token_transbank_abc123' },
-            estado: { type: 'string', enum: ['confirmado', 'anulado', 'revertido'], example: 'confirmado' }
+            estado: { type: 'string', enum: ['confirmado', 'anulado', 'revertido', 'error_confirmacion'], example: 'confirmado' }
           }
         },
         ApiKey: {

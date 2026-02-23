@@ -3,11 +3,20 @@ class ConvenioDTO {
         this.id = convenio.id;
         this.nombre = convenio.nombre;
         this.empresa_id = convenio.empresa_id;
+
+        // Extraer empresa a este nivel específico
+        if (convenio.empresa) {
+            this.empresa_nombre = convenio.empresa.nombre;
+            this.empresa_rut = convenio.empresa.rut_empresa;
+        }
+
         this.status = convenio.status;
 
         // Transformar tipo a array com pide el user -> ERROR: User corrected, single value.
         this.tipo_consulta = convenio.tipo;
         this.api_url_id = convenio.api_consulta_id;
+
+        // (Empresa ya extraída arriba)
 
         if (convenio.tipo === 'CODIGO_DESCUENTO') {
             this.endpoint = `/api/convenios/validar/{codigo}`;
@@ -32,15 +41,6 @@ class ConvenioDTO {
         // Consumo acumulado
         this.consumo_tickets = convenio.consumo_tickets || 0;
         this.consumo_monto_descuento = convenio.consumo_monto_descuento || 0;
-
-        // Si incluye la empresa relacionada
-        if (convenio.empresa) {
-            this.empresa = {
-                id: convenio.empresa.id,
-                nombre: convenio.empresa.nombre,
-                rut: convenio.empresa.rut_empresa
-            };
-        }
     }
 
     static fromArray(convenios) {

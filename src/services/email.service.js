@@ -36,7 +36,7 @@ exports.enviarCorreoRechazo = async (correoDestino, nombre, razonRechazo, tipoPa
                 <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     ${razonRechazo}
                 </div>
-                <p>Por favor, envíe las nuevas imágenes a esta dirección de correo: <strong>[correo por definir]</strong></p>
+                <p>En caso de dudas, puedes contactarnos a través de esta dirección de correo electrónico [EMAIL_ADDRESS]</p>
                 <br>
                 <p>Saludos,</p>
                 <p><strong>Equipo Pullman</strong></p>

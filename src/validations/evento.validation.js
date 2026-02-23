@@ -20,7 +20,7 @@ const crearCompra = {
         tarifa_base: Joi.number().integer().required(),
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
-        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
+        estado: Joi.string().valid('confirmado', 'anulado', 'revertido', 'error_confirmacion').allow(null).optional(),
         tipo_pago: Joi.string().allow(null, '').optional()
     })
 };
@@ -33,8 +33,8 @@ const crearDevolucion = {
         pnr: Joi.string().optional(),
         usuario_id: Joi.number().integer().optional(),
         monto_devolucion: Joi.number().integer().min(0).optional(),
-        estado: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
-        status: Joi.string().valid('confirmado', 'anulado', 'revertido').allow(null).optional(),
+        estado: Joi.string().valid('confirmado', 'anulado', 'revertido', 'error_confirmacion').allow(null).optional(),
+        status: Joi.string().valid('confirmado', 'anulado', 'revertido', 'error_confirmacion').allow(null).optional(),
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
         tipo_pago: Joi.string().allow(null, '').optional()
