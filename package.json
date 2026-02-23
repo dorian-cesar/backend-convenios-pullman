@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/dorian-cesar/backend-convenios-pullman#readme",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",

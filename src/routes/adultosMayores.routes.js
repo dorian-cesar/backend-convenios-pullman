@@ -183,6 +183,39 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *               $ref: '#/components/schemas/AdultoMayor'
  *       404:
  *         description: Adulto mayor no encontrado
+ *
+ * /api/adultos-mayores/rechazar/{id}:
+ *   patch:
+ *     summary: Rechazar un adulto mayor por ID y enviar correo de notificación
+ *     tags: [Adultos Mayores]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - razon_rechazo
+ *             properties:
+ *               razon_rechazo:
+ *                 type: string
+ *                 example: "Documentación ilegible o faltante."
+ *     responses:
+ *       200:
+ *         description: Adulto mayor rechazado y notificado
+ *       400:
+ *         description: La razón de rechazo es obligatoria
+ *       404:
+ *         description: Adulto mayor no encontrado
  */
 const { crearAdultoMayor, actualizarAdultoMayor, getAdultoMayor, getPorRut } = require('../validations/adultoMayor.validation');
 const validate = require('../middlewares/validate.middleware');
@@ -194,6 +227,7 @@ router.get('/:id', validate(getAdultoMayor), adultosMayoresController.obtener);
 router.get('/rut/:rut', validate(getPorRut), adultosMayoresController.obtenerPorRut);
 router.put('/:id', validate(actualizarAdultoMayor), adultosMayoresController.actualizar);
 router.patch('/activar/:id', validate(getAdultoMayor), adultosMayoresController.activar);
+router.patch('/rechazar/:id', validate(getAdultoMayor), adultosMayoresController.rechazar);
 router.delete('/:id', validate(getAdultoMayor), adultosMayoresController.eliminar);
 
 /**

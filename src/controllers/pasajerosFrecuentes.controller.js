@@ -78,6 +78,30 @@ exports.activar = async (req, res, next) => {
     }
 };
 
+exports.rechazar = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { razon_rechazo } = req.body;
+
+        if (!razon_rechazo) {
+            return res.status(400).json({ message: 'La razón de rechazo es obligatoria.' });
+        }
+
+        const frecuente = await pasajerosFrecuentesService.actualizar(id, {
+            status: 'INACTIVO',
+            razon_rechazo
+        });
+
+        if (!frecuente) {
+            return res.status(404).json({ message: 'Pasajero Frecuente no encontrado' });
+        }
+
+        res.json({ message: 'Pasajero Frecuente rechazado y notificado exitosamente.', frecuente });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.validarRut = async (req, res, next) => {
     try {
         const { rut } = req.body;

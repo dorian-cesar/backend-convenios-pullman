@@ -79,6 +79,30 @@ exports.activar = async (req, res, next) => {
     }
 };
 
+exports.rechazar = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { razon_rechazo } = req.body;
+
+        if (!razon_rechazo) {
+            return res.status(400).json({ message: 'La razón de rechazo es obligatoria.' });
+        }
+
+        const adulto = await adultosMayoresService.actualizar(id, {
+            status: 'INACTIVO',
+            razon_rechazo
+        });
+
+        if (!adulto) {
+            return res.status(404).json({ message: 'Adulto Mayor no encontrado' });
+        }
+
+        res.json({ message: 'Adulto Mayor rechazado y notificado exitosamente.', adulto });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.validarRut = async (req, res, next) => {
     try {
         const { rut } = req.body;

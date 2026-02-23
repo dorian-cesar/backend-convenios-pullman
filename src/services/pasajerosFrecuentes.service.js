@@ -1,4 +1,5 @@
 const { PasajeroFrecuente } = require('../models');
+const emailService = require('./email.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 const { formatRut } = require('../utils/rut.utils');
 const { Op } = require('sequelize');
@@ -39,6 +40,12 @@ exports.obtenerPorId = async (id) => {
 exports.actualizar = async (id, data) => {
     const frecuente = await PasajeroFrecuente.findByPk(id);
     if (!frecuente) return null;
+
+    // Si se está cambiando el estado a INACTIVO y se proporciona una razón
+    if (data.status === 'INACTIVO' && data.razon_rechazo && data.razon_rechazo !== frecuente.razon_rechazo) {
+        emailService.enviarCorreoRechazo(frecuente.correo, frecuente.nombre, data.razon_rechazo, 'Pasajero Frecuente').catch(console.error);
+    }
+
     return await frecuente.update(data);
 };
 

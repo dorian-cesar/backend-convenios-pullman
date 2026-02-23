@@ -188,6 +188,39 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *               $ref: '#/components/schemas/PasajeroFrecuente'
  *       404:
  *         description: Pasajero frecuente no encontrado
+ *
+ * /api/pasajeros-frecuentes/rechazar/{id}:
+ *   patch:
+ *     summary: Rechazar un pasajero frecuente por ID y enviar correo de notificación
+ *     tags: [Pasajeros Frecuentes]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - razon_rechazo
+ *             properties:
+ *               razon_rechazo:
+ *                 type: string
+ *                 example: "Documentación ilegible o faltante."
+ *     responses:
+ *       200:
+ *         description: Pasajero Frecuente rechazado y notificado
+ *       400:
+ *         description: La razón de rechazo es obligatoria
+ *       404:
+ *         description: Pasajero Frecuente no encontrado
  */
 const { crearPasajeroFrecuente, actualizarPasajeroFrecuente, getPasajeroFrecuente, getPorRut } = require('../validations/pasajeroFrecuente.validation');
 const validate = require('../middlewares/validate.middleware');
@@ -199,6 +232,7 @@ router.get('/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController
 router.get('/rut/:rut', validate(getPorRut), pasajerosFrecuentesController.obtenerPorRut);
 router.put('/:id', validate(actualizarPasajeroFrecuente), pasajerosFrecuentesController.actualizar);
 router.patch('/activar/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController.activar);
+router.patch('/rechazar/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController.rechazar);
 router.delete('/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController.eliminar);
 
 /**

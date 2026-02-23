@@ -183,6 +183,39 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *               $ref: '#/components/schemas/Estudiante'
  *       404:
  *         description: Estudiante no encontrado
+ *
+ * /api/estudiantes/rechazar/{id}:
+ *   patch:
+ *     summary: Rechazar un estudiante por ID y enviar correo de notificación
+ *     tags: [Estudiantes]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - razon_rechazo
+ *             properties:
+ *               razon_rechazo:
+ *                 type: string
+ *                 example: "Documentación ilegible o faltante."
+ *     responses:
+ *       200:
+ *         description: Estudiante rechazado y notificado
+ *       400:
+ *         description: La razón de rechazo es obligatoria
+ *       404:
+ *         description: Estudiante no encontrado
  */
 const { crearEstudiante, actualizarEstudiante, getEstudiante, getPorRut } = require('../validations/estudiante.validation');
 const validate = require('../middlewares/validate.middleware');
@@ -194,6 +227,7 @@ router.get('/:id', validate(getEstudiante), estudiantesController.obtener);
 router.get('/rut/:rut', validate(getPorRut), estudiantesController.obtenerPorRut);
 router.put('/:id', validate(actualizarEstudiante), estudiantesController.actualizar);
 router.patch('/activar/:id', validate(getEstudiante), estudiantesController.activar);
+router.patch('/rechazar/:id', validate(getEstudiante), estudiantesController.rechazar);
 router.delete('/:id', validate(getEstudiante), estudiantesController.eliminar);
 
 /**

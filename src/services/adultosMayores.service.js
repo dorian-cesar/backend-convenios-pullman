@@ -1,4 +1,5 @@
 const { AdultoMayor } = require('../models');
+const emailService = require('./email.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 const { formatRut } = require('../utils/rut.utils');
 const { Op } = require('sequelize');
@@ -38,6 +39,12 @@ exports.obtenerPorId = async (id) => {
 exports.actualizar = async (id, data) => {
     const adulto = await AdultoMayor.findByPk(id);
     if (!adulto) return null;
+
+    // Si se está cambiando el estado a INACTIVO y se proporciona una razón
+    if (data.status === 'INACTIVO' && data.razon_rechazo && data.razon_rechazo !== adulto.razon_rechazo) {
+        emailService.enviarCorreoRechazo(adulto.correo, adulto.nombre, data.razon_rechazo, 'Adulto Mayor').catch(console.error);
+    }
+
     return await adulto.update(data);
 };
 
