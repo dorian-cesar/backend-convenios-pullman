@@ -2,6 +2,7 @@ class EventoDTO {
     constructor(evento) {
         this.id = evento.id;
         this.tipo_evento = evento.tipo_evento;
+        this.tipo_pago = evento.tipo_pago;
         // evento_origen_id removed;
         this.pasajero_id = evento.pasajero_id;
         this.empresa_id = evento.empresa_id;

@@ -346,6 +346,10 @@
               "DEVOLUCION"
             ]
           },
+          "tipo_pago": {
+            "type": "string",
+            "example": "Tarjeta de Crédito"
+          },
           "ciudad_origen": {
             "type": "string",
             "example": "Santiago"
