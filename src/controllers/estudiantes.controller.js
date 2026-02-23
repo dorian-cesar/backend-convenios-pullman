@@ -82,14 +82,14 @@ exports.activar = async (req, res, next) => {
 exports.rechazar = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { razon_rechazo } = req.body;
+        const { razon_rechazo, status } = req.body;
 
         if (!razon_rechazo) {
             return res.status(400).json({ message: 'La razón de rechazo es obligatoria.' });
         }
 
         const estudiante = await estudiantesService.actualizar(id, {
-            status: 'RECHAZADO',
+            status: status || 'RECHAZADO',
             razon_rechazo
         });
 

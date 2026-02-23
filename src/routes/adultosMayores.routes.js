@@ -208,7 +208,12 @@ const authMiddleware = require('../middlewares/auth.middleware');
  *             properties:
  *               razon_rechazo:
  *                 type: string
- *                 example: "Documentación ilegible o faltante."
+ *                 description: Razón por la cual se rechaza al adulto mayor
+ *                 example: "Documentación inválida"
+ *               status:
+ *                 type: string
+ *                 description: Opcional. Estado a asignar (ej. RECHAZADO)
+ *                 example: "RECHAZADO"
  *     responses:
  *       200:
  *         description: Adulto mayor rechazado y notificado

@@ -148,7 +148,9 @@ router.get('/disponibles', convenioController.listarDisponibles);
  *     description: Retorna lista de convenios con detalles de configuración.
  *     tags:
  *       - Convenios
- *     security: []
+ *     security:
+ *       - ApiKeyAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: nombre
