@@ -210,7 +210,7 @@ const options = {
             pnr: { type: 'string', example: 'PNR-XYZ' },
             codigo_autorizacion: { type: 'string', example: '123456' },
             token: { type: 'string', example: 'token_transbank_abc123' },
-            estado: { type: 'string', enum: ['confirmado', 'anulado', 'revertido', 'error_confirmacion'], example: 'confirmado' }
+            estado: { type: 'string', example: 'confirmado', description: 'Estado del evento (e.g. confirmado, anulado, revertido, error_confirmacion)' }
           }
         },
         ApiKey: {

@@ -117,7 +117,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         estado: {
-            type: DataTypes.ENUM('confirmado', 'anulado', 'revertido', 'error_confirmacion'),
+            type: DataTypes.STRING,
             allowNull: true
         }
 
