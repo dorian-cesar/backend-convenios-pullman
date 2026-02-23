@@ -2465,7 +2465,7 @@
       }
     },
     "/api/eventos/devolucion": {
-      "post": {
+      "patch": {
         "summary": "Crear evento de devolución",
         "tags": [
           "Eventos"

@@ -113,7 +113,7 @@ router.post('/compra', validate(eventoValidation.crearCompra), eventosController
 /**
  * @openapi
  * /api/eventos/devolucion:
- *   post:
+ *   patch:
  *     summary: Crear evento de devolución
  *     security:
  *       - bearerAuth: []
@@ -151,7 +151,7 @@ router.post('/compra', validate(eventoValidation.crearCompra), eventosController
  *       404:
  *         description: Evento origen no encontrado
  */
-router.post('/devolucion', validate(eventoValidation.crearDevolucion), eventosController.crearDevolucion);
+router.patch('/devolucion', validate(eventoValidation.crearDevolucion), eventosController.crearDevolucion);
 
 /**
  * @openapi
