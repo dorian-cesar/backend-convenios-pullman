@@ -41,12 +41,14 @@ exports.actualizar = async (id, data) => {
     const frecuente = await PasajeroFrecuente.findByPk(id);
     if (!frecuente) return null;
 
+    let emailEnviado = false;
     // Si se está cambiando el estado a RECHAZADO y se proporciona una razón
     if (data.status === 'RECHAZADO' && data.razon_rechazo && data.razon_rechazo !== frecuente.razon_rechazo) {
-        emailService.enviarCorreoRechazo(frecuente.correo, frecuente.nombre, data.razon_rechazo, 'Pasajero Frecuente').catch(console.error);
+        emailEnviado = await emailService.enviarCorreoRechazo(frecuente.correo, frecuente.nombre, data.razon_rechazo, 'Pasajero Frecuente');
     }
 
-    return await frecuente.update(data);
+    const updated = await frecuente.update(data);
+    return { ...updated.toJSON(), emailEnviado };
 };
 
 exports.eliminar = async (id) => {

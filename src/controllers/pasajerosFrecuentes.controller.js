@@ -96,7 +96,16 @@ exports.rechazar = async (req, res, next) => {
             return res.status(404).json({ message: 'Pasajero Frecuente no encontrado' });
         }
 
-        res.json({ message: 'Pasajero Frecuente rechazado y notificado exitosamente.', frecuente });
+        const { emailEnviado } = frecuente;
+
+        let msg = 'Pasajero Frecuente rechazado exitosamente.';
+        if (emailEnviado) {
+            msg += ' Se envió un correo informando el motivo del rechazo.';
+        } else {
+            msg += ' (Aviso: No se pudo enviar el correo de notificación, revisar logs o API Key).';
+        }
+
+        res.json({ message: msg });
     } catch (error) {
         next(error);
     }

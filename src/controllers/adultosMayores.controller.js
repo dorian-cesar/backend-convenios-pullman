@@ -97,7 +97,16 @@ exports.rechazar = async (req, res, next) => {
             return res.status(404).json({ message: 'Adulto Mayor no encontrado' });
         }
 
-        res.json({ message: 'Adulto Mayor rechazado y notificado exitosamente.', adulto });
+        const { emailEnviado } = adulto;
+
+        let msg = 'Adulto Mayor rechazado exitosamente.';
+        if (emailEnviado) {
+            msg += ' Se envió un correo informando el motivo del rechazo.';
+        } else {
+            msg += ' (Aviso: No se pudo enviar el correo de notificación, revisar logs o API Key).';
+        }
+
+        res.json({ message: msg });
     } catch (error) {
         next(error);
     }

@@ -40,12 +40,14 @@ exports.actualizar = async (id, data) => {
     const estudiante = await Estudiante.findByPk(id);
     if (!estudiante) return null;
 
+    let emailEnviado = false;
     // Si se está cambiando el estado a RECHAZADO y se proporciona una razón
     if (data.status === 'RECHAZADO' && data.razon_rechazo && data.razon_rechazo !== estudiante.razon_rechazo) {
-        emailService.enviarCorreoRechazo(estudiante.correo, estudiante.nombre, data.razon_rechazo, 'Estudiante').catch(console.error);
+        emailEnviado = await emailService.enviarCorreoRechazo(estudiante.correo, estudiante.nombre, data.razon_rechazo, 'Estudiante');
     }
 
-    return await estudiante.update(data);
+    const updated = await estudiante.update(data);
+    return { ...updated.toJSON(), emailEnviado };
 };
 
 exports.eliminar = async (id) => {
