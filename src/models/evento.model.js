@@ -119,6 +119,10 @@ module.exports = (sequelize, DataTypes) => {
         estado: {
             type: DataTypes.STRING,
             allowNull: true
+        },
+        confirmed_pnrs: {
+            type: DataTypes.JSON,
+            allowNull: true
         }
 
     }, {

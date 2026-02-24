@@ -26,6 +26,7 @@ class EventoDTO {
         this.codigo_autorizacion = evento.codigo_autorizacion;
         this.token = evento.token;
         this.estado = evento.estado;
+        this.confirmed_pnrs = evento.confirmed_pnrs;
 
 
         if (evento.Pasajero) {

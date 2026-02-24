@@ -123,7 +123,8 @@ exports.crearCompraEvento = async (data) => {
     codigo_autorizacion,
     token,
     estado,
-    tipo_pago
+    tipo_pago,
+    confirmed_pnrs
   } = data;
 
   const pasajero = await Pasajero.findByPk(pasajero_id);
@@ -146,10 +147,9 @@ exports.crearCompraEvento = async (data) => {
   // (REMOVED) Verificar topes de convenio: A petición del negocio ya no se valida stock/monto al comprar,
   // solo se registra el consumo posteriormente.
 
-  const evento = await Evento.create({
+  const eventoDataToSave = {
     tipo_evento: 'COMPRA',
     tipo_pago,
-    // evento_origen_id removed
     pasajero_id,
     empresa_id,
     convenio_id,
@@ -168,7 +168,14 @@ exports.crearCompraEvento = async (data) => {
     codigo_autorizacion,
     token,
     estado
-  });
+  };
+
+  // Solo guardamos el array si tipo_pago es credito y viene el arreglo en la peticion
+  if (tipo_pago === 'credito' && Array.isArray(confirmed_pnrs)) {
+    eventoDataToSave.confirmed_pnrs = confirmed_pnrs;
+  }
+
+  const evento = await Evento.create(eventoDataToSave);
 
   /* 
   // -- RE-PARSING --
