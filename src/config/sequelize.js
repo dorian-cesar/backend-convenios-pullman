@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
+const { getChileOffset } = require('../utils/timezone');
 
 const sequelize = new Sequelize(
   process.env.NOMBRE_BD,
@@ -10,7 +11,11 @@ const sequelize = new Sequelize(
     port: process.env.PORT_BD,
     dialect: 'mysql',
     logging: false,
-    timezone: '-04:00', // America/Santiago standard offset (adjust if needed or use named TZ if supported by driver)
+    timezone: getChileOffset(), // Dynamic offset depending on DST (summer/winter time)
+    dialectOptions: {
+      dateStrings: true,
+      typeCast: true
+    }
   }
 );
 

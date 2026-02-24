@@ -1,3 +1,4 @@
+process.env.TZ = 'America/Santiago';
 const express = require('express');
 const routes = require('./routes');
 const cors = require('cors');
