@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
-    "seed": "node src/seeds/index.js",
-    "clean:db": "node src/utils/clean-db.js",
-    "test": "jest --coverage --runInBand"
+    "dev": "TZ='America/Santiago' node --watch src/server.js",
+    "start": "TZ='America/Santiago' node src/server.js",
+    "seed": "TZ='America/Santiago' node src/seeds/index.js",
+    "clean:db": "TZ='America/Santiago' node src/utils/clean-db.js",
+    "test": "TZ='America/Santiago' jest --coverage --runInBand"
   },
   "devDependencies": {
     "jest": "^30.2.0",
