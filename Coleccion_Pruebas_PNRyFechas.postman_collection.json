@@ -1,0 +1,111 @@
+{
+    "info": {
+        "_postman_id": "8b9e6e4f-7cf1-4a4b-8e10-c09a8f7c6d5e",
+        "name": "Pruebas Pullman - Eventos",
+        "description": "Colección para probar los últimos arreglos de `fecha_viaje` (como String, sin restar días) y el enriquecimiento de `confirmed_pnrs` en la compra y búsqueda.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Crear Compra (Con PNRs y Tarjeta)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"pasajero_id\": 68,\n    \"empresa_id\": 77,\n    \"convenio_id\": 116,\n    \"ciudad_origen\": \"Santiago\",\n    \"ciudad_destino\": \"Puerto Montt\",\n    \"fecha_viaje\": \"2026-02-28\",\n    \"hora_salida\": \"10:01\",\n    \"terminal_origen\": \"Terminal Sur\",\n    \"terminal_destino\": \"Terminal 5566\",\n    \"numero_asiento\": \"40\",\n    \"numero_ticket\": \"TS260225153740264JPQK\",\n    \"pnr\": \"TS260225153740264JPQK\",\n    \"tarifa_base\": 10000,\n    \"codigo_autorizacion\": \"1213\",\n    \"token\": \"01ab05d36d8e1031ad0e106fc2f974f95dbf5f31d91d6d9c9d26d3f3340bb1be\",\n    \"estado\": \"confirmado\",\n    \"tipo_pago\": \"credito\",\n    \"confirmed_pnrs\": [\n        \"TS260225153740264JPQK\",\n        \"TS260225153742334IDUS\"\n    ]\n}"
+                },
+                "url": {
+                    "raw": "http://localhost:3000/api/eventos/compra",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "eventos",
+                        "compra"
+                    ]
+                },
+                "description": "Crea una compra usando crédito. Observa que el Body raw NO es un arreglo grande, sino un `{}` estándar que contiene dentro el arreglo `confirmed_pnrs`."
+            },
+            "response": []
+        },
+        {
+            "name": "2. Buscar Eventos (Por PNR / RUT)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"pnr\": \"TS260225153740264JPQK\"\n}"
+                },
+                "url": {
+                    "raw": "http://localhost:3000/api/eventos/buscar",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "eventos",
+                        "buscar"
+                    ]
+                },
+                "description": "Busca un evento por su PNR o por el RUT para verificar la reconstrucción de la lista `confirmed_pnrs` y comprobar que trae monto_pagado y numero_asiento dentro del JSON."
+            },
+            "response": []
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{TOKEN}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "TOKEN",
+            "value": "pega_aqui_tu_token_jwt_valido",
+            "type": "string"
+        }
+    ]
+}
