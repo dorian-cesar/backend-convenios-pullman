@@ -16,6 +16,8 @@ const Estudiante = require('./estudiante.model')(sequelize, Sequelize.DataTypes)
 const AdultoMayor = require('./adultoMayor.model')(sequelize, Sequelize.DataTypes);
 const PasajeroFrecuente = require('./pasajeroFrecuente.model')(sequelize, Sequelize.DataTypes);
 const Carabinero = require('./carabinero.model')(sequelize, Sequelize.DataTypes);
+const ConvenioRuta = require('./convenioRuta.model')(sequelize, Sequelize.DataTypes);
+const ConvenioRutaConfiguracion = require('./convenioRutaConfiguracion.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -74,6 +76,14 @@ Evento.belongsTo(Convenio, { foreignKey: 'convenio_id', onDelete: 'NO ACTION' })
 Carabinero.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
 Carabinero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
+// CONVENIO -> CONVENIO RUTAS (1:N)
+Convenio.hasMany(ConvenioRuta, { foreignKey: 'convenio_id', as: 'rutas' });
+ConvenioRuta.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
+
+// CONVENIO RUTA -> CONVENIO RUTA CONFIGURACIONES (1:N)
+ConvenioRuta.hasMany(ConvenioRutaConfiguracion, { foreignKey: 'convenio_ruta_id', as: 'configuraciones' });
+ConvenioRutaConfiguracion.belongsTo(ConvenioRuta, { foreignKey: 'convenio_ruta_id', as: 'ruta' });
+
 
 module.exports = {
   sequelize,
@@ -90,5 +100,7 @@ module.exports = {
   Estudiante,
   AdultoMayor,
   PasajeroFrecuente,
-  Carabinero
+  Carabinero,
+  ConvenioRuta,
+  ConvenioRutaConfiguracion
 };

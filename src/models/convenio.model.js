@@ -89,12 +89,29 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'
+        },
+        tipo_convenio: {
+            type: DataTypes.ENUM('normal', 'especial'),
+            allowNull: false,
+            defaultValue: 'normal',
+            comment: 'Determina si el convenio aplica a nivel global o por rutas específicas'
         }
     }, {
         tableName: 'convenios',
         timestamps: true,
         paranoid: true
     });
+
+    Convenio.associate = function (models) {
+        // Un convenio puede tener múltiples rutas si es especial
+        Convenio.hasMany(models.ConvenioRuta, {
+            foreignKey: 'convenio_id',
+            as: 'rutas'
+        });
+
+        // Relación existente con Eventos, Pasajeros, Empresa, etc., deben de permanecer intactas 
+        // asumiendo que el framework invoca models.Convenio.associate(...) genéricamente
+    };
 
     return Convenio;
 };
