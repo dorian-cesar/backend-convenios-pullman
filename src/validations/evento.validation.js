@@ -8,7 +8,7 @@ const crearCompra = {
         convenio_id: Joi.number().integer().allow(null).optional(),
         ciudad_origen: Joi.string().required(),
         ciudad_destino: Joi.string().required(),
-        fecha_viaje: Joi.date().iso().required(),
+        fecha_viaje: Joi.string().required(),
         hora_salida: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/).required().messages({
             'string.pattern.base': 'El formato de hora_salida debe ser HH:mm'
         }),
