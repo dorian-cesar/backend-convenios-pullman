@@ -6,7 +6,6 @@ const EventoDTO = require('../dtos/evento.dto');
  */
 exports.crearCompra = async (req, res, next) => {
   try {
-    console.log("=== PAYLOAD ENTRANTE (CONTROLLER) ===", req.body);
     const evento = await eventosService.crearCompraEvento(req.body);
     res.status(201).json(new EventoDTO(evento));
   } catch (error) {
