@@ -295,17 +295,42 @@ exports.listarEventos = async (filters = {}) => {
     ],
     order: [[sortField, sortOrder]],
     limit: limitVal,
-    order: [[sortField, sortOrder]],
-    limit: limitVal,
     offset,
     attributes: [
       'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
       'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
       'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
       'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_devolucion', 'fecha_evento',
-      'codigo_autorizacion', 'token', 'estado', 'createdAt', 'updatedAt'
+      'codigo_autorizacion', 'token', 'estado', 'confirmed_pnrs', 'createdAt', 'updatedAt'
     ]
   });
+
+  // Enriquecer los arreglos confirmed_pnrs con numero_asiento y monto_pagado
+  const enrichedRows = await Promise.all(data.rows.map(async (row) => {
+    // Si tiene arreglos PNRs validos, los interamos y consultamos la db para obtener los detalles extras
+    if (row.confirmed_pnrs && Array.isArray(row.confirmed_pnrs) && row.confirmed_pnrs.length > 0) {
+      const pnrsDetalles = await Promise.all(row.confirmed_pnrs.map(async (pnrString) => {
+        const eventoPnr = await Evento.findOne({
+          where: { pnr: pnrString, tipo_evento: 'COMPRA' },
+          attributes: ['numero_asiento', 'monto_pagado']
+        });
+
+        return {
+          pnr: pnrString,
+          numero_asiento: eventoPnr ? eventoPnr.numero_asiento : null,
+          monto_pagado: eventoPnr ? eventoPnr.monto_pagado : null
+        };
+      }));
+      // Evitamos mutar directamente el model the Sequelize, extraemos los datos al objecto simple
+      const rawEvento = row.toJSON();
+      rawEvento.confirmed_pnrs = pnrsDetalles;
+      return rawEvento;
+    }
+    return row.toJSON();
+  }));
+
+  // Sobrescribir rows con la data enriquecida y en crudo
+  data.rows = enrichedRows;
 
   return getPagingData(data, page, limitVal);
 };
