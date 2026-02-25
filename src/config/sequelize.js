@@ -11,11 +11,7 @@ const sequelize = new Sequelize(
     port: process.env.PORT_BD,
     dialect: 'mysql',
     logging: false,
-    timezone: getChileOffset(), // Dynamic offset depending on DST (summer/winter time)
-    dialectOptions: {
-      dateStrings: true,
-      typeCast: true
-    }
+    timezone: getChileOffset() // Dynamic offset depending on DST (summer/winter time)
   }
 );
 

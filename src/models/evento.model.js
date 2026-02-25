@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
         },
 
         fecha_viaje: {
-            type: DataTypes.DATEONLY,
+            type: DataTypes.STRING,
             allowNull: false
         },
 
