@@ -167,7 +167,8 @@ exports.crearCompraEvento = async (data) => {
     monto_pagado: montoPagado,
     codigo_autorizacion,
     token,
-    estado
+    estado,
+    fecha_evento: new Date().toISOString()
   };
 
   // Solo guardamos el array si tipo_pago es credito y viene el arreglo en la peticion

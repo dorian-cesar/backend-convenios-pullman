@@ -104,8 +104,8 @@ module.exports = (sequelize, DataTypes) => {
         // Sof delete lógico manejado por paranoid
 
         fecha_evento: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW
+            type: DataTypes.STRING,
+            allowNull: true
         },
         // 💳 TRANSBANK FIELDS
         codigo_autorizacion: {
