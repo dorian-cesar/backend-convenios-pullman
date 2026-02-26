@@ -1,6 +1,6 @@
 class FachDTO {
     constructor(fach) {
-        // Ignoramos fach.id para no retornarlo en los payloads de la API, usando rut como llave pública.
+        this.id = fach.id;
         this.rut = fach.rut;
         this.nombre_completo = fach.nombre_completo;
         this.status = fach.status;
