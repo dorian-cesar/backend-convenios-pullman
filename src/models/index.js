@@ -16,6 +16,7 @@ const Estudiante = require('./estudiante.model')(sequelize, Sequelize.DataTypes)
 const AdultoMayor = require('./adultoMayor.model')(sequelize, Sequelize.DataTypes);
 const PasajeroFrecuente = require('./pasajeroFrecuente.model')(sequelize, Sequelize.DataTypes);
 const Carabinero = require('./carabinero.model')(sequelize, Sequelize.DataTypes);
+const Fach = require('./fach.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -74,6 +75,10 @@ Evento.belongsTo(Convenio, { foreignKey: 'convenio_id', onDelete: 'NO ACTION' })
 Carabinero.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
 Carabinero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
+// FACH -> EMPRESA / CONVENIO
+Fach.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+Fach.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
+
 
 module.exports = {
   sequelize,
@@ -90,5 +95,6 @@ module.exports = {
   Estudiante,
   AdultoMayor,
   PasajeroFrecuente,
-  Carabinero
+  Carabinero,
+  Fach
 };
