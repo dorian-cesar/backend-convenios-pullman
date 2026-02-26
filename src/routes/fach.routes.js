@@ -210,4 +210,82 @@ router.patch(
     fachController.cambiarEstado
 );
 
+/**
+ * @swagger
+ * /api/fach/validar:
+ *   post:
+ *     summary: Validar RUT de funcionario FACH
+ *     description: Endpoint para cajas. Valida si el RUT pertenece a FACH. Si es válido y activo, retorna o crea el pasajero.
+ *     tags: [FACH]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *             properties:
+ *               rut:
+ *                 type: string
+ *                 example: "12345678-9"
+ *     security:
+ *       - bearerAuth: []
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Validación exitosa.
+ *       400:
+ *         description: RUT inválido o faltante.
+ *       403:
+ *         description: Funcionario inactivo.
+ *       404:
+ *         description: RUT no encontrado.
+ */
+router.post(
+    '/validar',
+    authMiddleware,
+    validate({ body: fachValidation.validar }),
+    fachController.validar
+);
+
+/**
+ * @swagger
+ * /api/fach/validar-rut:
+ *   post:
+ *     summary: Validar RUT de funcionario FACH (Estándar)
+ *     description: Endpoint estandarizado para validación. Valida si el RUT pertenece a FACH. Si es válido y activo, retorna o crea el pasajero.
+ *     tags: [FACH]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rut
+ *             properties:
+ *               rut:
+ *                 type: string
+ *                 example: "12345678-9"
+ *     security:
+ *       - bearerAuth: []
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Validación exitosa.
+ *       400:
+ *         description: RUT inválido o faltante.
+ *       403:
+ *         description: Funcionario inactivo.
+ *       404:
+ *         description: RUT no encontrado.
+ */
+router.post(
+    '/validar-rut',
+    authMiddleware,
+    validate({ body: fachValidation.validar }),
+    fachController.validar
+);
+
 module.exports = router;

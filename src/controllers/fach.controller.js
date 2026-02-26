@@ -62,3 +62,46 @@ exports.cambiarEstado = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.validar = async (req, res, next) => {
+    try {
+        const { rut } = req.body;
+        if (!rut) {
+            return res.status(400).json({ message: 'El RUT es requerido' });
+        }
+
+        const formattedRut = formatRut(rut);
+        const fachService = require('../services/fach.service');
+        let fachReg;
+        try {
+            fachReg = await fachService.obtenerPorRut(formattedRut);
+        } catch (e) {
+            // Service throws Error if not found
+            return res.status(404).json({ message: 'RUT no encontrado en registros FACH' });
+        }
+
+        if (!fachReg.status || fachReg.status.toUpperCase() !== 'ACTIVO') {
+            return res.status(403).json({ message: 'El funcionario FACH no se encuentra activo' });
+        }
+
+        const pasajerosService = require('../services/pasajeros.service');
+        const nombreCompleto = fachReg.nombre_completo || '';
+        const nombreParts = nombreCompleto.split(' ');
+        const nombres = nombreParts[0] || 'Funcionario';
+        const apellidos = nombreParts.slice(1).join(' ') || 'FACH';
+
+        const result = await pasajerosService.validarYRegistrarPasajero({
+            rut: formattedRut,
+            nombres,
+            apellidos,
+            tipo_pasajero_id: 1,
+            empresa_nombre_defecto: 'FACH',
+            convenio_nombre_defecto: 'FACH'
+        });
+
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error en validar FACH:', error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};

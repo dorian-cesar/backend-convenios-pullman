@@ -40,6 +40,16 @@ const schemas = {
         rut: Joi.string().optional(),
         search: Joi.string().optional(),
         status: Joi.string().valid('ACTIVO', 'INACTIVO').optional()
+    }),
+
+    validar: Joi.object({
+        rut: Joi.string()
+            .pattern(rutPattern)
+            .custom(rutValidator, 'Validación Matemática de RUT')
+            .required()
+            .messages({
+                'string.pattern.base': 'El RUT debe tener el formato 12345678-9 (sin puntos, e incluir el guion)'
+            })
     })
 };
 
