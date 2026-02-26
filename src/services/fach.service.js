@@ -60,7 +60,7 @@ exports.obtenerTodos = async (filters = {}) => {
     }
 
     if (search) {
-        where.nombre_completo = { [Op.like]: `%${search}%` };
+        where.nombre_completo = search;
     }
 
     if (status) {
