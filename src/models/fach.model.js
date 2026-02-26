@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         convenio_id: {
             type: DataTypes.INTEGER,
-            allowNull: true
+            allowNull: true,
+            defaultValue: 158
         }
     }, {
         tableName: 'fach',
