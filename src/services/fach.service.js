@@ -72,7 +72,7 @@ exports.obtenerTodos = async (filters = {}) => {
         limit: limitVal,
         offset,
         include: getIncludeOptions(),
-        order: [['createdAt', 'DESC']]
+        order: [['rut', 'ASC']]
     });
 
     return getPagingData(data, pageVal, limitVal);
