@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         empresa_id: {
             type: DataTypes.INTEGER,
-            allowNull: true
+            allowNull: true,
+            defaultValue: 101
         },
         convenio_id: {
             type: DataTypes.INTEGER,
