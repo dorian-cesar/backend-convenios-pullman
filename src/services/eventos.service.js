@@ -312,13 +312,14 @@ exports.listarEventos = async (filters = {}) => {
       const pnrsDetalles = await Promise.all(row.confirmed_pnrs.map(async (pnrString) => {
         const eventoPnr = await Evento.findOne({
           where: { pnr: pnrString, tipo_evento: 'COMPRA' },
-          attributes: ['numero_asiento', 'monto_pagado']
+          attributes: ['numero_asiento', 'monto_pagado', 'tarifa_base']
         });
 
         return {
           pnr: pnrString,
           numero_asiento: eventoPnr ? eventoPnr.numero_asiento : null,
-          monto_pagado: eventoPnr ? eventoPnr.monto_pagado : null
+          monto_pagado: eventoPnr ? eventoPnr.monto_pagado : null,
+          tarifa_base: eventoPnr ? eventoPnr.tarifa_base : null
         };
       }));
       // Evitamos mutar directamente el model the Sequelize, extraemos los datos al objecto simple
@@ -361,13 +362,14 @@ exports.obtenerEvento = async (id) => {
     const pnrsDetalles = await Promise.all(evento.confirmed_pnrs.map(async (pnrString) => {
       const eventoPnr = await Evento.findOne({
         where: { pnr: pnrString, tipo_evento: 'COMPRA' },
-        attributes: ['numero_asiento', 'monto_pagado']
+        attributes: ['numero_asiento', 'monto_pagado', 'tarifa_base']
       });
 
       return {
         pnr: pnrString,
         numero_asiento: eventoPnr ? eventoPnr.numero_asiento : null,
-        monto_pagado: eventoPnr ? eventoPnr.monto_pagado : null
+        monto_pagado: eventoPnr ? eventoPnr.monto_pagado : null,
+        tarifa_base: eventoPnr ? eventoPnr.tarifa_base : null
       };
     }));
 
