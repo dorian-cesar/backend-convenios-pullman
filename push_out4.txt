@@ -1,0 +1,7 @@
+To github.com:dorian-cesar/backend-convenios-pullman.git
+ ! [rejected]        develop -> develop (non-fast-forward)
+error: falló el empuje de algunas referencias a 'github.com:dorian-cesar/backend-convenios-pullman.git'
+ayuda: Updates were rejected because the tip of your current branch is behind
+ayuda: its remote counterpart. If you want to integrate the remote changes,
+ayuda: use 'git pull' before pushing again.
+ayuda: See the 'Note about fast-forwards' in 'git push --help' for details.
