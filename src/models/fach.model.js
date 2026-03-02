@@ -3,11 +3,12 @@ module.exports = (sequelize, DataTypes) => {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
+            primaryKey: true,
             allowNull: false
         },
         rut: {
             type: DataTypes.STRING,
-            primaryKey: true,
+            unique: true,
             allowNull: false
         },
         nombre_completo: {
