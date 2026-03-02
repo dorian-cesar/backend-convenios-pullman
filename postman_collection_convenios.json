@@ -1,0 +1,435 @@
+{
+    "info": {
+        "_postman_id": "convenios-pullman-collection",
+        "name": "Convenios Pullman",
+        "description": "Colección de endpoints locales para la gestión de Convenios en Pullman Bus",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Convenios",
+            "item": [
+                {
+                    "name": "Listar Convenios",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios?page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar Convenios Activos",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/activos",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                "activos"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar Convenios Disponibles",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/disponibles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                "disponibles"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Crear Convenio",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Convenio Verano 2026\",\n    \"empresa_id\": 1,\n    \"tipo_consulta\": \"CODIGO_DESCUENTO\",\n    \"codigo\": \"VERANO2026\",\n    \"porcentaje_descuento\": 10,\n    \"tope_monto_descuento\": 1000000,\n    \"tope_cantidad_tickets\": 50,\n    \"limitar_por_stock\": false,\n    \"limitar_por_monto\": true,\n    \"fecha_inicio\": \"2026-01-01T00:00:00Z\",\n    \"fecha_termino\": \"2026-12-31T23:59:59Z\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obtener Convenio por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Actualizar Convenio",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Convenio Invierno 2026\",\n    \"status\": \"ACTIVO\",\n    \"porcentaje_descuento\": 15,\n    \"codigo\": \"INVIERNO2026\",\n    \"tope_monto_descuento\": 500000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Actualizar Consumo Convenio (Manual)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"consumo_tickets\": 10,\n    \"consumo_monto_descuento\": 50000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/:id/consumo",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                ":id",
+                                "consumo"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Eliminar Convenio",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Validar Código General",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/validar/:codigo",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                "validar",
+                                ":codigo"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "codigo",
+                                    "value": "VERANO2026"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Validar Código con ID de Convenio",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"convenio_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/validar/:codigo",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                "validar",
+                                ":codigo"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "codigo",
+                                    "value": "VERANO2026"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Consultar Disponibilidad Global de Convenio",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/convenios/:id/disponibilidad",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "convenios",
+                                ":id",
+                                "disponibilidad"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Crear Evento Compra (Resta de Cupo / Consumo)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"pasajero_id\": 1,\n    \"empresa_id\": 1,\n    \"convenio_id\": 1,\n    \"ciudad_origen\": \"Santiago\",\n    \"ciudad_destino\": \"Viña del Mar\",\n    \"fecha_viaje\": \"2026-02-28T12:00:00Z\",\n    \"hora_salida\": \"12:00\",\n    \"numero_asiento\": \"15\",\n    \"numero_ticket\": \"TK-12345\",\n    \"pnr\": \"ABC1234\",\n    \"terminal_origen\": \"Alameda\",\n    \"terminal_destino\": \"Terminal Viña\",\n    \"tarifa_base\": 15000,\n    \"estado\": \"confirmado\",\n    \"tipo_pago\": \"WEBPAY\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/eventos/compra",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "eventos",
+                                "compra"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Crear Evento Compra (Devolución Real de Cupo / Reversa)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"pasajero_id\": 1,\n    \"empresa_id\": 1,\n    \"convenio_id\": 1,\n    \"ciudad_origen\": \"Santiago\",\n    \"ciudad_destino\": \"Viña del Mar\",\n    \"fecha_viaje\": \"2026-02-28T12:00:00Z\",\n    \"hora_salida\": \"12:00\",\n    \"numero_ticket\": \"TK-12345\",\n    \"pnr\": \"ABC1234\",\n    \"tarifa_base\": -15000,\n    \"estado\": \"confirmado\",\n    \"tipo_pago\": \"WEBPAY\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/eventos/compra",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "eventos",
+                                "compra"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000"
+        },
+        {
+            "key": "token",
+            "value": "YOUR_JWT_TOKEN_HERE"
+        }
+    ]
+}
