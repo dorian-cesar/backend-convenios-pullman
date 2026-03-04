@@ -440,7 +440,9 @@ exports.validarYRegistrarPasajero = async ({ rut, nombres, apellidos, correo, te
     descuentos: convenio ? [
       {
         convenio: convenio.nombre,
-        porcentaje: convenio.porcentaje_descuento || 0
+        porcentaje: convenio.porcentaje_descuento || 0,
+        tipo_descuento: convenio.tipo_descuento || 'Porcentaje',
+        valor_descuento: convenio.valor_descuento !== null ? convenio.valor_descuento : convenio.porcentaje_descuento
       }
     ] : []
   };

@@ -122,7 +122,9 @@ exports.validar = async (req, res, next) => {
                     descuentosDisponibles.push({
                         id: c.id,
                         convenio: c.nombre,
-                        porcentaje: c.porcentaje_descuento || 0
+                        porcentaje: c.porcentaje_descuento || 0,
+                        tipo_descuento: c.tipo_descuento || 'Porcentaje',
+                        valor_descuento: c.valor_descuento !== null ? c.valor_descuento : c.porcentaje_descuento
                     });
                 });
             } else {

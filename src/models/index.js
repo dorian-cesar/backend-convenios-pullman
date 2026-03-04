@@ -17,6 +17,8 @@ const AdultoMayor = require('./adultoMayor.model')(sequelize, Sequelize.DataType
 const PasajeroFrecuente = require('./pasajeroFrecuente.model')(sequelize, Sequelize.DataTypes);
 const Carabinero = require('./carabinero.model')(sequelize, Sequelize.DataTypes);
 const Fach = require('./fach.model')(sequelize, Sequelize.DataTypes);
+const ConvenioRuta = require('./convenioRuta.model')(sequelize, Sequelize.DataTypes);
+const ConvenioRutaConfig = require('./convenioRutaConfig.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -57,7 +59,13 @@ Convenio.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsult
 Empresa.hasMany(ApiConsulta, { foreignKey: 'empresa_id', as: 'apisConsulta', onDelete: 'NO ACTION' });
 ApiConsulta.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 'NO ACTION' });
 
+// CONVENIO -> CONVENIO_RUTA (1:N)
+Convenio.hasMany(ConvenioRuta, { foreignKey: 'convenio_id', as: 'rutas', onDelete: 'NO ACTION' });
+ConvenioRuta.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio', onDelete: 'NO ACTION' });
 
+// CONVENIO_RUTA -> CONVENIO_RUTA_CONFIG (1:N)
+ConvenioRuta.hasMany(ConvenioRutaConfig, { foreignKey: 'convenio_ruta_id', as: 'configs', onDelete: 'NO ACTION' });
+ConvenioRutaConfig.belongsTo(ConvenioRuta, { foreignKey: 'convenio_ruta_id', as: 'ruta', onDelete: 'NO ACTION' });
 
 Pasajero.hasMany(Evento, { foreignKey: 'pasajero_id', onDelete: 'NO ACTION' });
 Evento.belongsTo(Pasajero, { foreignKey: 'pasajero_id', onDelete: 'NO ACTION' });
@@ -96,5 +104,7 @@ module.exports = {
   AdultoMayor,
   PasajeroFrecuente,
   Carabinero,
-  Fach
+  Fach,
+  ConvenioRuta,
+  ConvenioRutaConfig
 };

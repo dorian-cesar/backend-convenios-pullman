@@ -133,16 +133,31 @@ exports.crearCompraEvento = async (data) => {
   const empresa = await Empresa.findByPk(empresa_id);
   if (!empresa) throw new NotFoundError('Empresa no encontrada');
 
-  let porcentajeDescuento = 0;
+  let porcentajeDescuentoAplicado = 0;
+  let montoPagado = tarifa_base;
+
   if (convenio_id) {
     const convenio = await Convenio.findByPk(convenio_id);
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
+
     if (convenio.status === 'ACTIVO') {
-      porcentajeDescuento = convenio.porcentaje_descuento || 0;
+      // Lógica de Descuentos (Fase 3: Expandida)
+      if (convenio.tipo_descuento === 'Monto Fijo') {
+        const descuentoUnico = convenio.valor_descuento || 0;
+        montoPagado = Math.max(0, tarifa_base - descuentoUnico);
+        porcentajeDescuentoAplicado = 0;
+      } else if (convenio.tipo_descuento === 'Tarifa Plana') {
+        // TODO: La tarifa plana requerirá evaluar la ruta específica.
+        // Para la migración actual asume 0 descuento si no hay configuración
+        montoPagado = tarifa_base;
+        porcentajeDescuentoAplicado = 0;
+      } else {
+        // Fallback a Porcentaje (Lee la nueva columna, si falla, lee la antigua)
+        porcentajeDescuentoAplicado = convenio.valor_descuento !== null ? convenio.valor_descuento : (convenio.porcentaje_descuento || 0);
+        montoPagado = Math.round(tarifa_base - ((tarifa_base * porcentajeDescuentoAplicado) / 100));
+      }
     }
   }
-
-  const montoPagado = calcularMontoConDescuento(tarifa_base, porcentajeDescuento);
 
   // (REMOVED) Verificar topes de convenio: A petición del negocio ya no se valida stock/monto al comprar,
   // solo se registra el consumo posteriormente.
@@ -163,7 +178,7 @@ exports.crearCompraEvento = async (data) => {
     numero_ticket,
     pnr,
     tarifa_base,
-    porcentaje_descuento_aplicado: porcentajeDescuento,
+    porcentaje_descuento_aplicado: porcentajeDescuentoAplicado,
     monto_pagado: montoPagado,
     codigo_autorizacion,
     token,

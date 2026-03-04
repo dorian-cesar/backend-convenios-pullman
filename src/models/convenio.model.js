@@ -55,6 +55,23 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             comment: 'Código de descuento opcional para el convenio'
         },
+        tipo_alcance: {
+            type: DataTypes.ENUM('Global', 'Rutas Especificas'),
+            allowNull: false,
+            defaultValue: 'Global',
+            comment: 'Alcance del convenio (todas las rutas o específicas)'
+        },
+        tipo_descuento: {
+            type: DataTypes.ENUM('Porcentaje', 'Monto Fijo', 'Tarifa Plana'),
+            allowNull: false,
+            defaultValue: 'Porcentaje',
+            comment: 'Forma en que se aplica el descuento'
+        },
+        valor_descuento: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true,
+            comment: 'Valor del descuento (Porcentaje o Monto Fijo). Null para Tarifa Plana'
+        },
         limitar_por_stock: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
@@ -93,7 +110,21 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'convenios',
         timestamps: true,
-        paranoid: true
+        paranoid: true,
+        validate: {
+            checkValorDescuento() {
+                if (this.tipo_descuento === 'Tarifa Plana' && this.valor_descuento !== null) {
+                    throw new Error('El valor_descuento debe ser nulo cuando el tipo_descuento es Tarifa Plana');
+                }
+                if ((this.tipo_descuento === 'Porcentaje' || this.tipo_descuento === 'Monto Fijo') && this.valor_descuento === null) {
+                    // Permitimos el paso momentáneo si tienen porcentaje_descuento configurado a nivel antiguo, 
+                    // para no romper la app en el ínterin de migración.
+                    if (this.porcentaje_descuento === null || this.porcentaje_descuento === undefined) {
+                        throw new Error(`El valor_descuento es obligatorio cuando el tipo_descuento es ${this.tipo_descuento}`);
+                    }
+                }
+            }
+        }
     });
 
     return Convenio;
