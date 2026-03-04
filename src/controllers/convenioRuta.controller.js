@@ -39,6 +39,26 @@ const convenioRutaController = {
                 return res.status(400).json({ error: 'Este convenio es Global, debe cambiar su tipo_alcance primero.' });
             }
 
+            // Validar congruencia estricta entre tipo de descuento del padre y los "precios" enviados en las configuraciones
+            for (const ruta of rutas) {
+                for (const config of ruta.configuraciones) {
+                    if (convenio.tipo_descuento === 'Porcentaje') {
+                        if (config.precio_solo_ida > 100 || (config.precio_ida_vuelta && config.precio_ida_vuelta > 100)) {
+                            return res.status(400).json({
+                                error: 'Incongruencia: El convenio es de tipo Porcentaje. Las configuraciones de ruta no pueden tener valores mayores a 100.'
+                            });
+                        }
+                    } else if (convenio.tipo_descuento === 'Tarifa Plana' || convenio.tipo_descuento === 'Monto Fijo') {
+                        // Verificamos de forma general que no estén enviando tarifas con lógica de %
+                        if (config.precio_solo_ida > 0 && config.precio_solo_ida <= 100) {
+                            return res.status(400).json({
+                                error: `Incongruencia: El convenio es de tipo ${convenio.tipo_descuento}. Las configuraciones enviadas (ej: ${config.precio_solo_ida}) parecen ser valores porcentuales. Debe enviar el monto real.`
+                            });
+                        }
+                    }
+                }
+            }
+
             await convenioRutaService.agregarRutasAConvenio(id, rutas);
 
             // Return updated state
