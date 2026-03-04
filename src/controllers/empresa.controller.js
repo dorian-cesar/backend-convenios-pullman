@@ -27,7 +27,9 @@ exports.listarConDescuentos = async (req, res, next) => {
       // Map Convention -> Discount
       const allDiscounts = empresa.convenios.map(c => {
         return {
-          porcentaje_descuento: c.porcentaje_descuento || 0
+          porcentaje_descuento: c.porcentaje_descuento || 0,
+          tipo_descuento: c.tipo_descuento || 'Porcentaje',
+          valor_descuento: c.valor_descuento !== null ? c.valor_descuento : c.porcentaje_descuento
         };
       });
 

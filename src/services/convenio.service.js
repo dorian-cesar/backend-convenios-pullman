@@ -7,7 +7,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, tipo_alcance, tipo_descuento, valor_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -77,6 +77,21 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         if (hoy > termino) statusInicial = 'INACTIVO';
     }
 
+    // Lógica de compatibilidad hacia atrás Fase 3
+    let finalValorDescuento = valor_descuento;
+    let finalTipoDescuento = tipo_descuento || 'Porcentaje';
+    let finalTipoAlcance = tipo_alcance || 'Global';
+    let finalPorcentajeDescuento = porcentaje_descuento || 0;
+
+    // Si mandan porcentaje_descuento (Front viejo) pero no mandan el nuevo payload
+    if (porcentaje_descuento !== undefined && valor_descuento === undefined) {
+        finalValorDescuento = porcentaje_descuento;
+        finalTipoDescuento = 'Porcentaje';
+    } else if (finalTipoDescuento === 'Porcentaje' && finalValorDescuento !== undefined && finalValorDescuento !== null) {
+        // Front nuevo envía "Porcentaje" y valor_descuento: guardamos en porcentaje_descuento por si la app legacy lee
+        finalPorcentajeDescuento = Math.round(finalValorDescuento);
+    }
+
     const convenio = await Convenio.create({
         nombre,
         empresa_id,
@@ -84,7 +99,10 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         api_consulta_id: finalApiConsultaId,
         tope_monto_descuento,
         tope_cantidad_tickets,
-        porcentaje_descuento: porcentaje_descuento || 0,
+        porcentaje_descuento: finalPorcentajeDescuento,
+        tipo_alcance: finalTipoAlcance,
+        tipo_descuento: finalTipoDescuento,
+        valor_descuento: finalValorDescuento,
         codigo: finalCodigo,
         limitar_por_stock: limitar_por_stock || false,
         limitar_por_monto: limitar_por_monto || false,
@@ -256,6 +274,7 @@ exports.actualizarConvenio = async (id, datos) => {
 
     const {
         nombre, status, empresa_id, porcentaje_descuento, codigo,
+        tipo_alcance, tipo_descuento, valor_descuento,
         limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
         tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets,
         beneficio, imagenes
@@ -263,7 +282,28 @@ exports.actualizarConvenio = async (id, datos) => {
 
     if (nombre) convenio.nombre = nombre;
     if (status) convenio.status = status;
-    if (porcentaje_descuento !== undefined) convenio.porcentaje_descuento = porcentaje_descuento;
+
+    // Asignación de nuevos campos
+    if (tipo_alcance !== undefined) convenio.tipo_alcance = tipo_alcance;
+    if (tipo_descuento !== undefined) convenio.tipo_descuento = tipo_descuento;
+    if (valor_descuento !== undefined) convenio.valor_descuento = valor_descuento;
+
+    // Lógica retrocompatibilidad (doble escritura)
+    if (porcentaje_descuento !== undefined && valor_descuento === undefined) {
+        // App o Admin Viejo
+        convenio.valor_descuento = porcentaje_descuento;
+        convenio.tipo_descuento = 'Porcentaje';
+        convenio.porcentaje_descuento = porcentaje_descuento;
+    } else if (convenio.tipo_descuento === 'Porcentaje') {
+        // Front Nuevo envía tipo = Porcentaje y valor
+        if (convenio.valor_descuento !== null) {
+            convenio.porcentaje_descuento = Math.round(convenio.valor_descuento);
+        }
+    } else if (porcentaje_descuento !== undefined) {
+        // Caso fallback explícito del front nuevo o request mixto
+        convenio.porcentaje_descuento = porcentaje_descuento;
+    }
+
     if (codigo !== undefined) convenio.codigo = codigo;
     if (limitar_por_stock !== undefined) convenio.limitar_por_stock = limitar_por_stock;
     if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
