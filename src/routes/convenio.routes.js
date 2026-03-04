@@ -447,7 +447,7 @@ router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
  *   get:
  *     summary: Obtener todas las rutas específicas de un convenio
  *     tags:
- *       - Convenios
+ *       - Rutas de Convenios
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -475,7 +475,7 @@ router.get('/:id/rutas', convenioRutaController.listarRutas);
  *     summary: Agregar masivamente rutas a un convenio
  *     description: Inserta un arreglo de rutas y sus configuraciones (tipos de asientos, pasajes, precios) a un convenio tipo "Rutas Especificas".
  *     tags:
- *       - Convenios
+ *       - Rutas de Convenios
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -509,7 +509,7 @@ router.post('/:id/rutas', validate(agregarRutasMassivas), convenioRutaController
  *   delete:
  *     summary: Eliminar ruta específica
  *     tags:
- *       - Convenios
+ *       - Rutas de Convenios
  *     security:
  *       - bearerAuth: []
  *     parameters:
