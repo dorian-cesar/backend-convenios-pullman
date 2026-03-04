@@ -133,6 +133,55 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
+        ConvenioRutaConfig: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            tipo_viaje: { type: 'string', example: 'Solo Ida' },
+            tipo_asiento: { type: 'string', example: 'Semi Cama' },
+            precio_solo_ida: { type: 'integer', example: 15000 },
+            precio_ida_vuelta: { type: 'integer', example: null },
+            max_pasajes: { type: 'integer', example: 5 }
+          }
+        },
+        ConvenioRuta: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            origen_codigo: { type: 'string', example: '01' },
+            origen_ciudad: { type: 'string', example: 'Santiago' },
+            destino_codigo: { type: 'string', example: '02' },
+            destino_ciudad: { type: 'string', example: 'Valparaíso' },
+            configuraciones: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/ConvenioRutaConfig'
+              }
+            }
+          }
+        },
+        RutaInput: {
+          type: 'object',
+          properties: {
+            origen_codigo: { type: 'string', example: '01' },
+            origen_ciudad: { type: 'string', example: 'Santiago' },
+            destino_codigo: { type: 'string', example: '02' },
+            destino_ciudad: { type: 'string', example: 'Valparaíso' },
+            configuraciones: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  tipo_viaje: { type: 'string', example: 'Solo Ida' },
+                  tipo_asiento: { type: 'string', example: 'Semi Cama' },
+                  precio_solo_ida: { type: 'integer', example: 15000 },
+                  precio_ida_vuelta: { type: 'integer', example: null },
+                  max_pasajes: { type: 'integer', example: 5 }
+                }
+              }
+            }
+          }
+        },
         Pasajero: {
           type: 'object',
           properties: {

@@ -3,6 +3,8 @@ const convenioController = require('../controllers/convenio.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
 const { crearConvenio, actualizarConvenio, validarCodigoConvenio } = require('../validations/convenio.validation');
+const convenioRutaController = require('../controllers/convenioRuta.controller');
+const { agregarRutasMassivas } = require('../validations/convenioRuta.validation');
 
 const router = Router();
 
@@ -432,6 +434,103 @@ router.get('/:id', convenioController.obtener);
  *         description: Convenio no encontrado
  */
 router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
+
+/**
+ * ==========================================
+ *        CRUD RUTAS ESPECÍFICAS
+ * ==========================================
+ */
+
+/**
+ * @openapi
+ * /api/convenios/{id}/rutas:
+ *   get:
+ *     summary: Obtener todas las rutas específicas de un convenio
+ *     tags:
+ *       - Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de rutas y sus configuraciones
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ConvenioRuta'
+ */
+router.get('/:id/rutas', convenioRutaController.listarRutas);
+
+/**
+ * @openapi
+ * /api/convenios/{id}/rutas:
+ *   post:
+ *     summary: Agregar masivamente rutas a un convenio
+ *     description: Inserta un arreglo de rutas y sus configuraciones (tipos de asientos, pasajes, precios) a un convenio tipo "Rutas Especificas".
+ *     tags:
+ *       - Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rutas:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/RutaInput'
+ *     responses:
+ *       201:
+ *         description: Rutas creadas exitosamente
+ *       400:
+ *         description: Error de validación o el convenio es Global
+ */
+router.post('/:id/rutas', validate(agregarRutasMassivas), convenioRutaController.agregarRutas);
+
+/**
+ * @openapi
+ * /api/convenios/{id}/rutas/{ruta_id}:
+ *   delete:
+ *     summary: Eliminar ruta específica
+ *     tags:
+ *       - Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del convenio
+ *       - in: path
+ *         name: ruta_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID de la ruta a eliminar
+ *     responses:
+ *       204:
+ *         description: Ruta eliminada exitosamente
+ */
+router.delete('/:id/rutas/:ruta_id', convenioRutaController.eliminarRuta);
+
 
 /**
  * @openapi
