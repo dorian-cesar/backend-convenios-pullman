@@ -3,8 +3,9 @@ const express = require('express');
 const routes = require('./routes');
 const cors = require('cors');
 const errorMiddleware = require('./middlewares/error.middleware');
-
 const app = express();
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./docs/swagger');
 
 // CORS
 // CORS
@@ -20,6 +21,8 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
 // Rutas
+// Rutas
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', routes);
 
 // Errores (siempre al final)

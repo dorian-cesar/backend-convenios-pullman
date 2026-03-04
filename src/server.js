@@ -11,7 +11,7 @@ async function startServer() {
     await sequelize.authenticate();
     logger.info('🗄️ Conectado a la base de datos');
 
-    await sequelize.sync({ alter: true, force: false });
+    await sequelize.sync({ alter: false, force: false });
     logger.info('🗄️ Modelos sincronizados');
 
     // Job: Limpieza de convenios vencidos (cada 1 hora)
