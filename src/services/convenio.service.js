@@ -1,4 +1,4 @@
-const { Convenio, Empresa, ApiConsulta, Evento, sequelize } = require('../models');
+const { Convenio, Empresa, ApiConsulta, ApiRegistro, Evento, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
@@ -120,7 +120,16 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
             {
                 model: Empresa,
                 as: 'empresa',
-                attributes: ['id', 'nombre', 'rut_empresa']
+                attributes: ['id', 'nombre', 'rut_empresa'],
+                include: [
+                    {
+                        model: ApiRegistro,
+                        as: 'apisRegistro',
+                        required: false,
+                        where: { status: 'ACTIVO' },
+                        attributes: ['id', 'nombre', 'endpoint']
+                    }
+                ]
             },
             {
                 model: ApiConsulta,
@@ -165,7 +174,16 @@ exports.listarConvenios = async (filters = {}) => {
             {
                 model: Empresa,
                 as: 'empresa',
-                attributes: ['id', 'nombre', 'rut_empresa']
+                attributes: ['id', 'nombre', 'rut_empresa'],
+                include: [
+                    {
+                        model: ApiRegistro,
+                        as: 'apisRegistro',
+                        required: false,
+                        where: { status: 'ACTIVO' },
+                        attributes: ['id', 'nombre', 'endpoint']
+                    }
+                ]
             },
             {
                 model: ApiConsulta,
@@ -216,7 +234,16 @@ exports.listarActivos = async (filters = {}) => {
                 as: 'empresa',
                 attributes: ['id', 'nombre', 'rut_empresa'],
                 required: true, // Debe tener empresa
-                where: { status: 'ACTIVO' } // Opcional: ¿La empresa también debe estar activa? Asumo que sí por lógica de negocio.
+                where: { status: 'ACTIVO' }, // Opcional: ¿La empresa también debe estar activa? Asumo que sí por lógica de negocio.
+                include: [
+                    {
+                        model: ApiRegistro,
+                        as: 'apisRegistro',
+                        required: false,
+                        where: { status: 'ACTIVO' },
+                        attributes: ['id', 'nombre', 'endpoint']
+                    }
+                ]
             },
             {
                 model: ApiConsulta,
@@ -241,7 +268,16 @@ exports.obtenerConvenio = async (id) => {
             {
                 model: Empresa,
                 as: 'empresa',
-                attributes: ['id', 'nombre', 'rut_empresa']
+                attributes: ['id', 'nombre', 'rut_empresa'],
+                include: [
+                    {
+                        model: ApiRegistro,
+                        as: 'apisRegistro',
+                        required: false,
+                        where: { status: 'ACTIVO' },
+                        attributes: ['id', 'nombre', 'endpoint']
+                    }
+                ]
             },
             {
                 model: ApiConsulta,
@@ -376,7 +412,16 @@ exports.actualizarConvenio = async (id, datos) => {
             {
                 model: Empresa,
                 as: 'empresa',
-                attributes: ['id', 'nombre', 'rut_empresa']
+                attributes: ['id', 'nombre', 'rut_empresa'],
+                include: [
+                    {
+                        model: ApiRegistro,
+                        as: 'apisRegistro',
+                        required: false,
+                        where: { status: 'ACTIVO' },
+                        attributes: ['id', 'nombre', 'endpoint']
+                    }
+                ]
             },
             {
                 model: ApiConsulta,
