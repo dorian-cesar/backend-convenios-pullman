@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Beneficio = sequelize.define('Beneficio', {
+    const Beneficiario = sequelize.define('Beneficiario', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         }
     }, {
-        tableName: 'beneficios',
+        tableName: 'beneficiarios',
         timestamps: true,
         paranoid: true,
         indexes: [
@@ -61,12 +61,12 @@ module.exports = (sequelize, DataTypes) => {
         ]
     });
 
-    Beneficio.associate = (models) => {
-        Beneficio.belongsTo(models.Convenio, {
+    Beneficiario.associate = (models) => {
+        Beneficiario.belongsTo(models.Convenio, {
             foreignKey: 'convenio_id',
             as: 'convenio'
         });
     };
 
-    return Beneficio;
+    return Beneficiario;
 };

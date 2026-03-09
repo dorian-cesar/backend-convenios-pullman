@@ -28,7 +28,7 @@ const options = {
       { name: 'Adultos Mayores', description: 'Gestión de adultos mayores independientes' },
       { name: 'Pasajeros Frecuentes', description: 'Gestión de pasajeros frecuentes independientes' },
       { name: 'Carabineros', description: 'Validación de convenio Carabineros' },
-      { name: 'Beneficios', description: 'Gestión unificada de beneficiarios y sus programas (Ej. Escuela Militar)' },
+      { name: 'Beneficiarios', description: 'Gestión unificada de beneficiarios y sus programas (Ej. Escuela Militar)' },
       { name: 'APIs Registro', description: 'Catálogo de APIs para registro de beneficiarios externos' },
       { name: 'APIs Consulta', description: 'Catálogo de APIs para verificación de beneficiarios' }
     ],
@@ -89,7 +89,7 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
-        Beneficio: {
+        Beneficiario: {
           type: 'object',
           properties: {
             id: { type: 'integer' },
@@ -152,8 +152,7 @@ const options = {
             limitar_por_monto: { type: 'boolean', example: false },
             beneficio: { type: 'boolean', example: false },
             beneficio_nombre: { type: 'string', example: 'Descuento Estudiante', description: 'Nombre del beneficio si el convenio es de tipo beneficio' },
-            beneficio_empresa: { type: 'string', example: 'Pullman Bus', description: 'Empresa vinculada al beneficio' },
-            beneficio_endpoint_registro: { type: 'string', example: '/api/beneficios', description: 'Endpoint interno o externo al cual enviar los datos de registro (RUT, Nombre, convenio_id)' },
+            beneficio_endpoint_registro: { type: 'string', example: '/api/beneficiarios', description: 'Endpoint interno o externo al cual enviar los datos de registro (RUT, Nombre, convenio_id)' },
             beneficio_endpoint_validacion: { type: 'string', example: '/api/integraciones/beneficiarios/validar', description: 'Endpoint al cual enviar RUt y convenio_id para validar el beneficio' },
             imagenes: {
               type: 'array',
@@ -274,7 +273,7 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
-        Beneficio: {
+        Beneficiario: {
           type: 'object',
           properties: {
             id: { type: 'integer', example: 1 },
@@ -294,7 +293,7 @@ const options = {
             razon_rechazo: { type: 'string', example: 'Documento ilegible' }
           }
         },
-        CrearBeneficio: {
+        CrearBeneficiario: {
           type: 'object',
           required: ['nombre', 'rut', 'convenio_id'],
           properties: {
@@ -312,7 +311,7 @@ const options = {
             status: { type: 'string', example: 'INACTIVO', default: 'INACTIVO' }
           }
         },
-        ActualizarBeneficio: {
+        ActualizarBeneficiario: {
           type: 'object',
           properties: {
             nombre: { type: 'string', example: 'Juan Perez' },

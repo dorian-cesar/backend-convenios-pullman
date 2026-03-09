@@ -20,6 +20,13 @@ describe('Convenios API', () => {
             });
         token = authRes.body.token;
 
+        // Crear API Key para pruebas de endpoints públicos
+        const { ApiKey } = require('../models');
+        await ApiKey.findOrCreate({
+            where: { key: 'TEST_API_KEY_123' },
+            defaults: { name: 'Test Key', description: 'Llave de Test', status: 'ACTIVO' }
+        });
+
         // Limpiar datos previos
         await Empresa.destroy({ where: { nombre: 'Empresa Para Convenio' } });
 
@@ -42,7 +49,7 @@ describe('Convenios API', () => {
         it('debería listar convenios', async () => {
             const res = await request(app)
                 .get('/api/convenios')
-                .set('Authorization', `Bearer ${token}`);
+                .set('x-api-key', 'TEST_API_KEY_123');
 
             if (res.statusCode !== 200) console.log('DEBUG CONVENIO GET ERROR:', res.body);
             expect(res.statusCode).toBe(200);
@@ -85,6 +92,7 @@ describe('Convenios API', () => {
             const res = await request(app)
                 .put(`/api/convenios/${temp.id}`)
                 .set('Authorization', `Bearer ${token}`)
+                .set('x-api-key', 'TEST_API_KEY_123')
                 .send({
                     nombre: 'Convenio Actualizado'
                 });

@@ -1,4 +1,4 @@
-const { Beneficio, Convenio, Empresa } = require('../models');
+const { Beneficiario, Convenio, Empresa } = require('../models');
 const { formatRut } = require('../utils/rut.utils');
 const pasajerosService = require('../services/pasajeros.service');
 
@@ -25,28 +25,28 @@ const integracionBeneficiariosController = {
                 return res.status(404).json({ message: 'Convenio no encontrado' });
             }
 
-            const beneficio = await Beneficio.findOne({ 
+            const beneficiario = await Beneficiario.findOne({ 
                 where: { rut: formattedRUT, convenio_id: convenioId } 
             });
 
-            if (!beneficio) {
+            if (!beneficiario) {
                 return res.status(404).json({ message: `El RUT ingresado no se encuentra registrado para este beneficio o convenio.` });
             }
 
-            if (beneficio.status !== 'ACTIVO') {
-                return res.status(403).json({ message: `El beneficio se encuentra ${beneficio.status}` });
+            if (beneficiario.status !== 'ACTIVO') {
+                return res.status(403).json({ message: `El beneficio se encuentra ${beneficiario.status}` });
             }
 
-            const nombreParts = (beneficio.nombre || '').split(' ');
+            const nombreParts = (beneficiario.nombre || '').split(' ');
             const nombres = nombreParts[0] || 'Sin Nombre';
             const apellidos = nombreParts.slice(1).join(' ') || 'Sin Apellido';
 
             const registroResult = await pasajerosService.validarYRegistrarPasajero({
-                rut: beneficio.rut,
+                rut: beneficiario.rut,
                 nombres,
                 apellidos,
-                correo: beneficio.correo,
-                telefono: beneficio.telefono,
+                correo: beneficiario.correo,
+                telefono: beneficiario.telefono,
                 convenio_id: convenio.id,
                 empresa_id: convenio.empresa_id
             });

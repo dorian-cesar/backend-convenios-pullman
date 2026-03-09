@@ -1,15 +1,15 @@
 const { Router } = require('express');
-const beneficioController = require('../controllers/beneficio.controller');
+const beneficiarioController = require('../controllers/beneficiario.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
-const beneficioValidation = require('../validations/beneficio.validation');
+const beneficiarioValidation = require('../validations/beneficiario.validation');
 
 const router = Router();
 
 /**
  * @openapi
  * tags:
- *   name: Beneficios
+ *   name: Beneficiarios
  *   description: Gestión unificada de personas beneficiarias y sus programas correspondientes
  */
 
@@ -17,10 +17,10 @@ router.use(authMiddleware);
 
 /**
  * @openapi
- * /api/beneficios:
+ * /api/beneficiarios:
  *   post:
  *     summary: Crear un nuevo registro de beneficiario
- *     tags: [Beneficios]
+ *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -28,22 +28,22 @@ router.use(authMiddleware);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CrearBeneficio'
+ *             $ref: '#/components/schemas/CrearBeneficiario'
  *     responses:
  *       201:
  *         description: Beneficiario registrado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Beneficio'
+ *               $ref: '#/components/schemas/Beneficiario'
  */
-router.post('/', validate(beneficioValidation.crearBeneficio), beneficioController.crear);
+router.post('/', validate(beneficiarioValidation.crearBeneficiario), beneficiarioController.crear);
 /**
  * @openapi
- * /api/beneficios:
+ * /api/beneficiarios:
  *   get:
  *     summary: Listar todos los beneficiarios registrados
- *     tags: [Beneficios]
+ *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -56,13 +56,13 @@ router.post('/', validate(beneficioValidation.crearBeneficio), beneficioControll
  *       200:
  *         description: Lista de beneficiarios
  */
-router.get('/', beneficioController.listar);
+router.get('/', beneficiarioController.listar);
 /**
  * @openapi
- * /api/beneficios/{id}:
+ * /api/beneficiarios/{id}:
  *   get:
  *     summary: Obtener beneficiario por ID
- *     tags: [Beneficios]
+ *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -77,15 +77,15 @@ router.get('/', beneficioController.listar);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Beneficio'
+ *               $ref: '#/components/schemas/Beneficiario'
  */
-router.get('/:id', validate(beneficioValidation.getBeneficio), beneficioController.obtener);
+router.get('/:id', validate(beneficiarioValidation.getBeneficiario), beneficiarioController.obtener);
 /**
  * @openapi
- * /api/beneficios/rut/{rut}:
+ * /api/beneficiarios/rut/{rut}:
  *   get:
  *     summary: Obtener beneficiario filtrando por RUT
- *     tags: [Beneficios]
+ *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -104,15 +104,15 @@ router.get('/:id', validate(beneficioValidation.getBeneficio), beneficioControll
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Beneficio'
+ *               $ref: '#/components/schemas/Beneficiario'
  */
-router.get('/rut/:rut', validate(beneficioValidation.getPorRut), beneficioController.obtenerPorRut);
+router.get('/rut/:rut', validate(beneficiarioValidation.getPorRut), beneficiarioController.obtenerPorRut);
 /**
  * @openapi
- * /api/beneficios/{id}:
+ * /api/beneficiarios/{id}:
  *   put:
  *     summary: Actualizar beneficiario
- *     tags: [Beneficios]
+ *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -126,22 +126,22 @@ router.get('/rut/:rut', validate(beneficioValidation.getPorRut), beneficioContro
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/ActualizarBeneficio'
+ *             $ref: '#/components/schemas/ActualizarBeneficiario'
  *     responses:
  *       200:
  *         description: Beneficiario actualizado
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Beneficio'
+ *               $ref: '#/components/schemas/Beneficiario'
  */
-router.put('/:id', validate(beneficioValidation.actualizarBeneficio), beneficioController.actualizar);
+router.put('/:id', validate(beneficiarioValidation.actualizarBeneficiario), beneficiarioController.actualizar);
 /**
  * @openapi
- * /api/beneficios/{id}:
+ * /api/beneficiarios/{id}:
  *   delete:
  *     summary: Eliminar beneficiario
- *     tags: [Beneficios]
+ *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -154,13 +154,13 @@ router.put('/:id', validate(beneficioValidation.actualizarBeneficio), beneficioC
  *       204:
  *         description: Beneficiario eliminado
  */
-router.delete('/:id', validate(beneficioValidation.getBeneficio), beneficioController.eliminar);
+router.delete('/:id', validate(beneficiarioValidation.getBeneficiario), beneficiarioController.eliminar);
 /**
  * @openapi
- * /api/beneficios/{id}/activar:
+ * /api/beneficiarios/{id}/activar:
  *   patch:
  *     summary: Activar beneficiario
- *     tags: [Beneficios]
+ *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -173,6 +173,6 @@ router.delete('/:id', validate(beneficioValidation.getBeneficio), beneficioContr
  *       200:
  *         description: Beneficiario activado
  */
-router.patch('/:id/activar', beneficioController.activar);
+router.patch('/:id/activar', beneficiarioController.activar);
 
 module.exports = router;

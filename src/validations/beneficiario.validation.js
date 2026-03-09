@@ -8,7 +8,7 @@ const rutValidation = (value, helpers) => {
     return value;
 };
 
-const crearBeneficio = {
+const crearBeneficiario = {
     body: Joi.object().keys({
         nombre: Joi.string().required(),
         nombre_beneficio: Joi.string().allow(null, ''),
@@ -23,7 +23,7 @@ const crearBeneficio = {
     })
 };
 
-const actualizarBeneficio = {
+const actualizarBeneficiario = {
     params: Joi.object().keys({
         id: Joi.number().integer().required(),
     }),
@@ -41,7 +41,7 @@ const actualizarBeneficio = {
     }).min(1)
 };
 
-const getBeneficio = {
+const getBeneficiario = {
     params: Joi.object().keys({
         id: Joi.number().integer().required(),
     }),
@@ -57,8 +57,8 @@ const getPorRut = {
 };
 
 module.exports = {
-    crearBeneficio,
-    actualizarBeneficio,
-    getBeneficio,
+    crearBeneficiario,
+    actualizarBeneficiario,
+    getBeneficiario,
     getPorRut
 };

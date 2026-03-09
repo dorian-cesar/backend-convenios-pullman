@@ -1,11 +1,11 @@
-const { Beneficio, Empresa, Convenio } = require('../models');
+const { Beneficiario, Empresa, Convenio } = require('../models');
 const { formatRut } = require('../utils/rut.utils');
 
 exports.crear = async (data) => {
     if (data.rut) {
         data.rut = formatRut(data.rut);
     }
-    return await Beneficio.create(data);
+    return await Beneficiario.create(data);
 };
 
 exports.obtenerPorRut = async (rut, convenio_id = null) => {
@@ -14,7 +14,7 @@ exports.obtenerPorRut = async (rut, convenio_id = null) => {
     if (convenio_id) {
         where.convenio_id = convenio_id;
     }
-    return await Beneficio.findOne({ 
+    return await Beneficiario.findOne({ 
         where,
         include: [
             { model: Convenio, as: 'convenio' }
@@ -23,7 +23,7 @@ exports.obtenerPorRut = async (rut, convenio_id = null) => {
 };
 
 exports.obtenerPorId = async (id) => {
-    return await Beneficio.findByPk(id, {
+    return await Beneficiario.findByPk(id, {
         include: [
             { model: Convenio, as: 'convenio' }
         ]
@@ -39,7 +39,7 @@ exports.listar = async (query = {}) => {
     if (status) where.status = status;
     if (rut) where.rut = formatRut(rut);
 
-    const { count, rows } = await Beneficio.findAndCountAll({
+    const { count, rows } = await Beneficiario.findAndCountAll({
         where,
         limit: parseInt(limit),
         offset: parseInt(offset),
@@ -58,20 +58,20 @@ exports.listar = async (query = {}) => {
 };
 
 exports.actualizar = async (id, data) => {
-    const beneficio = await Beneficio.findByPk(id);
-    if (!beneficio) return null;
-    return await beneficio.update(data);
+    const beneficiario = await Beneficiario.findByPk(id);
+    if (!beneficiario) return null;
+    return await beneficiario.update(data);
 };
 
 exports.eliminar = async (id) => {
-    const beneficio = await Beneficio.findByPk(id);
-    if (!beneficio) return null;
-    await beneficio.destroy();
+    const beneficiario = await Beneficiario.findByPk(id);
+    if (!beneficiario) return null;
+    await beneficiario.destroy();
     return true;
 };
 
 exports.activar = async (id) => {
-    const beneficio = await Beneficio.findByPk(id);
-    if (!beneficio) return null;
-    return await beneficio.update({ status: 'ACTIVO' });
+    const beneficiario = await Beneficiario.findByPk(id);
+    if (!beneficiario) return null;
+    return await beneficiario.update({ status: 'ACTIVO' });
 };

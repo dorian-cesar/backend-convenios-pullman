@@ -18,7 +18,7 @@ const PasajeroFrecuente = require('./pasajeroFrecuente.model')(sequelize, Sequel
 const Carabinero = require('./carabinero.model')(sequelize, Sequelize.DataTypes);
 const Fach = require('./fach.model')(sequelize, Sequelize.DataTypes);
 const ApiRegistro = require('./apiRegistro.model')(sequelize, Sequelize.DataTypes);
-const Beneficio = require('./beneficio.model')(sequelize, Sequelize.DataTypes);
+const Beneficiario = require('./beneficiario.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -84,9 +84,9 @@ Carabinero.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 Fach.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
 Fach.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
-// CONVENIO -> BENEFICIO (1:N)
-Convenio.hasMany(Beneficio, { foreignKey: 'convenio_id', as: 'beneficiarios' });
-Beneficio.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
+// CONVENIO -> BENEFICIARIO (1:N)
+Convenio.hasMany(Beneficiario, { foreignKey: 'convenio_id', as: 'beneficiarios' });
+Beneficiario.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
 
 module.exports = {
@@ -108,5 +108,5 @@ module.exports = {
   Fach,
   ApiRegistro,
   ApiRegistro,
-  Beneficio
+  Beneficiario
 };
