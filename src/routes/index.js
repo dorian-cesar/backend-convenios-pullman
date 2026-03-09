@@ -13,9 +13,12 @@ const apiConsultaRoutes = require('./apiConsulta.routes');
 const estudiantesRoutes = require('./estudiantes.routes');
 const adultosMayoresRoutes = require('./adultosMayores.routes');
 const pasajerosFrecuentesRoutes = require('./pasajerosFrecuentes.routes');
+const integracionBeneficiariosRoutes = require('./integracionBeneficiarios.routes');
 const carabinerosRoutes = require('./carabineros.routes');
 const fachRoutes = require('./fach.routes');
 const rolesRoutes = require('./roles.routes');
+const apiRegistroRoutes = require('./apiRegistro.routes');
+const beneficioRoutes = require('./beneficio.routes');
 
 const router = Router();
 
@@ -29,10 +32,13 @@ router.use('/convenios', convenioRoutes);
 router.use('/kpis', kpiRoutes);
 router.use('/integraciones', araucanaRoutes);
 router.use('/apis-consulta', apiConsultaRoutes);
-router.use('/estudiantes', estudiantesRoutes);
+router.use('/apis-registro', apiRegistroRoutes);
+router.use('/beneficios', beneficioRoutes);
 router.use('/adultos-mayores', adultosMayoresRoutes);
 router.use('/pasajeros-frecuentes', pasajerosFrecuentesRoutes);
+router.use('/integraciones/beneficiarios', integracionBeneficiariosRoutes);
 router.use('/carabineros', carabinerosRoutes);
 router.use('/fach', fachRoutes);
 router.use('/roles', rolesRoutes);
+
 module.exports = router;
