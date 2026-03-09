@@ -25,18 +25,17 @@ exports.obtenerPorRut = async (rut, convenio_id = null) => {
 exports.obtenerPorId = async (id) => {
     return await Beneficio.findByPk(id, {
         include: [
-            { model: Empresa, as: 'empresa' },
             { model: Convenio, as: 'convenio' }
         ]
     });
 };
 
 exports.listar = async (query = {}) => {
-    const { limit = 10, page = 1, tipo_beneficio, status, rut } = query;
+    const { limit = 10, page = 1, convenio_id, status, rut } = query;
     const offset = (page - 1) * limit;
     const where = {};
 
-    if (tipo_beneficio) where.tipo_beneficio = tipo_beneficio;
+    if (convenio_id) where.convenio_id = convenio_id;
     if (status) where.status = status;
     if (rut) where.rut = formatRut(rut);
 
@@ -46,7 +45,6 @@ exports.listar = async (query = {}) => {
         offset: parseInt(offset),
         order: [['createdAt', 'DESC']],
         include: [
-            { model: Empresa, as: 'empresa' },
             { model: Convenio, as: 'convenio' }
         ]
     });
