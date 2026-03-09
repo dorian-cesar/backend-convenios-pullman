@@ -7,7 +7,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, tipo_alcance, tipo_descuento, valor_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, tipo_alcance, tipo_descuento, valor_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes, rutas }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -110,8 +110,10 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         fecha_termino,
         status: statusInicial,
         beneficio: beneficio || false,
-        imagenes: imagenes || []
+        imagenes: imagenes || [],
+        rutas: rutas || null
     });
+
 
     return await Convenio.findByPk(convenio.id, {
         include: [
@@ -277,7 +279,7 @@ exports.actualizarConvenio = async (id, datos) => {
         tipo_alcance, tipo_descuento, valor_descuento,
         limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
         tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets,
-        beneficio, imagenes
+        beneficio, imagenes, rutas
     } = datos;
 
     if (nombre) convenio.nombre = nombre;
@@ -309,6 +311,7 @@ exports.actualizarConvenio = async (id, datos) => {
     if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
     if (beneficio !== undefined) convenio.beneficio = beneficio;
     if (imagenes !== undefined) convenio.imagenes = imagenes;
+    if (rutas !== undefined) convenio.rutas = rutas;
 
     // Nuevos campos para actualización
     if (fecha_inicio !== undefined) convenio.fecha_inicio = fecha_inicio;
@@ -768,4 +771,109 @@ exports.actualizarConsumo = async (id, { consumo_tickets, consumo_monto_descuent
     }
 
     return convenio;
+};
+
+/**
+ * Buscar convenios que contengan una ruta específica (Origen/Destino)
+ */
+exports.buscarConveniosPorRuta = async (origen_codigo, destino_codigo) => {
+    const hoy = new Date();
+
+    // 1. Buscar convenios activos de tipo Rutas Específicas
+    const convenios = await Convenio.findAll({
+        where: {
+            status: 'ACTIVO',
+            tipo_alcance: 'Rutas Especificas',
+            [Op.and]: [
+                {
+                    [Op.or]: [
+                        { fecha_inicio: null },
+                        { fecha_inicio: { [Op.lte]: hoy } }
+                    ]
+                },
+                {
+                    [Op.or]: [
+                        { fecha_termino: null },
+                        { fecha_termino: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) } }
+                    ]
+                }
+            ]
+        },
+        include: [
+            {
+                model: Empresa,
+                as: 'empresa',
+                attributes: ['id', 'nombre', 'rut_empresa'],
+                where: { status: 'ACTIVO' }
+            },
+            {
+                model: ApiConsulta,
+                as: 'apiConsulta',
+                attributes: ['id', 'nombre', 'endpoint']
+            }
+        ]
+    });
+
+    // 2. Filtrar por el campo JSON rutas
+    const conveniosFiltrados = convenios.filter(conv => {
+        if (conv.rutas && Array.isArray(conv.rutas)) {
+            return conv.rutas.some(r =>
+                r.origen_codigo === origen_codigo &&
+                r.destino_codigo === destino_codigo
+            );
+        }
+        return false;
+    });
+
+    return conveniosFiltrados;
+};
+
+/**
+ * Reemplaza o agrega rutas al campo JSON de un convenio.
+ * Consolidado desde convenioRuta.service.js
+ */
+exports.agregarRutasAConvenio = async (convenioId, rutasData) => {
+    const convenio = await Convenio.findByPk(convenioId);
+    if (!convenio) throw new NotFoundError('Convenio no encontrado');
+
+    // Normalizar y asignar al campo JSON
+    const nuevasRutas = rutasData.map(r => ({
+        origen_codigo: r.origen_codigo,
+        origen_ciudad: r.origen_ciudad,
+        destino_codigo: r.destino_codigo,
+        destino_ciudad: r.destino_ciudad,
+        configuraciones: r.configuraciones || []
+    }));
+
+    await convenio.update({ rutas: nuevasRutas });
+    return nuevasRutas;
+};
+
+/**
+ * Obtiene las rutas del campo JSON
+ * Consolidado desde convenioRuta.service.js
+ */
+exports.obtenerRutasPorConvenio = async (convenioId) => {
+    const convenio = await Convenio.findByPk(convenioId);
+    return convenio ? (convenio.rutas || []) : [];
+};
+
+/**
+ * Elimina una ruta del campo JSON comparando origen y destino
+ * Consolidado desde convenioRuta.service.js
+ */
+exports.eliminarRutaDeConvenio = async (convenioId, origen_codigo, destino_codigo) => {
+    const convenio = await Convenio.findByPk(convenioId);
+    if (!convenio) throw new NotFoundError('Convenio no encontrado');
+
+    if (!convenio.rutas || !Array.isArray(convenio.rutas)) {
+        return true;
+    }
+
+    const rutasFiltradas = convenio.rutas.filter(r =>
+        !(r.origen_codigo === origen_codigo && r.destino_codigo === destino_codigo)
+    );
+
+    await convenio.update({ rutas: rutasFiltradas });
+    return true;
 };

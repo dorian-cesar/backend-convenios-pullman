@@ -2,9 +2,7 @@ const { Router } = require('express');
 const convenioController = require('../controllers/convenio.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
-const { crearConvenio, actualizarConvenio, validarCodigoConvenio } = require('../validations/convenio.validation');
-const convenioRutaController = require('../controllers/convenioRuta.controller');
-const { agregarRutasMassivas } = require('../validations/convenioRuta.validation');
+const { crearConvenio, actualizarConvenio, validarCodigoConvenio, agregarRutasMassivas } = require('../validations/convenio.validation');
 
 const router = Router();
 
@@ -140,6 +138,43 @@ router.get('/activos', convenioController.listarActivos);
  *                 $ref: '#/components/schemas/Convenio'
  */
 router.get('/disponibles', convenioController.listarDisponibles);
+
+/**
+ * @openapi
+ * /api/convenios/buscar/rutas:
+ *   get:
+ *     summary: Buscar convenios disponibles para una ruta específica
+ *     description: Retorna convenios activos de tipo "Rutas Específicas" que contengan el origen y destino consultado.
+ *     tags:
+ *       - Rutas de Convenios
+ *     parameters:
+ *       - in: query
+ *         name: origen_codigo
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: destino_codigo
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lista de convenios que aplican a la ruta
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Convenio'
+ *       400:
+ *         description: Parámetros faltantes (origen_codigo o destino_codigo)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/buscar/rutas', convenioController.buscarPorRuta);
 
 // Rutas protegidas (Ya lo son todas)
 
@@ -466,7 +501,7 @@ router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
  *               items:
  *                 $ref: '#/components/schemas/ConvenioRuta'
  */
-router.get('/:id/rutas', convenioRutaController.listarRutas);
+router.get('/:id/rutas', convenioController.listarRutas);
 
 /**
  * @openapi
@@ -501,7 +536,7 @@ router.get('/:id/rutas', convenioRutaController.listarRutas);
  *       400:
  *         description: Error de validación o el convenio es Global
  */
-router.post('/:id/rutas', validate(agregarRutasMassivas), convenioRutaController.agregarRutas);
+router.post('/:id/rutas', validate(agregarRutasMassivas), convenioController.agregarRutas);
 
 /**
  * @openapi
@@ -529,7 +564,7 @@ router.post('/:id/rutas', validate(agregarRutasMassivas), convenioRutaController
  *       204:
  *         description: Ruta eliminada exitosamente
  */
-router.delete('/:id/rutas/:ruta_id', convenioRutaController.eliminarRuta);
+router.delete('/:id/rutas', convenioController.eliminarRuta);
 
 
 /**
