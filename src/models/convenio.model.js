@@ -103,6 +103,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.JSON, // Array of strings
             allowNull: true
         },
+        rutas: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Estructura denormalizada de rutas y configuraciones'
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'
