@@ -27,7 +27,10 @@ const options = {
       { name: 'Estudiantes', description: 'Gestión de estudiantes independientes' },
       { name: 'Adultos Mayores', description: 'Gestión de adultos mayores independientes' },
       { name: 'Pasajeros Frecuentes', description: 'Gestión de pasajeros frecuentes independientes' },
-      { name: 'Carabineros', description: 'Validación de convenio Carabineros' }
+      { name: 'Carabineros', description: 'Validación de convenio Carabineros' },
+      { name: 'Beneficios', description: 'Gestión unificada de beneficiarios y sus programas (Ej. Escuela Militar)' },
+      { name: 'APIs Registro', description: 'Catálogo de APIs para registro de beneficiarios externos' },
+      { name: 'APIs Consulta', description: 'Catálogo de APIs para verificación de beneficiarios' }
     ],
     components: {
       securitySchemes: {
@@ -74,6 +77,28 @@ const options = {
             nombre: { type: 'string', example: 'API Araucana' },
             endpoint: { type: 'string', example: '/api/integraciones/araucana/validar' },
             status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        ApiRegistro: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'API Registro Estudiante' },
+            endpoint: { type: 'string', example: '/api/integraciones/beneficiarios/estudiante/validar' },
+            empresa_id: { type: 'integer' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        Beneficio: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            slug: { type: 'string', example: 'ESTUDIANTE' },
+            nombre: { type: 'string', example: 'Estudiante Regular' },
+            api_consulta_id: { type: 'integer' },
+            api_registro_id: { type: 'integer' },
+            configuracion_imagenes: { type: 'object' },
+            status: { type: 'string' }
           }
         },
         CreateEmpresa: {
@@ -131,24 +156,28 @@ const options = {
               items: { type: 'string' },
               example: ['https://img1.com', 'https://img2.com']
             },
-            status: { type: 'string', example: 'ACTIVO' }
+            status: { type: 'string', example: 'ACTIVO' },
+            rutas: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/ConvenioRuta'
+              }
+            }
           }
         },
         ConvenioRutaConfig: {
           type: 'object',
           properties: {
-            id: { type: 'integer', example: 1 },
             tipo_viaje: { type: 'string', example: 'Solo Ida' },
             tipo_asiento: { type: 'string', example: 'Semi Cama' },
-            precio_solo_ida: { type: 'integer', example: 15000 },
-            precio_ida_vuelta: { type: 'integer', example: null },
+            precio_solo_ida: { type: 'number', example: 15000 },
+            precio_ida_vuelta: { type: 'number', example: null },
             max_pasajes: { type: 'integer', example: 5 }
           }
         },
         ConvenioRuta: {
           type: 'object',
           properties: {
-            id: { type: 'integer', example: 1 },
             origen_codigo: { type: 'string', example: '01' },
             origen_ciudad: { type: 'string', example: 'Santiago' },
             destino_codigo: { type: 'string', example: '02' },
@@ -241,6 +270,61 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
+        Beneficio: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 158 },
+            nombre: { type: 'string', example: 'Juan Perez' },
+            nombre_beneficio: { type: 'string', example: 'Estudiante Regular' },
+            rut: { type: 'string', example: '11.111.111-1' },
+            telefono: { type: 'string', example: '+56912345678' },
+            correo: { type: 'string', example: 'juan@email.com' },
+            direccion: { type: 'string', example: 'Calle Falsa 123' },
+            status: { type: 'string', example: 'ACTIVO' },
+            imagenes: {
+              type: 'object',
+              additionalProperties: { type: 'string' },
+              description: 'Mapa de imágenes en Base64 (ej: { "cedula_frontal": "data:image/png;base64,..." })'
+            },
+            razon_rechazo: { type: 'string', example: 'Documento ilegible' }
+          }
+        },
+        CrearBeneficio: {
+          type: 'object',
+          required: ['nombre', 'rut', 'convenio_id'],
+          properties: {
+            nombre: { type: 'string', example: 'Juan Perez' },
+            nombre_beneficio: { type: 'string', example: 'Estudiante Regular', description: 'Nombre descriptivo del beneficio o programa asociado' },
+            rut: { type: 'string', example: '11.111.111-1' },
+            convenio_id: { type: 'integer', example: 158 },            telefono: { type: 'string', example: '+56912345678' },
+            correo: { type: 'string', example: 'juan@email.com' },
+            direccion: { type: 'string', example: 'Calle Falsa 123' },
+            imagenes: {
+              type: 'object',
+              additionalProperties: { type: 'string' },
+              description: 'Mapa de imágenes en Base64'
+            },
+            status: { type: 'string', example: 'INACTIVO', default: 'INACTIVO' }
+          }
+        },
+        ActualizarBeneficio: {
+          type: 'object',
+          properties: {
+            nombre: { type: 'string', example: 'Juan Perez' },
+            nombre_beneficio: { type: 'string', example: 'Estudiante Regular' },
+            rut: { type: 'string', example: '11.111.111-1' },
+            convenio_id: { type: 'integer', example: 158 },            telefono: { type: 'string', example: '+56912345678' },
+            correo: { type: 'string', example: 'juan@email.com' },
+            direccion: { type: 'string', example: 'Calle Falsa 123' },
+            imagenes: {
+              type: 'object',
+              additionalProperties: { type: 'string' }
+            },
+            status: { type: 'string', example: 'ACTIVO' },
+            razon_rechazo: { type: 'string', example: 'Documento faltante' }
+          }
+        },
 
         Evento: {
           type: 'object',
@@ -275,6 +359,22 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ErrorResponse: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Descripción del error' }
+          }
+        },
+        ValidacionBeneficiarioResponse: {
+          type: 'object',
+          properties: {
+            afiliado: { type: 'boolean', example: true },
+            mensaje: { type: 'string', example: 'Validación exitosa' },
+            pasajero: { $ref: '#/components/schemas/Pasajero' },
+            empresa: { type: 'string', example: 'PULLMAN BUS' },
+            convenio: { $ref: '#/components/schemas/Convenio' }
           }
         }
       }

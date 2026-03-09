@@ -63,5 +63,34 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
+    // Shadow Writing Hooks for Safe Migration
+    const syncWithBeneficio = async (estudiante, options) => {
+        const { Beneficio } = sequelize.models;
+        const data = {
+            nombre: estudiante.nombre,
+            rut: estudiante.rut,
+            telefono: estudiante.telefono,
+            correo: estudiante.correo,
+            direccion: estudiante.direccion,
+            status: estudiante.status,
+            razon_rechazo: estudiante.razon_rechazo,
+            tipo_beneficio: 'ESTUDIANTE',
+            nombre_beneficio: 'Estudiante',
+            empresa_id: 6, // Empresa Estudiante
+            imagenes: {
+                cedula_identidad: estudiante.imagen_cedula_identidad,
+                certificado_alumno_regular: estudiante.imagen_certificado_alumno_regular
+            }
+        };
+
+        await Beneficio.upsert(data, { 
+            transaction: options.transaction,
+            conflictFields: ['rut', 'tipo_beneficio']
+        });
+    };
+
+    Estudiante.addHook('afterCreate', syncWithBeneficio);
+    Estudiante.addHook('afterUpdate', syncWithBeneficio);
+
     return Estudiante;
 };
