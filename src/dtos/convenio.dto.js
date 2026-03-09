@@ -41,6 +41,12 @@ class ConvenioDTO {
         this.beneficio = convenio.beneficio !== undefined ? convenio.beneficio : null;
         this.imagenes = convenio.imagenes || null;
 
+        if (this.beneficio) {
+            this.beneficio_nombre = this.nombre;
+            this.beneficio_empresa = this.empresa_nombre || null;
+            this.beneficio_endpoint_registro = '/api/beneficios';
+        }
+
         // Consumo acumulado
         this.consumo_tickets = convenio.consumo_tickets || 0;
         this.consumo_monto_descuento = convenio.consumo_monto_descuento || 0;
