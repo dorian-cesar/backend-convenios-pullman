@@ -153,7 +153,8 @@ const options = {
             beneficio: { type: 'boolean', example: false },
             beneficio_nombre: { type: 'string', example: 'Descuento Estudiante', description: 'Nombre del beneficio si el convenio es de tipo beneficio' },
             beneficio_empresa: { type: 'string', example: 'Pullman Bus', description: 'Empresa vinculada al beneficio' },
-            beneficio_endpoint_registro: { type: 'string', example: '/api/beneficios', description: 'Endpoint interno al cual enviar los datos de registro (RUT, Nombre, convenio_id)' },
+            beneficio_endpoint_registro: { type: 'string', example: '/api/beneficios', description: 'Endpoint interno o externo al cual enviar los datos de registro (RUT, Nombre, convenio_id)' },
+            beneficio_endpoint_validacion: { type: 'string', example: '/api/integraciones/beneficiarios/validar', description: 'Endpoint al cual enviar RUt y convenio_id para validar el beneficio' },
             imagenes: {
               type: 'array',
               items: { type: 'string' },

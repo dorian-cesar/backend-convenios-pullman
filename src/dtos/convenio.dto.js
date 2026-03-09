@@ -45,6 +45,7 @@ class ConvenioDTO {
             this.beneficio_nombre = this.nombre;
             this.beneficio_empresa = this.empresa_nombre || null;
             this.beneficio_endpoint_registro = '/api/beneficios'; // Default fallback backend route
+            this.beneficio_endpoint_validacion = '/api/integraciones/beneficiarios/validar'; // Default backend format validations
 
             if (convenio.empresa && convenio.empresa.apisRegistro && convenio.empresa.apisRegistro.length > 0) {
                 // Use the configured external/internal endpoint
