@@ -1,11 +1,28 @@
 const { Beneficiario, Empresa, Convenio } = require('../models');
 const { formatRut } = require('../utils/rut.utils');
+const emailService = require('./email.service');
 
 exports.crear = async (data) => {
     if (data.rut) {
         data.rut = formatRut(data.rut);
     }
-    return await Beneficiario.create(data);
+    
+    // Forzar estado inicial INACTIVO para enrolamiento
+    data.status = 'INACTIVO';
+    
+    const beneficiario = await Beneficiario.create(data);
+    
+    // Obtener info del convenio para el correo
+    const convenio = await Convenio.findByPk(beneficiario.convenio_id);
+    if (beneficiario.correo) {
+        await emailService.enviarCorreoEnrolamiento(
+            beneficiario.correo, 
+            beneficiario.nombre, 
+            convenio ? convenio.nombre : 'Programa de Beneficios'
+        );
+    }
+    
+    return beneficiario;
 };
 
 exports.obtenerPorRut = async (rut, convenio_id = null) => {
@@ -58,9 +75,29 @@ exports.listar = async (query = {}) => {
 };
 
 exports.actualizar = async (id, data) => {
-    const beneficiario = await Beneficiario.findByPk(id);
+    const beneficiario = await Beneficiario.findByPk(id, {
+        include: [{ model: Convenio, as: 'convenio' }]
+    });
     if (!beneficiario) return null;
-    return await beneficiario.update(data);
+
+    const oldStatus = beneficiario.status;
+    const updated = await beneficiario.update(data);
+
+    // Disparar correos según cambio de estado
+    if (updated.correo) {
+        const nombreConvenio = updated.convenio ? updated.convenio.nombre : 'Programa de Beneficios';
+        
+        // Caso Aceptación: Pasa de cualquier estado a ACTIVO
+        if (oldStatus !== 'ACTIVO' && updated.status === 'ACTIVO') {
+            await emailService.enviarCorreoAceptacion(updated.correo, updated.nombre, nombreConvenio);
+        } 
+        // Caso Rechazo: El nuevo estado es RECHAZADO y se provee una razón (obligatoria para el correo)
+        else if (updated.status === 'RECHAZADO' && updated.razon_rechazo && updated.razon_rechazo !== beneficiario.razon_rechazo) {
+            await emailService.enviarCorreoRechazo(updated.correo, updated.nombre, updated.razon_rechazo, nombreConvenio);
+        }
+    }
+
+    return updated;
 };
 
 exports.eliminar = async (id) => {
@@ -71,7 +108,17 @@ exports.eliminar = async (id) => {
 };
 
 exports.activar = async (id) => {
-    const beneficiario = await Beneficiario.findByPk(id);
+    const beneficiario = await Beneficiario.findByPk(id, {
+        include: [{ model: Convenio, as: 'convenio' }]
+    });
     if (!beneficiario) return null;
-    return await beneficiario.update({ status: 'ACTIVO' });
+
+    const updated = await beneficiario.update({ status: 'ACTIVO' });
+    
+    if (updated.correo) {
+        const nombreConvenio = beneficiario.convenio ? beneficiario.convenio.nombre : 'Programa de Beneficios';
+        await emailService.enviarCorreoAceptacion(updated.correo, updated.nombre, nombreConvenio);
+    }
+
+    return updated;
 };
