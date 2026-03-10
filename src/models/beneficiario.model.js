@@ -47,7 +47,14 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'beneficiarios',
         timestamps: true,
-        paranoid: true
+        paranoid: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['rut', 'convenio_id'],
+                name: 'beneficiarios_rut_convenio_unique'
+            }
+        ]
     });
 
     Beneficiario.associate = (models) => {
