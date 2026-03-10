@@ -1,10 +1,11 @@
 const beneficiarioService = require('../services/beneficiario.service');
 const pasajerosService = require('../services/pasajeros.service');
+const BeneficiarioDTO = require('../dtos/beneficiario.dto');
 
 exports.crear = async (req, res, next) => {
     try {
         const beneficiario = await beneficiarioService.crear(req.body);
-        res.status(201).json(beneficiario);
+        res.status(201).json(new BeneficiarioDTO(beneficiario));
     } catch (error) {
         next(error);
     }
@@ -18,7 +19,7 @@ exports.obtenerPorRut = async (req, res, next) => {
         if (!beneficiario) {
             return res.status(404).json({ message: 'Beneficiario no encontrado' });
         }
-        res.json(beneficiario);
+        res.json(new BeneficiarioDTO(beneficiario));
     } catch (error) {
         next(error);
     }
@@ -30,7 +31,7 @@ exports.obtener = async (req, res, next) => {
         if (!beneficiario) {
             return res.status(404).json({ message: 'Beneficiario no encontrado' });
         }
-        res.json(beneficiario);
+        res.json(new BeneficiarioDTO(beneficiario));
     } catch (error) {
         next(error);
     }
@@ -39,7 +40,10 @@ exports.obtener = async (req, res, next) => {
 exports.listar = async (req, res, next) => {
     try {
         const result = await beneficiarioService.listar(req.query);
-        res.json(result);
+        res.json({
+            ...result,
+            data: BeneficiarioDTO.list(result.data)
+        });
     } catch (error) {
         next(error);
     }
@@ -51,7 +55,7 @@ exports.actualizar = async (req, res, next) => {
         if (!beneficiario) {
             return res.status(404).json({ message: 'Beneficiario no encontrado' });
         }
-        res.json(beneficiario);
+        res.json(new BeneficiarioDTO(beneficiario));
     } catch (error) {
         next(error);
     }
@@ -75,7 +79,7 @@ exports.activar = async (req, res, next) => {
         if (!beneficiario) {
             return res.status(404).json({ message: 'Beneficiario no encontrado' });
         }
-        res.json(beneficiario);
+        res.json(new BeneficiarioDTO(beneficiario));
     } catch (error) {
         next(error);
     }

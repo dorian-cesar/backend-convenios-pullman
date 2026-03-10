@@ -13,10 +13,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        nombre_beneficio: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
         rut: {
             type: DataTypes.STRING,
             allowNull: false,

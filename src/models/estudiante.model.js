@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
 
     // Shadow Writing Hooks for Safe Migration
     const syncWithBeneficio = async (estudiante, options) => {
-        const { Beneficio } = sequelize.models;
+        const { Beneficiario } = sequelize.models;
         const data = {
             nombre: estudiante.nombre,
             rut: estudiante.rut,
@@ -74,18 +74,16 @@ module.exports = (sequelize, DataTypes) => {
             direccion: estudiante.direccion,
             status: estudiante.status,
             razon_rechazo: estudiante.razon_rechazo,
-            tipo_beneficio: 'ESTUDIANTE',
-            nombre_beneficio: 'Estudiante',
-            empresa_id: 6, // Empresa Estudiante
+            convenio_id: 158,
             imagenes: {
                 cedula_identidad: estudiante.imagen_cedula_identidad,
                 certificado_alumno_regular: estudiante.imagen_certificado_alumno_regular
             }
         };
 
-        await Beneficio.upsert(data, { 
+        await Beneficiario.upsert(data, { 
             transaction: options.transaction,
-            conflictFields: ['rut', 'tipo_beneficio']
+            conflictFields: ['rut', 'convenio_id']
         });
     };
 

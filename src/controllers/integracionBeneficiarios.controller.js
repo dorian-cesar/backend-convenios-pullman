@@ -1,6 +1,7 @@
 const { Beneficiario, Convenio, Empresa } = require('../models');
 const { formatRut } = require('../utils/rut.utils');
 const pasajerosService = require('../services/pasajeros.service');
+const ConvenioDTO = require('../dtos/convenio.dto');
 
 const integracionBeneficiariosController = {
     /**
@@ -56,7 +57,7 @@ const integracionBeneficiariosController = {
                 mensaje: `Validación exitosa`,
                 pasajero: registroResult.pasajero,
                 empresa: convenio.empresa ? convenio.empresa.nombre : 'N/A',
-                convenio: convenio
+                convenio: new ConvenioDTO(convenio)
             });
         } catch (error) {
             next(error);

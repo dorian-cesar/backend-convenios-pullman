@@ -11,7 +11,6 @@ const rutValidation = (value, helpers) => {
 const crearBeneficiario = {
     body: Joi.object().keys({
         nombre: Joi.string().required(),
-        nombre_beneficio: Joi.string().allow(null, ''),
         rut: Joi.string().required().custom(rutValidation),
         convenio_id: Joi.number().integer().required(),
         telefono: Joi.string().allow('', null),
@@ -29,7 +28,6 @@ const actualizarBeneficiario = {
     }),
     body: Joi.object().keys({
         nombre: Joi.string(),
-        nombre_beneficio: Joi.string().allow(null, ''),
         rut: Joi.string().custom(rutValidation),
         convenio_id: Joi.number().integer(),
         telefono: Joi.string().allow('', null),
