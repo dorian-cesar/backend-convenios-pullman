@@ -41,7 +41,7 @@ class ConvenioDTO {
         this.limitar_por_monto = !!convenio.limitar_por_monto;
         
         if (this.tipo_alcance === 'Rutas Especificas') {
-            this.configuracion_ruta_endpoint = `/api/convenios/${this.id}/rutas`;
+            this.endpoint_rutas_especificas = `/api/convenios/${this.id}/rutas`;
         }
         if (this.beneficio) {
             this.beneficio_nombre = this.nombre;
