@@ -49,7 +49,7 @@ module.exports = async (req, res, next) => {
     }
 
     // 2. Try API Key
-    if (apiKeyHeader) {
+    if (apiKeyHeader && apiKeyHeader.trim() !== '') {
       const apiKeyRecord = await ApiKey.findOne({ where: { key: apiKeyHeader } });
 
       if (!apiKeyRecord) {
