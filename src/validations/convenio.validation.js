@@ -27,7 +27,9 @@ const crearConvenio = {
                 'string.empty': 'El código es obligatorio para este tipo de convenio',
                 'any.required': 'El código es obligatorio para este tipo de convenio'
             }),
-            otherwise: Joi.any().strip() // Remove from payload for API_EXTERNA
+            otherwise: Joi.any().valid(null).messages({
+                'any.only': 'El código debe ser null para convenios de tipo API_EXTERNA'
+            })
         }),
         limitar_por_stock: Joi.boolean().default(false),
         limitar_por_monto: Joi.boolean().default(false),
@@ -70,7 +72,13 @@ const actualizarConvenio = {
         tipo_descuento: Joi.string().valid('Porcentaje', 'Monto Fijo', 'Tarifa Plana'),
         valor_descuento: Joi.number().precision(2).allow(null),
         porcentaje_descuento: Joi.number().integer().min(0).max(100),
-        codigo: Joi.string().allow(null, ''),
+        codigo: Joi.when('tipo_consulta', {
+            is: 'API_EXTERNA',
+            then: Joi.any().valid(null).messages({
+                'any.only': 'El código debe ser null para convenios de tipo API_EXTERNA'
+            }),
+            otherwise: Joi.string().allow(null, '')
+        }),
         limitar_por_stock: Joi.boolean(),
         limitar_por_monto: Joi.boolean(),
         status: Joi.string().valid('ACTIVO', 'INACTIVO'),

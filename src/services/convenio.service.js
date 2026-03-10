@@ -38,6 +38,9 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         finalApiConsultaId = api.id;
     } else if (tipo === 'API_EXTERNA') {
         // Regla: En API_EXTERNA el código debe ser NULL
+        if (codigo !== undefined && codigo !== null) {
+            throw new BusinessError('El código debe ser null para convenios de tipo API_EXTERNA');
+        }
         finalCodigo = null;
 
         if (finalApiConsultaId) {
@@ -342,7 +345,12 @@ exports.actualizarConvenio = async (id, datos) => {
         convenio.porcentaje_descuento = porcentaje_descuento;
     }
 
-    if (codigo !== undefined) convenio.codigo = codigo;
+    const finalTipo = tipo !== undefined ? tipo : convenio.tipo;
+    if (finalTipo === 'API_EXTERNA' && codigo !== undefined && codigo !== null) {
+        throw new BusinessError('El código debe ser null para convenios de tipo API_EXTERNA');
+    }
+
+    if (codigo !== undefined) convenio.codigo = finalTipo === 'API_EXTERNA' ? null : codigo;
     if (limitar_por_stock !== undefined) convenio.limitar_por_stock = limitar_por_stock;
     if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
     if (beneficio !== undefined) convenio.beneficio = beneficio;
