@@ -15,8 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         rut: {
             type: DataTypes.STRING,
-            allowNull: false,
-            unique: 'rut_convenio_id'
+            allowNull: false
         },
         telefono: {
             type: DataTypes.STRING,
@@ -48,13 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'beneficiarios',
         timestamps: true,
-        paranoid: true,
-        indexes: [
-            {
-                unique: true,
-                fields: ['rut', 'convenio_id']
-            }
-        ]
+        paranoid: true
     });
 
     Beneficiario.associate = (models) => {
