@@ -23,7 +23,7 @@ const sequelize = new Sequelize(
     },
     hooks: {
       afterConnect: async (connection) => {
-        await connection.query("SET SESSION sort_buffer_size = 1048576;"); // 1MB
+        await connection.promise().query("SET SESSION sort_buffer_size = 1048576;"); // 1MB
       }
     }
   }
