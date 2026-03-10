@@ -6,8 +6,8 @@ const validarBeneficiario = {
             'any.required': 'El rut es obligatorio',
             'string.pattern.base': 'El formato del RUT debe ser sin puntos y con guión (ej: 12345678-9)'
         }),
-        convenioId: Joi.number().required().messages({
-            'any.required': 'El convenioId es obligatorio'
+        convenio_id: Joi.number().required().messages({
+            'any.required': 'El convenio_id es obligatorio'
         }),
         tipo_beneficio: Joi.string().optional().valid('ESTUDIANTE', 'ADULTO_MAYOR', 'PASAJERO_FRECUENTE', 'CARABINERO', 'FACH')
     })

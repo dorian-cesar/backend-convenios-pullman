@@ -46,13 +46,8 @@ class ConvenioDTO {
         }
         if (this.beneficio) {
             this.beneficio_nombre = this.nombre;
-            this.beneficio_endpoint_registro = '/api/beneficiarios'; // Default fallback backend route
-            this.beneficio_endpoint_validacion = this.endpoint; // Match the principal endpoint
-
-            if (convenio.empresa && convenio.empresa.apisRegistro && convenio.empresa.apisRegistro.length > 0) {
-                // Use the configured external/internal endpoint
-                this.beneficio_endpoint_registro = convenio.empresa.apisRegistro[0].endpoint;
-            }
+            this.beneficio_endpoint_registro = '/api/beneficiarios';
+            this.beneficio_endpoint_validacion = '/api/integraciones/beneficiarios/validar';
         }
 
         // Consumo acumulado

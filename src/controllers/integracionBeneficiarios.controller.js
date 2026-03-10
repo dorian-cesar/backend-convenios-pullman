@@ -11,17 +11,18 @@ const integracionBeneficiariosController = {
      */
     async validar(req, res, next) {
         try {
-            const { rut, convenioId } = req.body;
-            if (!rut || !convenioId) {
+            const { rut, convenio_id } = req.body;
+
+            if (!rut || !convenio_id) {
                 return res.status(400).json({ 
                     afiliado: false,
-                    mensaje: 'El RUT y el convenioId son requeridos' 
+                    mensaje: 'El RUT y el convenio_id son requeridos' 
                 });
             }
 
             const formattedRUT = formatRut(rut);
 
-            const convenio = await Convenio.findByPk(convenioId, {
+            const convenio = await Convenio.findByPk(convenio_id, {
                 include: [{ model: Empresa, as: 'empresa' }]
             });
 
@@ -33,7 +34,7 @@ const integracionBeneficiariosController = {
             }
 
             const beneficiario = await Beneficiario.findOne({ 
-                where: { rut: formattedRUT, convenio_id: convenioId } 
+                where: { rut: formattedRUT, convenio_id: convenio_id } 
             });
 
             if (!beneficiario) {

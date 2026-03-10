@@ -51,6 +51,12 @@ const router = Router();
  *       403:
  *         description: Beneficio inactivo
  */
+// Ruta Unificada
 router.post('/validar', validate(validarBeneficiario), integracionBeneficiariosController.validar);
+
+// Alias para compatibilidad con rutas segmentadas
+router.post('/estudiante/validar', validate(validarBeneficiario), integracionBeneficiariosController.validar);
+router.post('/adulto-mayor/validar', validate(validarBeneficiario), integracionBeneficiariosController.validar);
+router.post('/pasajero-frecuente/validar', validate(validarBeneficiario), integracionBeneficiariosController.validar);
 
 module.exports = router;
