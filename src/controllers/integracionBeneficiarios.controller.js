@@ -13,7 +13,10 @@ const integracionBeneficiariosController = {
         try {
             const { rut, convenioId } = req.body;
             if (!rut || !convenioId) {
-                return res.status(400).json({ message: 'El RUT y el convenioId son requeridos' });
+                return res.status(400).json({ 
+                    afiliado: false,
+                    mensaje: 'El RUT y el convenioId son requeridos' 
+                });
             }
 
             const formattedRUT = formatRut(rut);
@@ -23,7 +26,10 @@ const integracionBeneficiariosController = {
             });
 
             if (!convenio) {
-                return res.status(404).json({ message: 'Convenio no encontrado' });
+                return res.status(404).json({ 
+                    afiliado: false,
+                    mensaje: 'Convenio no encontrado' 
+                });
             }
 
             const beneficiario = await Beneficiario.findOne({ 
@@ -31,11 +37,17 @@ const integracionBeneficiariosController = {
             });
 
             if (!beneficiario) {
-                return res.status(404).json({ message: `El RUT ingresado no se encuentra registrado para este beneficio o convenio.` });
+                return res.status(200).json({ 
+                    afiliado: false,
+                    mensaje: `El RUT ingresado no se encuentra registrado para este beneficio o convenio.` 
+                });
             }
 
             if (beneficiario.status !== 'ACTIVO') {
-                return res.status(403).json({ message: `El beneficio se encuentra ${beneficiario.status}` });
+                return res.status(200).json({ 
+                    afiliado: false,
+                    mensaje: `El beneficio se encuentra ${beneficiario.status}` 
+                });
             }
 
             const nombreParts = (beneficiario.nombre || '').split(' ');
