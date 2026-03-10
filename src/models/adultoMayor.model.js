@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
         rut: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
             validate: {
                 is: /^[0-9]+-[0-9kKxX]$/
             }

@@ -8,7 +8,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         rut: {
             type: DataTypes.STRING,
-            unique: true,
             allowNull: false
         },
         nombre_completo: {
