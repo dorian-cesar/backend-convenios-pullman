@@ -1,17 +1,10 @@
 const Joi = require('joi');
-const { validateRut } = require('../utils/rut.utils');
-
-const rutValidation = (value, helpers) => {
-    if (!validateRut(value)) {
-        return helpers.message('El RUT no es válido');
-    }
-    return value;
-};
 
 const validarBeneficiario = {
     body: Joi.object().keys({
-        rut: Joi.string().required().custom(rutValidation).messages({
-            'any.required': 'El rut es obligatorio'
+        rut: Joi.string().required().regex(/^[0-9]+-[0-9kKxX]$/).messages({
+            'any.required': 'El rut es obligatorio',
+            'string.pattern.base': 'El formato del RUT debe ser sin puntos y con guión (ej: 12345678-9)'
         }),
         convenioId: Joi.number().required().messages({
             'any.required': 'El convenioId es obligatorio'
