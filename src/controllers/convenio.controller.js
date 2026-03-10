@@ -8,11 +8,11 @@ exports.crear = async (req, res, next) => {
     try {
         // Mapear tipo_consulta (JSON user) a tipo (Modelo interno)
         // Mapear api_url_id a api_consulta_id
-        const { tipo_consulta, api_url_id, ...rest } = req.body;
+        const { tipo_consulta, api_url_id, api_consulta_id, ...rest } = req.body;
         const data = {
             ...rest,
             tipo: tipo_consulta || rest.tipo,
-            api_consulta_id: api_url_id || rest.api_consulta_id
+            api_consulta_id: api_url_id || api_consulta_id || rest.api_consulta_id
         };
         const convenio = await convenioService.crearConvenio(data);
         res.status(201).json(new ConvenioDTO(convenio));
@@ -80,11 +80,11 @@ exports.obtener = async (req, res, next) => {
 exports.actualizar = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { tipo_consulta, api_url_id, ...rest } = req.body;
+        const { tipo_consulta, api_url_id, api_consulta_id, ...rest } = req.body;
         const data = {
             ...rest,
             tipo: tipo_consulta || rest.tipo,
-            api_consulta_id: api_url_id || rest.api_consulta_id
+            api_consulta_id: api_url_id || api_consulta_id || rest.api_consulta_id
         };
         const convenio = await convenioService.actualizarConvenio(id, data);
         res.json(new ConvenioDTO(convenio));
