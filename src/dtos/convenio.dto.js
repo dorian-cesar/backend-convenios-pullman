@@ -18,7 +18,9 @@ class ConvenioDTO {
 
         // (Empresa ya extraída arriba)
 
-        if (convenio.tipo === 'CODIGO_DESCUENTO') {
+        if (convenio.beneficio) {
+            this.endpoint = '/api/integraciones/beneficiarios/validar';
+        } else if (convenio.tipo === 'CODIGO_DESCUENTO') {
             this.endpoint = `/api/convenios/validar/{codigo}`;
         } else {
             // Si es externo, tomar de la BD (si es relativo, se queda relativo)
