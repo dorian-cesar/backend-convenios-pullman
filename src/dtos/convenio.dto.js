@@ -40,6 +40,7 @@ class ConvenioDTO {
         this.limitar_por_stock = !!convenio.limitar_por_stock;
         this.limitar_por_monto = !!convenio.limitar_por_monto;
         
+        this.endpoint_rutas_especificas = null;
         if (this.tipo_alcance === 'Rutas Especificas') {
             this.endpoint_rutas_especificas = `/api/convenios/${this.id}/rutas`;
         }
