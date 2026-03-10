@@ -12,15 +12,14 @@ class ConvenioDTO {
 
         this.status = convenio.status;
 
-        // Transformar tipo a array com pide el user -> ERROR: User corrected, single value.
         this.tipo_consulta = convenio.tipo;
         this.api_url_id = convenio.api_consulta_id;
+        this.beneficio = !!convenio.beneficio;
+        this.imagenes = convenio.imagenes || null;
 
-        // (Empresa ya extraída arriba)
-
-        if (convenio.beneficio) {
+        if (this.beneficio) {
             this.endpoint = '/api/integraciones/beneficiarios/validar';
-        } else if (convenio.tipo === 'CODIGO_DESCUENTO') {
+        } else if (this.tipo_consulta === 'CODIGO_DESCUENTO') {
             this.endpoint = `/api/convenios/validar/{codigo}`;
         } else {
             // Si es externo, tomar de la BD (si es relativo, se queda relativo)
@@ -40,13 +39,10 @@ class ConvenioDTO {
         this.codigo = convenio.codigo;
         this.limitar_por_stock = !!convenio.limitar_por_stock;
         this.limitar_por_monto = !!convenio.limitar_por_monto;
-        this.beneficio = convenio.beneficio !== undefined ? convenio.beneficio : null;
-        this.imagenes = convenio.imagenes || null;
-
         if (this.beneficio) {
             this.beneficio_nombre = this.nombre;
             this.beneficio_endpoint_registro = '/api/beneficiarios'; // Default fallback backend route
-            this.beneficio_endpoint_validacion = '/api/integraciones/beneficiarios/validar'; // Default backend format validations
+            this.beneficio_endpoint_validacion = this.endpoint; // Match the principal endpoint
 
             if (convenio.empresa && convenio.empresa.apisRegistro && convenio.empresa.apisRegistro.length > 0) {
                 // Use the configured external/internal endpoint
