@@ -51,6 +51,21 @@
 		},
 		{
 			"name": "1. Crear Convenio con Beneficio",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"if (jsonData.id) {",
+							"    pm.collectionVariables.set(\"ultimo_convenio_id\", jsonData.id);",
+							"    console.log(\"Convenio ID guardado: \" + jsonData.id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [
@@ -175,35 +190,35 @@
 			"response": []
 		},
 		{
-			"name": "5. Catálogo de Beneficios (Inscripción)",
+			"name": "6. Configurar Rutas de Convenio",
 			"request": {
-				"method": "GET",
+				"method": "POST",
 				"header": [
-					{
-						"key": "x-api-key",
-						"value": "{{frontend_api_key}}",
-						"type": "text"
-					},
 					{
 						"key": "Authorization",
 						"value": "Bearer {{admin_token}}",
 						"type": "text"
 					}
 				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"rutas\": [\n        {\n            \"origen_codigo\": \"01\",\n            \"origen_ciudad\": \"Santiago\",\n            \"destino_codigo\": \"02\",\n            \"destino_ciudad\": \"Valparaíso\",\n            \"configuraciones\": [\n                {\n                    \"tipo_viaje\": \"Solo Ida\",\n                    \"tipo_asiento\": \"Semi Cama\",\n                    \"precio_solo_ida\": 15000,\n                    \"max_pasajes\": 5\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "{{baseUrl}}/api/convenios?beneficio=true",
+					"raw": "{{baseUrl}}/api/convenios/{{ultimo_convenio_id}}/rutas",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
-						"convenios"
-					],
-					"query": [
-						{
-							"key": "beneficio",
-							"value": "true"
-						}
+						"convenios",
+						"{{ultimo_convenio_id}}",
+						"rutas"
 					]
 				}
 			},
