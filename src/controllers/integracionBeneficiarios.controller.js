@@ -44,6 +44,13 @@ const integracionBeneficiariosController = {
                 });
             }
 
+            if (beneficiario.status === 'INACTIVO') {
+                return res.status(200).json({ 
+                    afiliado: false,
+                    mensaje: `El beneficiario existe pero esta en revision` 
+                });
+            }
+
             if (beneficiario.status !== 'ACTIVO') {
                 return res.status(200).json({ 
                     afiliado: false,
