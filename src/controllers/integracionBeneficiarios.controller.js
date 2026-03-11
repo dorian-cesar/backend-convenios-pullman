@@ -4,16 +4,13 @@ const pasajerosService = require('../services/pasajeros.service');
 const ConvenioDTO = require('../dtos/convenio.dto');
 
 const integracionBeneficiariosController = {
-    /**
-     * Valida contra la tabla unificada de Beneficios usando la data directamente.
-     * En el futuro, si Empresa tiene ApiConsulta definida para validación externa,
-     * podemos proxy-arla aquí usando `convenioId` -> `Empresa`.
-     */
     async validar(req, res, next) {
         try {
             const { rut, convenio_id } = req.body;
+            console.log(`[Beneficiarios Validar] Inicio - RUT: ${rut}, Convenio ID: ${convenio_id}`);
 
             if (!rut || !convenio_id) {
+                console.log(`[Beneficiarios Validar] Faltan datos (rut o convenio_id)`);
                 return res.status(400).json({ 
                     afiliado: false,
                     mensaje: 'El RUT y el convenio_id son requeridos' 
@@ -21,12 +18,14 @@ const integracionBeneficiariosController = {
             }
 
             const formattedRUT = formatRut(rut);
+            console.log(`[Beneficiarios Validar] RUT Formateado: ${formattedRUT}`);
 
             const convenio = await Convenio.findByPk(convenio_id, {
                 include: [{ model: Empresa, as: 'empresa' }]
             });
 
             if (!convenio) {
+                console.log(`[Beneficiarios Validar] Convenio no encontrado (${convenio_id})`);
                 return res.status(404).json({ 
                     afiliado: false,
                     mensaje: 'Convenio no encontrado' 
@@ -38,13 +37,17 @@ const integracionBeneficiariosController = {
             });
 
             if (!beneficiario) {
+                console.log(`[Beneficiarios Validar] Beneficiario NO encontrado para RUT ${formattedRUT} en convenio ${convenio_id}`);
                 return res.status(200).json({ 
                     afiliado: false,
                     mensaje: `El RUT ingresado no se encuentra registrado como beneficiario para este convenio.` 
                 });
             }
 
+            console.log(`[Beneficiarios Validar] Beneficiario Encontrado! Estado: ${beneficiario.status}`);
+
             if (beneficiario.status === 'INACTIVO') {
+                console.log(`[Beneficiarios Validar] Beneficiario en revisión (INACTIVO)`);
                 return res.status(200).json({ 
                     afiliado: false,
                     mensaje: `El beneficiario existe pero esta en revision` 
@@ -52,11 +55,14 @@ const integracionBeneficiariosController = {
             }
 
             if (beneficiario.status !== 'ACTIVO') {
+                console.log(`[Beneficiarios Validar] Beneficiario rechazado o no apto (${beneficiario.status})`);
                 return res.status(200).json({ 
                     afiliado: false,
                     mensaje: `El beneficiario existe pero no puede viajar porque su estado actual es: ${beneficiario.status}` 
                 });
             }
+
+            console.log(`[Beneficiarios Validar] Beneficiario ACTIVO, procediendo a verificar/registrar pasajero...`);
 
             const nombreParts = (beneficiario.nombre || '').split(' ');
             const nombres = nombreParts[0] || 'Sin Nombre';
