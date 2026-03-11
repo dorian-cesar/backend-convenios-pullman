@@ -106,7 +106,12 @@ module.exports = (sequelize, DataTypes) => {
         rutas: {
             type: DataTypes.JSON,
             allowNull: true,
-            comment: 'Estructura denormalizada de rutas y configuraciones'
+            comment: 'Estructura denormalizada de rutas'
+        },
+        configuraciones: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Configuración única de precios para todas las rutas del convenio'
         },
         status: {
             type: DataTypes.STRING,

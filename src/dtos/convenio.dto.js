@@ -54,8 +54,9 @@ class ConvenioDTO {
         this.consumo_tickets = convenio.consumo_tickets || 0;
         this.consumo_monto_descuento = convenio.consumo_monto_descuento || 0;
 
-        // Rutas (Campo JSON directo)
+        // Rutas y Configuraciones (Campos JSON directos)
         this.rutas = convenio.rutas || [];
+        this.configuraciones = convenio.configuraciones || [];
     }
 
     static fromArray(convenios) {

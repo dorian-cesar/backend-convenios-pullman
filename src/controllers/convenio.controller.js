@@ -237,7 +237,7 @@ exports.listarRutas = async (req, res, next) => {
 exports.agregarRutas = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { rutas } = req.body;
+        const { rutas, configuraciones } = req.body;
 
         const convenio = await convenioService.obtenerConvenio(id);
         if (convenio.tipo_alcance !== 'Rutas Especificas') {
@@ -263,7 +263,26 @@ exports.agregarRutas = async (req, res, next) => {
             }
         }
 
-        await convenioService.agregarRutasAConvenio(id, rutas);
+        // Validar configuraciones globales si existen
+        if (configuraciones && Array.isArray(configuraciones)) {
+            for (const config of configuraciones) {
+                if (convenio.tipo_descuento === 'Porcentaje') {
+                    if (config.precio_solo_ida > 100 || (config.precio_ida_vuelta && config.precio_ida_vuelta > 100)) {
+                        return res.status(400).json({
+                            error: 'Incongruencia en configuración global: El convenio es de tipo Porcentaje. Los valores no pueden ser mayores a 100.'
+                        });
+                    }
+                } else if (convenio.tipo_descuento === 'Tarifa Plana' || convenio.tipo_descuento === 'Monto Fijo') {
+                    if (config.precio_solo_ida > 0 && config.precio_solo_ida <= 100) {
+                        return res.status(400).json({
+                            error: `Incongruencia en configuración global: El convenio es de tipo ${convenio.tipo_descuento}. Los valores parecen ser porcentuales.`
+                        });
+                    }
+                }
+            }
+        }
+
+        const data = await convenioService.agregarRutasAConvenio(id, rutas, configuraciones);
         const rutasActualizadas = await convenioService.obtenerRutasPorConvenio(id);
         return res.status(201).json(rutasActualizadas);
     } catch (error) {

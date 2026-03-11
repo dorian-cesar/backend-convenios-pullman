@@ -7,7 +7,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, tipo_alcance, tipo_descuento, valor_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes, rutas }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, tipo_alcance, tipo_descuento, valor_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes, rutas, configuraciones }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -95,6 +95,12 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         finalPorcentajeDescuento = Math.round(finalValorDescuento);
     }
 
+    // Limpieza según el tipo de alcance
+    if (tipo_alcance === 'Global') {
+        rutas = null;
+        configuraciones = null;
+    }
+
     const convenio = await Convenio.create({
         nombre,
         empresa_id,
@@ -114,7 +120,8 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         status: statusInicial,
         beneficio: beneficio || false,
         imagenes: imagenes || [],
-        rutas: rutas || null
+        rutas: rutas || null,
+        configuraciones: configuraciones || null
     });
 
 
@@ -318,7 +325,7 @@ exports.actualizarConvenio = async (id, datos) => {
         tipo_alcance, tipo_descuento, valor_descuento,
         limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
         tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets,
-        beneficio, imagenes, rutas
+        beneficio, imagenes, rutas, configuraciones
     } = datos;
 
     if (nombre) convenio.nombre = nombre;
@@ -353,9 +360,18 @@ exports.actualizarConvenio = async (id, datos) => {
     if (codigo !== undefined) convenio.codigo = finalTipo === 'API_EXTERNA' ? null : codigo;
     if (limitar_por_stock !== undefined) convenio.limitar_por_stock = limitar_por_stock;
     if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
+    // Lógica de alcance
+    const alcanceFinal = tipo_alcance !== undefined ? tipo_alcance : convenio.tipo_alcance;
+    if (alcanceFinal === 'Global') {
+        convenio.rutas = null;
+        convenio.configuraciones = null;
+    } else {
+        if (rutas !== undefined) convenio.rutas = rutas;
+        if (configuraciones !== undefined) convenio.configuraciones = configuraciones;
+    }
+
     if (beneficio !== undefined) convenio.beneficio = beneficio;
     if (imagenes !== undefined) convenio.imagenes = imagenes;
-    if (rutas !== undefined) convenio.rutas = rutas;
 
     // Nuevos campos para actualización
     if (fecha_inicio !== undefined) convenio.fecha_inicio = fecha_inicio;
@@ -885,21 +901,49 @@ exports.buscarConveniosPorRuta = async (origen_codigo, destino_codigo) => {
  * Reemplaza o agrega rutas al campo JSON de un convenio.
  * Consolidado desde convenioRuta.service.js
  */
-exports.agregarRutasAConvenio = async (convenioId, rutasData) => {
+exports.agregarRutasAConvenio = async (convenioId, rutasData, configuracionesData = null) => {
     const convenio = await Convenio.findByPk(convenioId);
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
 
-    // Normalizar y asignar al campo JSON
+    if (convenio.tipo_alcance !== 'Rutas Especificas') {
+        throw new BusinessError('Este convenio es Global. Cambie el alcance a "Rutas Especificas" para añadir tramos.');
+    }
+
+    const rutasActuales = Array.isArray(convenio.rutas) ? convenio.rutas : [];
+
+    // Normalizar nuevas rutas (Solo origen y destino, sin config interna ya que se rigen por la global)
     const nuevasRutas = rutasData.map(r => ({
         origen_codigo: r.origen_codigo,
         origen_ciudad: r.origen_ciudad,
         destino_codigo: r.destino_codigo,
-        destino_ciudad: r.destino_ciudad,
-        configuraciones: r.configuraciones || []
+        destino_ciudad: r.destino_ciudad
     }));
 
-    await convenio.update({ rutas: nuevasRutas });
-    return nuevasRutas;
+    // Combinar rutas
+    let rutasFinales = [...rutasActuales];
+    nuevasRutas.forEach(nueva => {
+        const index = rutasFinales.findIndex(r => 
+            r.origen_codigo === nueva.origen_codigo && 
+            r.destino_codigo === nueva.destino_codigo
+        );
+
+        if (index !== -1) {
+            rutasFinales[index] = nueva;
+        } else {
+            rutasFinales.push(nueva);
+        }
+    });
+
+    const updateData = { rutas: rutasFinales };
+    if (configuracionesData) {
+        updateData.configuraciones = configuracionesData;
+    }
+
+    await convenio.update(updateData);
+    return {
+        rutas: rutasFinales,
+        configuraciones: updateData.configuraciones || convenio.configuraciones
+    };
 };
 
 /**

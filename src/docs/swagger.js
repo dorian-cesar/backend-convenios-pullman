@@ -165,6 +165,12 @@ const options = {
               items: {
                 $ref: '#/components/schemas/ConvenioRuta'
               }
+            },
+            configuraciones: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/ConvenioRutaConfig'
+              }
             }
           }
         },
@@ -173,8 +179,8 @@ const options = {
           properties: {
             tipo_viaje: { type: 'string', example: 'Solo Ida' },
             tipo_asiento: { type: 'string', example: 'Semi Cama' },
-            precio_solo_ida: { type: 'number', example: 15000 },
-            precio_ida_vuelta: { type: 'number', example: null },
+            precio_solo_ida: { type: 'number', example: 15000, nullable: true },
+            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true },
             max_pasajes: { type: 'integer', example: 5 }
           }
         },
@@ -193,25 +199,63 @@ const options = {
             }
           }
         },
-        RutaInput: {
+        CrearConvenio: {
           type: 'object',
+          required: ['nombre', 'empresa_id'],
           properties: {
-            origen_codigo: { type: 'string', example: '01' },
-            origen_ciudad: { type: 'string', example: 'Santiago' },
-            destino_codigo: { type: 'string', example: '02' },
-            destino_ciudad: { type: 'string', example: 'Valparaíso' },
+            nombre: { type: 'string', example: "Convenio Verano 2026" },
+            empresa_id: { type: 'integer', example: 1 },
+            codigo: { type: 'string', example: "PROMO2026" },
+            tipo_consulta: { type: 'string', enum: ['API_EXTERNA', 'CODIGO_DESCUENTO'], default: 'CODIGO_DESCUENTO' },
+            tipo_alcance: { type: 'string', enum: ['Global', 'Rutas Especificas'], default: 'Global' },
+            tipo_descuento: { type: 'string', enum: ['Porcentaje', 'Monto Fijo', 'Tarifa Plana'], default: 'Porcentaje' },
+            valor_descuento: { type: 'number', example: 10000 },
+            porcentaje_descuento: { type: 'integer', example: 10 },
+            endpoint: { type: 'string', example: "/api/integraciones/araucana/validar" },
+            tope_monto_descuento: { type: 'integer', example: 1000000 },
+            tope_cantidad_tickets: { type: 'integer', example: 50 },
+            limitar_por_stock: { type: 'boolean', example: false },
+            limitar_por_monto: { type: 'boolean', example: false },
+            api_consulta_id: { type: 'integer', example: 1 },
+            fecha_inicio: { type: 'string', format: 'date-time' },
+            fecha_termino: { type: 'string', format: 'date-time' },
+            beneficio: { type: 'boolean', default: false },
+            imagenes: { type: 'array', items: { type: 'string' } },
+            rutas: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRuta' }
+            },
             configuraciones: {
               type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  tipo_viaje: { type: 'string', example: 'Solo Ida' },
-                  tipo_asiento: { type: 'string', example: 'Semi Cama' },
-                  precio_solo_ida: { type: 'integer', example: 15000 },
-                  precio_ida_vuelta: { type: 'integer', example: null },
-                  max_pasajes: { type: 'integer', example: 5 }
-                }
-              }
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
+            }
+          }
+        },
+        ActualizarConvenio: {
+          type: 'object',
+          properties: {
+            nombre: { type: 'string' },
+            empresa_id: { type: 'integer' },
+            status: { type: 'string', enum: ['ACTIVO', 'INACTIVO'] },
+            tipo_alcance: { type: 'string', enum: ['Global', 'Rutas Especificas'] },
+            tipo_descuento: { type: 'string', enum: ['Porcentaje', 'Monto Fijo', 'Tarifa Plana'] },
+            valor_descuento: { type: 'number' },
+            porcentaje_descuento: { type: 'integer' },
+            codigo: { type: 'string' },
+            limitar_por_stock: { type: 'boolean' },
+            limitar_por_monto: { type: 'boolean' },
+            api_consulta_id: { type: 'integer' },
+            fecha_inicio: { type: 'string', format: 'date-time' },
+            fecha_termino: { type: 'string', format: 'date-time' },
+            beneficio: { type: 'boolean' },
+            imagenes: { type: 'array', items: { type: 'string' } },
+            rutas: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRuta' }
+            },
+            configuraciones: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
             }
           }
         },
