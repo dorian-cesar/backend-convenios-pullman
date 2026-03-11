@@ -11,6 +11,7 @@ async function startServer() {
     await sequelize.authenticate();
     logger.info('🗄️ Conectado a la base de datos');
 
+    // Sincronizar modelos (Seguro para producción: no altera tablas automáticamente)
     await sequelize.sync({ alter: false, force: false });
     logger.info('🗄️ Modelos sincronizados');
 
