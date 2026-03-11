@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('beneficios', {
+        await queryInterface.createTable('beneficiarios', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -80,18 +80,15 @@ module.exports = {
                 allowNull: true,
                 type: Sequelize.DATE
             }
-        }, {
-            indexes: [
-                {
-                    unique: true,
-                    fields: ['rut', 'tipo_beneficio'],
-                    name: 'unique_rut_per_benefit'
-                }
-            ]
         });
+
+        // Índices para beneficiarios
+        await queryInterface.addIndex('beneficiarios', ['rut']);
+        await queryInterface.addIndex('beneficiarios', ['convenio_id']);
+        await queryInterface.addIndex('beneficiarios', ['createdAt']);
     },
 
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('beneficios');
+        await queryInterface.dropTable('beneficiarios');
     }
 };
