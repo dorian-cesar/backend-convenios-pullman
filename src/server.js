@@ -11,8 +11,8 @@ async function startServer() {
     await sequelize.authenticate();
     logger.info('🗄️ Conectado a la base de datos');
 
-    // Sincronizar modelos (alter: true permite agregar nuevas columnas sin borrar datos)
-    await sequelize.sync({ alter: true, force: false });
+    // Sincronizar modelos (Seguro para producción: no altera tablas automáticamente)
+    await sequelize.sync({ alter: false, force: false });
     logger.info('🗄️ Modelos sincronizados');
 
     // Job: Limpieza de convenios vencidos (cada 1 hora)
