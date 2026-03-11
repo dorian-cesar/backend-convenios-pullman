@@ -47,7 +47,7 @@ const integracionBeneficiariosController = {
             if (beneficiario.status !== 'ACTIVO') {
                 return res.status(200).json({ 
                     afiliado: false,
-                    mensaje: `El beneficio se encuentra ${beneficiario.status}` 
+                    mensaje: `El beneficiario existe pero no puede viajar porque su estado actual es: ${beneficiario.status}` 
                 });
             }
 
