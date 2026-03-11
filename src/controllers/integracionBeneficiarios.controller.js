@@ -40,7 +40,7 @@ const integracionBeneficiariosController = {
             if (!beneficiario) {
                 return res.status(200).json({ 
                     afiliado: false,
-                    mensaje: `El RUT ingresado no se encuentra registrado para este beneficio o convenio.` 
+                    mensaje: `El RUT ingresado no se encuentra registrado como beneficiario para este convenio.` 
                 });
             }
 
