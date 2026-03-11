@@ -31,13 +31,24 @@ const validateRut = (rut) => {
     if (typeof rut !== 'string' || !rut) return false;
 
     // Remove dots, convert to uppercase (keep hyphens)
-    const cleanRut = rut.replace(/\./g, '').toUpperCase();
+    const cleanRutStr = rut.replace(/\./g, '').toUpperCase();
 
     // Verify format allows numbers, and ends in number, K, k, X, or x
-    return /^[0-9]+-[0-9kKxX]$/.test(cleanRut);
+    return /^[0-9]+-[0-9kKxX]$/.test(cleanRutStr);
+};
+
+/**
+ * Clean a RUT (removes dots and hyphens)
+ * @param {string} rut
+ * @returns {string}
+ */
+const cleanRut = (rut) => {
+    if (!rut) return rut;
+    return rut.replace(/[^0-9kKxX]/g, '').toUpperCase();
 };
 
 module.exports = {
     formatRut,
-    validateRut
+    validateRut,
+    cleanRut
 };

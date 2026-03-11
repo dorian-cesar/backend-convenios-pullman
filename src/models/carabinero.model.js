@@ -35,5 +35,25 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
+    // Shadow Writing Hooks for Safe Migration
+    const syncWithBeneficio = async (carabinero, options) => {
+        const { Beneficiario } = sequelize.models;
+        const data = {
+            nombre: carabinero.nombre_completo,
+            rut: carabinero.rut,
+            status: carabinero.status || 'ACTIVO',
+            convenio_id: carabinero.convenio_id || 158,
+            imagenes: {} 
+        };
+
+        await Beneficiario.upsert(data, { 
+            transaction: options.transaction,
+            conflictFields: ['rut', 'convenio_id']
+        });
+    };
+
+    Carabinero.addHook('afterCreate', syncWithBeneficio);
+    Carabinero.addHook('afterUpdate', syncWithBeneficio);
+
     return Carabinero;
 };

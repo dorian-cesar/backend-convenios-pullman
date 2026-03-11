@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
         rut: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
             validate: {
                 is: /^[0-9]+-[0-9kKxX]$/
             }
@@ -65,6 +64,34 @@ module.exports = (sequelize, DataTypes) => {
             adultoMayor.rut = formatRut(adultoMayor.rut);
         }
     });
+
+    // Shadow Writing Hooks for Safe Migration
+    const syncWithBeneficio = async (adultoMayor, options) => {
+        const { Beneficiario } = sequelize.models;
+        const data = {
+            nombre: adultoMayor.nombre,
+            rut: adultoMayor.rut,
+            telefono: adultoMayor.telefono,
+            correo: adultoMayor.correo,
+            direccion: adultoMayor.direccion,
+            status: adultoMayor.status,
+            razon_rechazo: adultoMayor.razon_rechazo,
+            convenio_id: 158,
+            imagenes: {
+                cedula_identidad: adultoMayor.imagen_cedula_identidad,
+                certificado_residencia: adultoMayor.imagen_certificado_residencia,
+                certificado: adultoMayor.certificado
+            }
+        };
+
+        await Beneficiario.upsert(data, { 
+            transaction: options.transaction,
+            conflictFields: ['rut', 'convenio_id']
+        });
+    };
+
+    AdultoMayor.addHook('afterCreate', syncWithBeneficio);
+    AdultoMayor.addHook('afterUpdate', syncWithBeneficio);
 
     return AdultoMayor;
 };

@@ -362,7 +362,7 @@ exports.asociarPasajeroAEventos = async (data) => {
  * Validar y Registrar Pasajero (Lógica Unificada para validaciones de RUT)
  * Busca/Crea pasajero, asigna empresa/convenio y verifica topes.
  */
-exports.validarYRegistrarPasajero = async ({ rut, nombres, apellidos, correo, telefono, fecha_nacimiento, tipo_pasajero_id, empresa_nombre_defecto, convenio_nombre_defecto }) => {
+exports.validarYRegistrarPasajero = async ({ rut, nombres, apellidos, correo, telefono, fecha_nacimiento, tipo_pasajero_id, empresa_nombre_defecto, convenio_nombre_defecto, empresa_id, convenio_id }) => {
   if (!rut) {
     throw new BusinessError('El RUT es obligatorio');
   }
@@ -371,11 +371,16 @@ exports.validarYRegistrarPasajero = async ({ rut, nombres, apellidos, correo, te
   let empresa = null;
   let convenio = null;
 
-  if (empresa_nombre_defecto) {
+  // Prioridad al ID directo si viene enviado
+  if (empresa_id) {
+    empresa = await Empresa.findByPk(empresa_id);
+  } else if (empresa_nombre_defecto) {
     empresa = await Empresa.findOne({ where: { nombre: empresa_nombre_defecto } });
   }
 
-  if (convenio_nombre_defecto) {
+  if (convenio_id) {
+    convenio = await Convenio.findByPk(convenio_id);
+  } else if (convenio_nombre_defecto) {
     convenio = await Convenio.findOne({ where: { nombre: convenio_nombre_defecto } });
   }
 

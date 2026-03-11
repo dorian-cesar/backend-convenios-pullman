@@ -2,7 +2,7 @@ const { Router } = require('express');
 const convenioController = require('../controllers/convenio.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
-const { crearConvenio, actualizarConvenio, validarCodigoConvenio } = require('../validations/convenio.validation');
+const { crearConvenio, actualizarConvenio, validarCodigoConvenio, agregarRutasMassivas } = require('../validations/convenio.validation');
 
 const router = Router();
 
@@ -139,6 +139,43 @@ router.get('/activos', convenioController.listarActivos);
  */
 router.get('/disponibles', convenioController.listarDisponibles);
 
+/**
+ * @openapi
+ * /api/convenios/buscar/rutas:
+ *   get:
+ *     summary: Buscar convenios disponibles para una ruta específica
+ *     description: Retorna convenios activos de tipo "Rutas Específicas" que contengan el origen y destino consultado.
+ *     tags:
+ *       - Rutas de Convenios
+ *     parameters:
+ *       - in: query
+ *         name: origen_codigo
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: destino_codigo
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lista de convenios que aplican a la ruta
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Convenio'
+ *       400:
+ *         description: Parámetros faltantes (origen_codigo o destino_codigo)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/buscar/rutas', convenioController.buscarPorRuta);
+
 // Rutas protegidas (Ya lo son todas)
 
 /**
@@ -209,73 +246,7 @@ router.get('/disponibles', convenioController.listarDisponibles);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - nombre
- *               - empresa_id
- *               - codigo
- *             properties:
- *               nombre:
- *                 type: string
- *                 example: "Convenio Verano 2026"
- *               empresa_id:
- *                 type: integer
- *                 example: 1
- *               codigo:
- *                 type: string
- *                 example: "PROMO2026"
- *                 description: "Código de descuento (OBLIGATORIO para convenios internos)"
- *               tipo_consulta:
- *                 type: string
- *                 enum: [API_EXTERNA, CODIGO_DESCUENTO]
- *                 default: CODIGO_DESCUENTO
- *               porcentaje_descuento:
- *                 type: integer
- *                 example: 10
- *                 description: "Porcentaje de descuento (0-100)"
- *               endpoint:
- *                 type: string
- *                 description: "Ruta del servicio (Solo para API_EXTERNA)"
- *                 example: "/api/integraciones/araucana/validar"
- *               tope_monto_descuento:
- *                 type: integer
- *                 example: 1000000
- *               tope_cantidad_tickets:
- *                 type: integer
- *                 example: 50
- *               limitar_por_stock:
- *                 type: boolean
- *                 example: false
- *               limitar_por_monto:
- *                 type: boolean
- *                 example: false
- *               api_url_id:
- *                 type: integer
- *                 example: 1
- *               fecha_inicio:
- *                 type: string
- *                 format: date-time
- *               fecha_termino:
- *                 type: string
- *                 format: date-time
- *           examples:
- *             CodigoDescuento:
- *               summary: Convenio de Código (Default)
- *               value:
- *                 nombre: "Convenio Verano 2026"
- *                 empresa_id: 1
- *                 tipo_consulta: "CODIGO_DESCUENTO"
- *                 codigo: "VERANO2026"
- *                 porcentaje_descuento: 10
- *                 tope_monto_descuento: 1000000
- *                 tope_cantidad_tickets: 50
- *             ApiExterna:
- *               summary: Convenio con API Externa
- *               value:
- *                 nombre: "Convenio Araucana"
- *                 empresa_id: 2
- *                 tipo_consulta: "API_EXTERNA"
- *                 endpoint: "https://api.externa.com/validar"
+ *             $ref: '#/components/schemas/CrearConvenio'
  *     responses:
  *       201:
  *         description: Convenio creado exitosamente
@@ -388,39 +359,7 @@ router.get('/:id', convenioController.obtener);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nombre:
- *                 type: string
- *                 example: Convenio Invierno 2026
- *               empresa_id:
- *                 type: integer
- *                 example: 1
- *               status:
- *                 type: string
- *                 enum: [ACTIVO, INACTIVO]
- *                 example: ACTIVO
- *               porcentaje_descuento:
- *                 type: integer
- *                 example: 15
- *               codigo:
- *                 type: string
- *                 example: "INVIERNO2026"
- *               limitar_por_stock:
- *                 type: boolean
- *                 example: true
- *               limitar_por_monto:
- *                 type: boolean
- *                 example: false
- *               api_url_id:
- *                 type: integer
- *                 example: 1
- *               fecha_inicio:
- *                 type: string
- *                 format: date-time
- *               fecha_termino:
- *                 type: string
- *                 format: date-time
+ *             $ref: '#/components/schemas/ActualizarConvenio'
  *     responses:
  *       200:
  *         description: Convenio actualizado
@@ -432,6 +371,118 @@ router.get('/:id', convenioController.obtener);
  *         description: Convenio no encontrado
  */
 router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
+
+/**
+ * ==========================================
+ *        CRUD RUTAS ESPECÍFICAS
+ * ==========================================
+ */
+
+/**
+ * @openapi
+ * /api/convenios/{id}/rutas:
+ *   get:
+ *     summary: Obtener todas las rutas específicas de un convenio
+ *     tags:
+ *       - Rutas de Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de rutas y sus configuraciones
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ConvenioRuta'
+ */
+router.get('/:id/rutas', convenioController.listarRutas);
+
+/**
+ * @openapi
+ * /api/convenios/{id}/rutas:
+ *   post:
+ *     summary: Agregar masivamente rutas a un convenio
+ *     description: Inserta un arreglo de rutas y sus configuraciones (tipos de asientos, pasajes, precios) a un convenio tipo "Rutas Especificas".
+ *     tags:
+ *       - Rutas de Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               configuraciones:
+ *                 type: array
+ *                 description: "Precios fijos (Solo Ida e Ida/Vuelta) que rigen a todas las rutas. Se usan en lugar del valor_descuento del convenio."
+ *                 items:
+ *                   $ref: '#/components/schemas/ConfiguracionRuta'
+ *               rutas:
+ *                 type: array
+ *                 description: "Listado de tramos planos. Todos heredarán la configuración de precios anterior."
+ *                 items:
+ *                   $ref: '#/components/schemas/ConvenioRuta'
+ *                 example:
+ *                   - origen_codigo: "01"
+ *                     origen_ciudad: "Santiago"
+ *                     destino_codigo: "02"
+ *                     destino_ciudad: "Valparaíso"
+ *                   - origen_codigo: "02"
+ *                     origen_ciudad: "Valparaíso"
+ *                     destino_codigo: "01"
+ *                     destino_ciudad: "Santiago"
+ *     responses:
+ *       201:
+ *         description: Rutas creadas exitosamente
+ *       400:
+ *         description: Error de validación o el convenio es Global
+ */
+router.post('/:id/rutas', validate(agregarRutasMassivas), convenioController.agregarRutas);
+
+/**
+ * @openapi
+ * /api/convenios/{id}/rutas/{ruta_id}:
+ *   delete:
+ *     summary: Eliminar ruta específica
+ *     tags:
+ *       - Rutas de Convenios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del convenio
+ *       - in: path
+ *         name: ruta_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID de la ruta a eliminar
+ *     responses:
+ *       204:
+ *         description: Ruta eliminada exitosamente
+ */
+router.delete('/:id/rutas', convenioController.eliminarRuta);
+
 
 /**
  * @openapi

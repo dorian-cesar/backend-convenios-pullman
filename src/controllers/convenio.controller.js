@@ -8,11 +8,11 @@ exports.crear = async (req, res, next) => {
     try {
         // Mapear tipo_consulta (JSON user) a tipo (Modelo interno)
         // Mapear api_url_id a api_consulta_id
-        const { tipo_consulta, api_url_id, ...rest } = req.body;
+        const { tipo_consulta, api_url_id, api_consulta_id, ...rest } = req.body;
         const data = {
             ...rest,
             tipo: tipo_consulta || rest.tipo,
-            api_consulta_id: api_url_id || rest.api_consulta_id
+            api_consulta_id: api_url_id || api_consulta_id || rest.api_consulta_id
         };
         const convenio = await convenioService.crearConvenio(data);
         res.status(201).json(new ConvenioDTO(convenio));
@@ -80,11 +80,11 @@ exports.obtener = async (req, res, next) => {
 exports.actualizar = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { tipo_consulta, api_url_id, ...rest } = req.body;
+        const { tipo_consulta, api_url_id, api_consulta_id, ...rest } = req.body;
         const data = {
             ...rest,
             tipo: tipo_consulta || rest.tipo,
-            api_consulta_id: api_url_id || rest.api_consulta_id
+            api_consulta_id: api_url_id || api_consulta_id || rest.api_consulta_id
         };
         const convenio = await convenioService.actualizarConvenio(id, data);
         res.json(new ConvenioDTO(convenio));
@@ -194,8 +194,118 @@ exports.verificarDisponibilidad = async (req, res, next) => {
                 valido: false,
                 msj: error.message
             });
-        } else {
-            next(error);
         }
+    }
+};
+
+/**
+ * Buscar convenios activos que contengan una ruta específica
+ */
+exports.buscarPorRuta = async (req, res, next) => {
+    try {
+        const { origen_codigo, destino_codigo } = req.query;
+
+        if (!origen_codigo || !destino_codigo) {
+            return res.status(400).json({ error: 'origen_codigo y destino_codigo son requeridos como query params' });
+        }
+
+        const convenios = await convenioService.buscarConveniosPorRuta(origen_codigo, destino_codigo);
+        res.json(ConvenioDTO.fromArray(convenios));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Obtener todas las rutas de un convenio
+ * Consolidado desde convenioRuta.controller.js
+ */
+exports.listarRutas = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const rutas = await convenioService.obtenerRutasPorConvenio(id);
+        return res.status(200).json(rutas);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Agrega un arreglo masivo de rutas a un convenio
+ * Consolidado desde convenioRuta.controller.js
+ */
+exports.agregarRutas = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { rutas, configuraciones } = req.body;
+
+        const convenio = await convenioService.obtenerConvenio(id);
+        if (convenio.tipo_alcance !== 'Rutas Especificas') {
+            return res.status(400).json({ error: 'Este convenio es Global, debe cambiar su tipo_alcance primero.' });
+        }
+
+        // Validar congruencia estricta entre tipo de descuento del padre y los "precios" enviados en las configuraciones
+        for (const ruta of rutas) {
+            for (const config of ruta.configuraciones) {
+                if (convenio.tipo_descuento === 'Porcentaje') {
+                    if (config.precio_solo_ida > 100 || (config.precio_ida_vuelta && config.precio_ida_vuelta > 100)) {
+                        return res.status(400).json({
+                            error: 'Incongruencia: El convenio es de tipo Porcentaje. Las configuraciones de ruta no pueden tener valores mayores a 100.'
+                        });
+                    }
+                } else if (convenio.tipo_descuento === 'Tarifa Plana' || convenio.tipo_descuento === 'Monto Fijo') {
+                    if (config.precio_solo_ida > 0 && config.precio_solo_ida <= 100) {
+                        return res.status(400).json({
+                            error: `Incongruencia: El convenio es de tipo ${convenio.tipo_descuento}. Las configuraciones enviadas parecen ser valores porcentuales. Debe enviar el monto real.`
+                        });
+                    }
+                }
+            }
+        }
+
+        // Validar configuraciones globales si existen
+        if (configuraciones && Array.isArray(configuraciones)) {
+            for (const config of configuraciones) {
+                if (convenio.tipo_descuento === 'Porcentaje') {
+                    if (config.precio_solo_ida > 100 || (config.precio_ida_vuelta && config.precio_ida_vuelta > 100)) {
+                        return res.status(400).json({
+                            error: 'Incongruencia en configuración global: El convenio es de tipo Porcentaje. Los valores no pueden ser mayores a 100.'
+                        });
+                    }
+                } else if (convenio.tipo_descuento === 'Tarifa Plana' || convenio.tipo_descuento === 'Monto Fijo') {
+                    if (config.precio_solo_ida > 0 && config.precio_solo_ida <= 100) {
+                        return res.status(400).json({
+                            error: `Incongruencia en configuración global: El convenio es de tipo ${convenio.tipo_descuento}. Los valores parecen ser porcentuales.`
+                        });
+                    }
+                }
+            }
+        }
+
+        const data = await convenioService.agregarRutasAConvenio(id, rutas, configuraciones);
+        const rutasActualizadas = await convenioService.obtenerRutasPorConvenio(id);
+        return res.status(201).json(rutasActualizadas);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Eliminar ruta específica de un convenio
+ * Consolidado desde convenioRuta.controller.js
+ */
+exports.eliminarRuta = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { origen_codigo, destino_codigo } = req.query;
+
+        if (!origen_codigo || !destino_codigo) {
+            return res.status(400).json({ error: 'origen_codigo y destino_codigo son requeridos para eliminar una ruta del JSON' });
+        }
+
+        await convenioService.eliminarRutaDeConvenio(id, origen_codigo, destino_codigo);
+        return res.status(204).send();
+    } catch (error) {
+        next(error);
     }
 };

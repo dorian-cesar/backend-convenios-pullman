@@ -19,14 +19,18 @@ const options = {
       { name: 'Auth', description: 'Operaciones de autenticación (login, register)' },
       { name: 'Admin', description: 'Administración de usuarios y roles' },
       { name: 'Empresas', description: 'Gestión de empresas' },
-      { name: 'Convenios', description: 'Gestión de convenios empresariales' },
+      { name: 'Convenios', description: 'Gestión de convenios empresariales (Datos base)' },
+      { name: 'Rutas de Convenios', description: 'Gestión de rutas específicas y configuraciones de pasajes' },
       { name: 'Pasajeros', description: 'Gestión de pasajeros' },
       { name: 'Eventos', description: 'Gestión de eventos (viajes)' },
       { name: 'ApiKeys', description: 'Gestión de llaves de acceso para integraciones externas' },
       { name: 'Estudiantes', description: 'Gestión de estudiantes independientes' },
       { name: 'Adultos Mayores', description: 'Gestión de adultos mayores independientes' },
       { name: 'Pasajeros Frecuentes', description: 'Gestión de pasajeros frecuentes independientes' },
-      { name: 'Carabineros', description: 'Validación de convenio Carabineros' }
+      { name: 'Carabineros', description: 'Validación de convenio Carabineros' },
+      { name: 'Beneficiarios', description: 'Gestión unificada de beneficiarios y sus programas (Ej. Escuela Militar)' },
+      { name: 'APIs Registro', description: 'Catálogo de APIs para registro de beneficiarios externos' },
+      { name: 'APIs Consulta', description: 'Catálogo de APIs para verificación de beneficiarios' }
     ],
     components: {
       securitySchemes: {
@@ -73,6 +77,28 @@ const options = {
             nombre: { type: 'string', example: 'API Araucana' },
             endpoint: { type: 'string', example: '/api/integraciones/araucana/validar' },
             status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        ApiRegistro: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            nombre: { type: 'string', example: 'API Registro Estudiante' },
+            endpoint: { type: 'string', example: '/api/integraciones/beneficiarios/estudiante/validar' },
+            empresa_id: { type: 'integer' },
+            status: { type: 'string', example: 'ACTIVO' }
+          }
+        },
+        Beneficiario: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            slug: { type: 'string', example: 'ESTUDIANTE' },
+            nombre: { type: 'string', example: 'Estudiante Regular' },
+            api_consulta_id: { type: 'integer' },
+            api_registro_id: { type: 'integer' },
+            configuracion_imagenes: { type: 'object' },
+            status: { type: 'string' }
           }
         },
         CreateEmpresa: {
@@ -125,12 +151,112 @@ const options = {
             limitar_por_stock: { type: 'boolean', example: false },
             limitar_por_monto: { type: 'boolean', example: false },
             beneficio: { type: 'boolean', example: false },
+            beneficio_nombre: { type: 'string', example: 'Descuento Estudiante', description: 'Nombre del beneficio si el convenio es de tipo beneficio' },
+            beneficio_endpoint_registro: { type: 'string', example: '/api/beneficiarios', description: 'Endpoint interno o externo al cual enviar los datos de registro (RUT, Nombre, convenio_id)' },
+            beneficio_endpoint_validacion: { type: 'string', example: '/api/integraciones/beneficiarios/validar', description: 'Endpoint al cual enviar RUt y convenio_id para validar el beneficio' },
             imagenes: {
               type: 'array',
               items: { type: 'string' },
               example: ['https://img1.com', 'https://img2.com']
             },
-            status: { type: 'string', example: 'ACTIVO' }
+            status: { type: 'string', example: 'ACTIVO' },
+            rutas: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/ConvenioRuta'
+              }
+            },
+            configuraciones: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/ConvenioRutaConfig'
+              }
+            }
+          }
+        },
+        ConvenioRutaConfig: {
+          type: 'object',
+          properties: {
+            tipo_viaje: { type: 'string', example: 'Solo Ida' },
+            tipo_asiento: { type: 'string', example: 'Semi Cama' },
+            precio_solo_ida: { type: 'number', example: 15000, nullable: true },
+            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true },
+            max_pasajes: { type: 'integer', example: 5 }
+          }
+        },
+        ConvenioRuta: {
+          type: 'object',
+          properties: {
+            origen_codigo: { type: 'string', example: '01' },
+            origen_ciudad: { type: 'string', example: 'Santiago' },
+            destino_codigo: { type: 'string', example: '02' },
+            destino_ciudad: { type: 'string', example: 'Valparaíso' },
+            configuraciones: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/ConvenioRutaConfig'
+              }
+            }
+          }
+        },
+        CrearConvenio: {
+          type: 'object',
+          required: ['nombre', 'empresa_id'],
+          properties: {
+            nombre: { type: 'string', example: "Convenio Verano 2026" },
+            empresa_id: { type: 'integer', example: 1 },
+            codigo: { type: 'string', example: "PROMO2026" },
+            tipo_consulta: { type: 'string', enum: ['API_EXTERNA', 'CODIGO_DESCUENTO'], default: 'CODIGO_DESCUENTO' },
+            tipo_alcance: { type: 'string', enum: ['Global', 'Rutas Especificas'], default: 'Global' },
+            tipo_descuento: { type: 'string', enum: ['Porcentaje', 'Monto Fijo', 'Tarifa Plana'], default: 'Porcentaje' },
+            valor_descuento: { type: 'number', example: 10000 },
+            porcentaje_descuento: { type: 'integer', example: 10 },
+            endpoint: { type: 'string', example: "/api/integraciones/araucana/validar" },
+            tope_monto_descuento: { type: 'integer', example: 1000000 },
+            tope_cantidad_tickets: { type: 'integer', example: 50 },
+            limitar_por_stock: { type: 'boolean', example: false },
+            limitar_por_monto: { type: 'boolean', example: false },
+            api_consulta_id: { type: 'integer', example: 1 },
+            fecha_inicio: { type: 'string', format: 'date-time' },
+            fecha_termino: { type: 'string', format: 'date-time' },
+            beneficio: { type: 'boolean', default: false },
+            imagenes: { type: 'array', items: { type: 'string' } },
+            rutas: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRuta' }
+            },
+            configuraciones: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
+            }
+          }
+        },
+        ActualizarConvenio: {
+          type: 'object',
+          properties: {
+            nombre: { type: 'string' },
+            empresa_id: { type: 'integer' },
+            status: { type: 'string', enum: ['ACTIVO', 'INACTIVO'] },
+            tipo_alcance: { type: 'string', enum: ['Global', 'Rutas Especificas'] },
+            tipo_descuento: { type: 'string', enum: ['Porcentaje', 'Monto Fijo', 'Tarifa Plana'] },
+            valor_descuento: { type: 'number' },
+            porcentaje_descuento: { type: 'integer' },
+            codigo: { type: 'string' },
+            limitar_por_stock: { type: 'boolean' },
+            limitar_por_monto: { type: 'boolean' },
+            api_consulta_id: { type: 'integer' },
+            fecha_inicio: { type: 'string', format: 'date-time' },
+            fecha_termino: { type: 'string', format: 'date-time' },
+            beneficio: { type: 'boolean' },
+            imagenes: { type: 'array', items: { type: 'string' } },
+            rutas: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRuta' }
+            },
+            configuraciones: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
+            }
           }
         },
         Pasajero: {
@@ -191,6 +317,61 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' }
           }
         },
+        Beneficiario: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            convenio_id: { type: 'integer', example: 158 },
+            nombre: { type: 'string', example: 'Juan Perez' },
+            nombre_beneficio: { type: 'string', example: 'Estudiante Regular' },
+            rut: { type: 'string', example: '11.111.111-1' },
+            telefono: { type: 'string', example: '+56912345678' },
+            correo: { type: 'string', example: 'juan@email.com' },
+            direccion: { type: 'string', example: 'Calle Falsa 123' },
+            status: { type: 'string', example: 'ACTIVO' },
+            imagenes: {
+              type: 'object',
+              additionalProperties: { type: 'string' },
+              description: 'Mapa de imágenes en Base64 (ej: { "cedula_frontal": "data:image/png;base64,..." })'
+            },
+            razon_rechazo: { type: 'string', example: 'Documento ilegible' }
+          }
+        },
+        CrearBeneficiario: {
+          type: 'object',
+          required: ['nombre', 'rut', 'convenio_id'],
+          properties: {
+            nombre: { type: 'string', example: 'Juan Perez' },
+            nombre_beneficio: { type: 'string', example: 'Estudiante Regular', description: 'Nombre descriptivo del beneficio o programa asociado' },
+            rut: { type: 'string', example: '11.111.111-1' },
+            convenio_id: { type: 'integer', example: 158 },            telefono: { type: 'string', example: '+56912345678' },
+            correo: { type: 'string', example: 'juan@email.com' },
+            direccion: { type: 'string', example: 'Calle Falsa 123' },
+            imagenes: {
+              type: 'object',
+              additionalProperties: { type: 'string' },
+              description: 'Mapa de imágenes en Base64'
+            },
+            status: { type: 'string', example: 'INACTIVO', default: 'INACTIVO' }
+          }
+        },
+        ActualizarBeneficiario: {
+          type: 'object',
+          properties: {
+            nombre: { type: 'string', example: 'Juan Perez' },
+            nombre_beneficio: { type: 'string', example: 'Estudiante Regular' },
+            rut: { type: 'string', example: '11.111.111-1' },
+            convenio_id: { type: 'integer', example: 158 },            telefono: { type: 'string', example: '+56912345678' },
+            correo: { type: 'string', example: 'juan@email.com' },
+            direccion: { type: 'string', example: 'Calle Falsa 123' },
+            imagenes: {
+              type: 'object',
+              additionalProperties: { type: 'string' }
+            },
+            status: { type: 'string', example: 'ACTIVO' },
+            razon_rechazo: { type: 'string', example: 'Documento faltante' }
+          }
+        },
 
         Evento: {
           type: 'object',
@@ -225,6 +406,22 @@ const options = {
             status: { type: 'string', example: 'ACTIVO' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ErrorResponse: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Descripción del error' }
+          }
+        },
+        ValidacionBeneficiarioResponse: {
+          type: 'object',
+          properties: {
+            afiliado: { type: 'boolean', example: true },
+            mensaje: { type: 'string', example: 'Validación exitosa' },
+            pasajero: { $ref: '#/components/schemas/Pasajero' },
+            empresa: { type: 'string', example: 'PULLMAN BUS' },
+            convenio: { $ref: '#/components/schemas/Convenio' }
           }
         }
       }

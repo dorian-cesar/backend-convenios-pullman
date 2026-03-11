@@ -23,10 +23,15 @@ module.exports = (err, req, res, next) => {
   }
 
   // Log critical/unknown errors
-  logger.error(err);
+  if (!err.statusCode && !err.status) {
+    logger.error(err);
+  }
 
-  res.status(500).json({
-    error: 'INTERNAL_ERROR',
+  const statusCode = err.statusCode || err.status || 500;
+  const errorCode = err.code || (statusCode === 400 ? 'VALIDATION_ERROR' : 'INTERNAL_ERROR');
+
+  res.status(statusCode).json({
+    error: errorCode,
     message: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });

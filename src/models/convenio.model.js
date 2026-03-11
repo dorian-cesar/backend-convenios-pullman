@@ -103,6 +103,16 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.JSON, // Array of strings
             allowNull: true
         },
+        rutas: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Estructura denormalizada de rutas'
+        },
+        configuraciones: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Configuración única de precios para todas las rutas del convenio'
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'
@@ -113,8 +123,10 @@ module.exports = (sequelize, DataTypes) => {
         paranoid: true,
         validate: {
             checkValorDescuento() {
-                if (this.tipo_descuento === 'Tarifa Plana' && this.valor_descuento !== null) {
-                    throw new Error('El valor_descuento debe ser nulo cuando el tipo_descuento es Tarifa Plana');
+                // Se permite valor_descuento para Tarifa Plana si el usuario lo requiere (ej. precio fijo del pasaje)
+                if (this.tipo_descuento === 'Tarifa Plana' && (this.valor_descuento === null || this.valor_descuento === undefined)) {
+                    // Opcional: podrías lanzar error si quieres que SIEMPRE sea obligatorio, 
+                    // pero por ahora solo eliminamos la prohibición de que sea nulo.
                 }
                 if ((this.tipo_descuento === 'Porcentaje' || this.tipo_descuento === 'Monto Fijo') && this.valor_descuento === null) {
                     // Permitimos el paso momentáneo si tienen porcentaje_descuento configurado a nivel antiguo, 

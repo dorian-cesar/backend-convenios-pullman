@@ -1,0 +1,265 @@
+{
+	"info": {
+		"_postman_id": "7f8b9e2d-4d5c-4a1b-9c8d-3f2a1b9c8d7e",
+		"name": "Pullman - Refinamiento Beneficiarios",
+		"description": "Colección para probar el flujo completo de convenios con beneficios/inscripción.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. Login (Obtener Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"if (jsonData.token) {",
+							"    pm.collectionVariables.set(\"admin_token\", jsonData.token);",
+							"    console.log(\"Token guardado automáticamente en admin_token\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"admin@pullman.cl\",\n    \"password\": \"DevAdmin\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "1. Crear Convenio con Beneficio",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"if (jsonData.id) {",
+							"    pm.collectionVariables.set(\"ultimo_convenio_id\", jsonData.id);",
+							"    console.log(\"Convenio ID guardado: \" + jsonData.id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombre\": \"Convenio Test Beneficio\",\n    \"empresa_id\": 1,\n    \"tipo_consulta\": \"CODIGO_DESCUENTO\",\n    \"codigo\": \"TESTBENEF\",\n    \"beneficio\": true,\n    \"porcentaje_descuento\": 10,\n    \"tipo_descuento\": \"Porcentaje\",\n    \"valor_descuento\": 10,\n    \"tipo_alcance\": \"Global\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/convenios",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"convenios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Registro de Beneficiario",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "{{frontend_api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombre\": \"Juan Perez\",\n    \"rut\": \"11.111.111-1\",\n    \"convenio_id\": 1,\n    \"telefono\": \"+56912345678\",\n    \"correo\": \"juan.perez@example.com\",\n    \"direccion\": \"Alameda 123, Santiago\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/beneficiarios",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"beneficiarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Validación de Beneficiario (Integración)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"rut\": \"11.111.111-1\",\n    \"convenioId\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/integraciones/beneficiarios/validar",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"integraciones",
+						"beneficiarios",
+						"validar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Listar Convenios Activos",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/convenios/activos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"convenios",
+						"activos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Configurar Rutas de Convenio",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"rutas\": [\n        {\n            \"origen_codigo\": \"01\",\n            \"origen_ciudad\": \"Santiago\",\n            \"destino_codigo\": \"02\",\n            \"destino_ciudad\": \"Valparaíso\",\n            \"configuraciones\": [\n                {\n                    \"tipo_viaje\": \"Solo Ida\",\n                    \"tipo_asiento\": \"Semi Cama\",\n                    \"precio_solo_ida\": 15000,\n                    \"max_pasajes\": 5\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/convenios/{{ultimo_convenio_id}}/rutas",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"convenios",
+						"{{ultimo_convenio_id}}",
+						"rutas"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://backend-dev-convenios.dev-wit.com",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "TU_TOKEN_AQUI",
+			"type": "string"
+		},
+		{
+			"key": "frontend_api_key",
+			"value": "pb_58277b3eb6e682efa28fa6fd547ddd23bff602de1675e9c3",
+			"type": "string"
+		}
+	]
+}

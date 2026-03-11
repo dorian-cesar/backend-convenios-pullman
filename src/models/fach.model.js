@@ -8,7 +8,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         rut: {
             type: DataTypes.STRING,
-            unique: true,
             allowNull: false
         },
         nombre_completo: {
@@ -43,6 +42,26 @@ module.exports = (sequelize, DataTypes) => {
             fach.rut = formatRut(fach.rut);
         }
     });
+
+    // Shadow Writing Hooks for Safe Migration
+    const syncWithBeneficio = async (fach, options) => {
+        const { Beneficiario } = sequelize.models;
+        const data = {
+            nombre: fach.nombre_completo,
+            rut: fach.rut,
+            status: fach.status || 'ACTIVO',
+            convenio_id: fach.convenio_id || 158,
+            imagenes: {}
+        };
+
+        await Beneficiario.upsert(data, { 
+            transaction: options.transaction,
+            conflictFields: ['rut', 'convenio_id']
+        });
+    };
+
+    Fach.addHook('afterCreate', syncWithBeneficio);
+    Fach.addHook('afterUpdate', syncWithBeneficio);
 
     return Fach;
 };
