@@ -53,6 +53,7 @@ full_spec.json
 
 # Internal Scripts
 *.postman_collection.json
+src/docs/*.postman_collection.json
 
 # Documentation
 DOCUMENTACION_PROYECTO.md
