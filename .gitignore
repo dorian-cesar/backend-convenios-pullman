@@ -51,10 +51,33 @@ full_spec.json
 #bat
 *.bat
 
-# Internal Scripts
+# Internal Scripts/Tests
+test_*.js
+check_*.js
+combined.js
+list_tables.js
+run_migr.js
+seedAll.js
+update_fach_empresa.js
+token.txt
+*.txt
+*.log
+*.html
+*.json
+!package.json
+!package-lock.json
+!swagger.json
+!src/docs/*.json
+
+# Postman
 *.postman_collection.json
 src/docs/*.postman_collection.json
 
 # Documentation
 DOCUMENTACION_PROYECTO.md
 PLAN_MIGRACION_PRODUCCION.md
+intrucciones_nuevas_tablas.md
+analisis_*.toml
+*.toml
+*.pem
+*.bat
