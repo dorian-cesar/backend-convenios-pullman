@@ -1,15 +1,18 @@
-const { sequelize, Estudiante, AdultoMayor, PasajeroFrecuente, Beneficio } = require('../../models');
+const { sequelize, Estudiante, AdultoMayor, PasajeroFrecuente, Beneficiario } = require('../../models');
 
 async function backfillBeneficios() {
-    console.log('--- Iniciando Backfill de Beneficios (Desde Producción) ---');
+    console.log('--- Iniciando Backfill de Beneficiarios (Desde Producción) ---');
     const transaction = await sequelize.transaction();
 
     try {
+        // Encontrar modelo beneficiario específicamente
+        const BeneficiarioModel = Beneficiario;
+
         // 1. Migrar Estudiantes
         const estudiantes = await Estudiante.findAll({ paranoid: false });
         console.log(`Migrando ${estudiantes.length} estudiantes...`);
         for (const e of estudiantes) {
-            await Beneficio.upsert({
+            await BeneficiarioModel.upsert({
                 nombre: e.nombre,
                 rut: e.rut,
                 telefono: e.telefono,
@@ -26,14 +29,14 @@ async function backfillBeneficios() {
                 createdAt: e.createdAt,
                 updatedAt: e.updatedAt,
                 deletedAt: e.deletedAt
-            }, { transaction, conflictFields: ['rut', 'tipo_beneficio'] });
+            }, { transaction });
         }
 
         // 2. Migrar Adultos Mayores
         const adultosMayores = await AdultoMayor.findAll({ paranoid: false });
         console.log(`Migrando ${adultosMayores.length} adultos mayores...`);
         for (const am of adultosMayores) {
-            await Beneficio.upsert({
+            await BeneficiarioModel.upsert({
                 nombre: am.nombre,
                 rut: am.rut,
                 telefono: am.telefono,
@@ -51,14 +54,14 @@ async function backfillBeneficios() {
                 createdAt: am.createdAt,
                 updatedAt: am.updatedAt,
                 deletedAt: am.deletedAt
-            }, { transaction, conflictFields: ['rut', 'tipo_beneficio'] });
+            }, { transaction });
         }
 
         // 3. Migrar Pasajeros Frecuentes
         const pasajerosFrecuentes = await PasajeroFrecuente.findAll({ paranoid: false });
         console.log(`Migrando ${pasajerosFrecuentes.length} pasajeros frecuentes...`);
         for (const pf of pasajerosFrecuentes) {
-            await Beneficio.upsert({
+            await BeneficiarioModel.upsert({
                 nombre: pf.nombre,
                 rut: pf.rut,
                 telefono: pf.telefono,
@@ -75,14 +78,14 @@ async function backfillBeneficios() {
                 createdAt: pf.createdAt,
                 updatedAt: pf.updatedAt,
                 deletedAt: pf.deletedAt
-            }, { transaction, conflictFields: ['rut', 'tipo_beneficio'] });
+            }, { transaction });
         }
 
         // 4. Migrar Carabineros
         const carabineros = await sequelize.models.Carabinero.findAll({ paranoid: false });
         console.log(`Migrando ${carabineros.length} carabineros...`);
         for (const c of carabineros) {
-            await Beneficio.upsert({
+            await BeneficiarioModel.upsert({
                 nombre: c.nombre_completo,
                 rut: c.rut,
                 status: c.status || 'ACTIVO',
@@ -94,14 +97,14 @@ async function backfillBeneficios() {
                 createdAt: c.createdAt,
                 updatedAt: c.updatedAt,
                 deletedAt: c.deletedAt
-            }, { transaction, conflictFields: ['rut', 'tipo_beneficio'] });
+            }, { transaction });
         }
 
         // 5. Migrar FACH
         const fuchs = await sequelize.models.Fach.findAll({ paranoid: false });
         console.log(`Migrando ${fuchs.length} registros FACH...`);
         for (const f of fuchs) {
-            await Beneficio.upsert({
+            await BeneficiarioModel.upsert({
                 nombre: f.nombre_completo,
                 rut: f.rut,
                 status: f.status || 'ACTIVO',
@@ -113,7 +116,7 @@ async function backfillBeneficios() {
                 createdAt: f.createdAt,
                 updatedAt: f.updatedAt,
                 deletedAt: f.deletedAt
-            }, { transaction, conflictFields: ['rut', 'tipo_beneficio'] });
+            }, { transaction });
         }
 
         await transaction.commit();
