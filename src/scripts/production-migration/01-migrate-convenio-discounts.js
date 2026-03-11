@@ -46,6 +46,14 @@ async function migrateData() {
             logger.info('  - Columna rutas agregada');
         }
 
+        if (!table.configuraciones) {
+            await queryInterface.addColumn('convenios', 'configuraciones', {
+                type: DataTypes.JSON,
+                allowNull: true
+            });
+            logger.info('  - Columna configuraciones agregada');
+        }
+
         logger.info('✅ Columnas verificadas/agregadas exitosamente');
 
         // 2. Backfill de datos
