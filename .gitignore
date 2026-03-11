@@ -54,6 +54,7 @@ full_spec.json
 # Internal Scripts/Tests
 test_*.js
 check_*.js
+check-*.js
 combined.js
 list_tables.js
 run_migr.js
@@ -71,13 +72,14 @@ token.txt
 
 # Postman
 *.postman_collection.json
-src/docs/*.postman_collection.json
+postman_collection.json
 
 # Documentation
 DOCUMENTACION_PROYECTO.md
 PLAN_MIGRACION_PRODUCCION.md
-intrucciones_nuevas_tablas.md
+intrucciones_*.md
 analisis_*.toml
+analisis-*.toml
 *.toml
 *.pem
 *.bat
