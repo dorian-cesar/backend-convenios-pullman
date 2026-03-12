@@ -52,9 +52,20 @@ router.post('/', validate(beneficiarioValidation.crearBeneficiario), beneficiari
  *         schema:
  *           type: integer
  *         description: Filtrar por convenio asociado
+ *       - in: query
+ *         name: empresa_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por empresa asociada al convenio
  *     responses:
  *       200:
  *         description: Lista de beneficiarios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Beneficiario'
  */
 router.get('/', beneficiarioController.listar);
 /**

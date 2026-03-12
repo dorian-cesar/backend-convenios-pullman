@@ -48,13 +48,15 @@ exports.obtenerPorId = async (id) => {
 };
 
 exports.listar = async (query = {}) => {
-    const { limit = 10, page = 1, convenio_id, status, rut } = query;
+    const { limit = 10, page = 1, convenio_id, status, rut, empresa_id } = query;
     const offset = (page - 1) * limit;
     const where = {};
+    const includeConvenioWhere = {};
 
     if (convenio_id) where.convenio_id = convenio_id;
     if (status) where.status = status;
     if (rut) where.rut = formatRut(rut);
+    if (empresa_id) includeConvenioWhere.empresa_id = empresa_id;
 
     const { count, rows } = await Beneficiario.findAndCountAll({
         where,
@@ -62,7 +64,11 @@ exports.listar = async (query = {}) => {
         offset: parseInt(offset),
         order: [['createdAt', 'DESC']],
         include: [
-            { model: Convenio, as: 'convenio' }
+            { 
+                model: Convenio, 
+                as: 'convenio',
+                where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
+            }
         ]
     });
 
