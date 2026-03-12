@@ -6,9 +6,9 @@ const rutaConfigSchema = Joi.object({
         'any.required': 'El tipo_viaje es obligatorio',
         'any.only': 'El tipo_viaje debe ser "Solo Ida" o "Ida y Vuelta"'
     }),
-    tipo_asiento: Joi.string().valid('Semi Cama', 'Cama', 'Premium').required().messages({
+    tipo_asiento: Joi.string().valid('Semi Cama', 'Cama', 'Premium', 'Ejecutivo').required().messages({
         'any.required': 'El tipo_asiento es obligatorio',
-        'any.only': 'El tipo_asiento debe ser "Semi Cama", "Cama" o "Premium"'
+        'any.only': 'El tipo_asiento debe ser "Semi Cama", "Cama", "Premium" o "Ejecutivo"'
     }),
     precio_solo_ida: Joi.number().min(0).allow(null).optional().messages({
         'number.min': 'El precio_solo_ida no puede ser negativo'
