@@ -58,20 +58,25 @@ exports.listar = async (query = {}) => {
     if (rut) where.rut = formatRut(rut);
     if (empresa_id) includeConvenioWhere.empresa_id = empresa_id;
 
-    const { count, rows } = await Beneficiario.findAndCountAll({
+    const includeConvenio = { 
+        model: Convenio, 
+        as: 'convenio',
+        where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
+    };
+
+    // 1. Contar el total de registros (sin order ni limit para no saturar memoria)
+    const count = await Beneficiario.count({
+        where,
+        include: [includeConvenio]
+    });
+
+    // 2. Obtener la página solicitada
+    const rows = await Beneficiario.findAll({
         where,
         limit: parseInt(limit),
         offset: parseInt(offset),
         order: [['createdAt', 'DESC']],
-        subQuery: false,
-        distinct: true,
-        include: [
-            { 
-                model: Convenio, 
-                as: 'convenio',
-                where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
-            }
-        ]
+        include: [includeConvenio]
     });
 
     return {
