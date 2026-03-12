@@ -61,6 +61,7 @@ exports.listar = async (query = {}) => {
     const includeConvenio = { 
         model: Convenio, 
         as: 'convenio',
+        attributes: ['id', 'nombre'],
         where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
     };
 
@@ -70,14 +71,35 @@ exports.listar = async (query = {}) => {
         include: [includeConvenio]
     });
 
-    // 2. Obtener la página solicitada
-    const rows = await Beneficiario.findAll({
+    // 2. Obtener solo los IDs ordenados
+    const rowsIds = await Beneficiario.findAll({
+        attributes: ['id'],
         where,
         limit: parseInt(limit),
         offset: parseInt(offset),
         order: [['createdAt', 'DESC']],
-        include: [includeConvenio]
+        include: [{ 
+            model: Convenio, 
+            as: 'convenio',
+            attributes: [], // No cargar columnas, solo para el INNER JOIN
+            where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
+        }],
+        raw: true
     });
+
+    const ids = rowsIds.map(row => row.id);
+
+    // 3. Traer los registros completos filtrados por los IDs encontrados (sin forzar sort en BD)
+    let rows = [];
+    if (ids.length > 0) {
+        rows = await Beneficiario.findAll({
+            where: { id: ids },
+            include: [includeConvenio]
+        });
+        
+        // 4. Ordenar en memoria (Node.js) para evadir las limitaciones del sort_buffer de MySQL
+        rows.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+    }
 
     return {
         total: count,
