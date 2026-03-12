@@ -63,6 +63,8 @@ exports.listar = async (query = {}) => {
         limit: parseInt(limit),
         offset: parseInt(offset),
         order: [['createdAt', 'DESC']],
+        subQuery: false,
+        distinct: true,
         include: [
             { 
                 model: Convenio, 
