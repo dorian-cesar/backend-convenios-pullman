@@ -2,14 +2,14 @@ const Joi = require('joi');
 
 // --- Esquemas Reutilizables ---
 const rutaConfigSchema = Joi.object({
-    tipo_viaje: Joi.string().valid('Solo Ida', 'Ida y Vuelta').required().messages({
-        'any.required': 'El tipo_viaje es obligatorio',
+    tipo_viaje: Joi.string().valid('Solo Ida', 'Ida y Vuelta').optional().messages({
         'any.only': 'El tipo_viaje debe ser "Solo Ida" o "Ida y Vuelta"'
     }),
-    tipo_asiento: Joi.string().valid('Semi Cama', 'Cama', 'Premium', 'Ejecutivo').required().messages({
-        'any.required': 'El tipo_asiento es obligatorio',
+    tipo_asiento: Joi.string().valid('Semi Cama', 'Cama', 'Premium', 'Ejecutivo').optional().messages({
         'any.only': 'El tipo_asiento debe ser "Semi Cama", "Cama", "Premium" o "Ejecutivo"'
     }),
+    valor_ida: Joi.number().min(0).allow(null).optional(),
+    valor_ida_vuelta: Joi.number().min(0).allow(null).optional(),
     precio_solo_ida: Joi.number().min(0).allow(null).optional().messages({
         'number.min': 'El precio_solo_ida no puede ser negativo'
     }),
@@ -33,7 +33,8 @@ const rutaSchema = Joi.object({
     }),
     destino_ciudad: Joi.string().max(100).required().messages({
         'any.required': 'La destino_ciudad es obligatoria'
-    })
+    }),
+    configuraciones: rutaConfigSchema.optional()
 });
 
 // --- Esquemas de Endpoints ---
@@ -68,7 +69,7 @@ const crearConvenio = {
         beneficio: Joi.boolean().default(false),
         imagenes: Joi.array().items(Joi.string()).allow(null),
         rutas: Joi.array().items(rutaSchema).optional(),
-        configuraciones: Joi.array().items(rutaConfigSchema).optional()
+        configuraciones: rutaConfigSchema.optional()
     }).messages({
         'object.min': 'Debe proporcionar al menos un campo para actualizar'
     })
@@ -95,7 +96,7 @@ const actualizarConvenio = {
         beneficio: Joi.boolean(),
         imagenes: Joi.array().items(Joi.string()).allow(null),
         rutas: Joi.array().items(rutaSchema).allow(null),
-        configuraciones: Joi.array().items(rutaConfigSchema).allow(null)
+        configuraciones: rutaConfigSchema.allow(null)
     }).min(1),
 };
 
