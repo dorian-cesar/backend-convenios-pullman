@@ -96,10 +96,27 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         finalPorcentajeDescuento = Math.round(finalValorDescuento);
     }
 
-    // Limpieza según el tipo de alcance
-    if (tipo_alcance === 'Global') {
+    // Limpieza y validaciones según el tipo de alcance
+    if (finalTipoAlcance === 'Global') {
         rutas = null;
         configuraciones = null;
+    } else if (finalTipoAlcance === 'Rutas Especificas') {
+        // REGLA: Si es por ruta, el tipo de descuento DEBE ser Tarifa Plana
+        finalTipoDescuento = 'Tarifa Plana';
+
+        if (!configuraciones || configuraciones.valor_ida === undefined || configuraciones.valor_ida === null) {
+            throw new BusinessError('Para convenios por rutas, el valor de ida es obligatorio en las configuraciones');
+        }
+
+        // Validar que valor_ida_vuelta solo se setee si hay valor_ida (ya validado arriba que existe)
+        if (configuraciones.valor_ida_vuelta !== undefined && configuraciones.valor_ida_vuelta !== null) {
+            if (configuraciones.valor_ida === undefined || configuraciones.valor_ida === null) {
+                throw new BusinessError('No se puede setear el valor de ida y vuelta sin haber seteado primero el valor de ida');
+            }
+        }
+
+        // Sincronizar valor_descuento con valor_ida para mantener consistencia
+        finalValorDescuento = configuraciones.valor_ida;
     }
 
     const convenio = await Convenio.create({
@@ -399,7 +416,25 @@ exports.actualizarConvenio = async (id, datos) => {
     if (alcanceFinal === 'Global') {
         convenio.rutas = null;
         convenio.configuraciones = null;
-    } else {
+    } else if (alcanceFinal === 'Rutas Especificas') {
+        // REGLA: Forzar Tarifa Plana
+        convenio.tipo_descuento = 'Tarifa Plana';
+
+        const configActual = configuraciones !== undefined ? configuraciones : convenio.configuraciones;
+
+        if (!configActual || configActual.valor_ida === undefined || configActual.valor_ida === null) {
+            throw new BusinessError('Para convenios por rutas, el valor de ida es obligatorio en las configuraciones');
+        }
+
+        if (configActual.valor_ida_vuelta !== undefined && configActual.valor_ida_vuelta !== null) {
+            if (configActual.valor_ida === undefined || configActual.valor_ida === null) {
+                throw new BusinessError('No se puede setear el valor de ida y vuelta sin haber seteado primero el valor de ida');
+            }
+        }
+
+        // Sincronizar valor_descuento
+        convenio.valor_descuento = configActual.valor_ida;
+
         if (rutas !== undefined) convenio.rutas = rutas;
         if (configuraciones !== undefined) convenio.configuraciones = configuraciones;
     }
