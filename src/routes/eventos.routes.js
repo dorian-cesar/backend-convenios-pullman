@@ -81,6 +81,15 @@ router.use(authMiddleware);
  *               tarifa_base:
  *                 type: integer
  *                 example: 50000
+ *               monto_pagado:
+ *                 type: integer
+ *                 example: 45000
+ *                 description: "Monto final pagado tras aplicar descuentos (calculado por el frontend)"
+ *               porcentaje_descuento_aplicado:
+ *                 type: number
+ *                 format: float
+ *                 example: 10.0
+ *                 description: "Porcentaje de descuento aplicado (calculado por el frontend)"
  *               codigo_autorizacion:
  *                 type: string
  *                 example: "123456"

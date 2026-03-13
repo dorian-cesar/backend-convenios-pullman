@@ -51,6 +51,9 @@ class ConvenioDTO {
         this.consumo_tickets = convenio.consumo_tickets || 0;
         this.consumo_monto_descuento = convenio.consumo_monto_descuento || 0;
 
+        // Total beneficiarios (subquery)
+        this.total_beneficiarios = convenio.getDataValue ? convenio.getDataValue('total_beneficiarios') : (convenio.total_beneficiarios || 0);
+
         // Rutas y Configuraciones (Campos JSON directos)
         this.rutas = convenio.rutas || [];
         this.configuraciones = convenio.configuraciones || [];

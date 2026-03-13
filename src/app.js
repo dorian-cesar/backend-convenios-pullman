@@ -21,7 +21,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
 // Rutas
-if (process.env.SHOW_SWAGGER === 'true') {
+if (process.env.SHOW_SWAGGER === 'true' || process.env.NODE_ENV === 'development') {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }
 app.use('/api', routes);

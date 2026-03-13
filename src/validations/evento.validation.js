@@ -18,6 +18,8 @@ const crearCompra = {
         terminal_origen: Joi.string().allow(null, '').optional(),
         terminal_destino: Joi.string().allow(null, '').optional(),
         tarifa_base: Joi.number().integer().required(),
+        monto_pagado: Joi.number().integer().optional(),
+        porcentaje_descuento_aplicado: Joi.number().precision(2).optional(),
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
         estado: Joi.string().allow(null, '').optional(),

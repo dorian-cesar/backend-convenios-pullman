@@ -166,11 +166,13 @@ router.put('/:id', validate(beneficiarioValidation.actualizarBeneficiario), bene
  *         description: Beneficiario eliminado
  */
 router.delete('/:id', validate(beneficiarioValidation.getBeneficiario), beneficiarioController.eliminar);
+router.patch('/:id/activar', beneficiarioController.activar);
+
 /**
  * @openapi
- * /api/beneficiarios/{id}/activar:
- *   patch:
- *     summary: Activar beneficiario
+ * /api/beneficiarios/convenio/{id}:
+ *   get:
+ *     summary: Listar beneficiarios por ID de convenio
  *     tags: [Beneficiarios]
  *     security:
  *       - bearerAuth: []
@@ -180,10 +182,36 @@ router.delete('/:id', validate(beneficiarioValidation.getBeneficiario), benefici
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID del convenio
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
  *     responses:
  *       200:
- *         description: Beneficiario activado
+ *         description: Lista de beneficiarios del convenio
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: integer
+ *                 pages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Beneficiario'
  */
-router.patch('/:id/activar', beneficiarioController.activar);
+router.get('/convenio/:id', beneficiarioController.listarPorConvenio);
 
 module.exports = router;

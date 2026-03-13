@@ -1,4 +1,4 @@
-const { Convenio, Empresa, ApiConsulta, ApiRegistro, Evento, sequelize } = require('../models');
+const { Convenio, Empresa, ApiConsulta, ApiRegistro, Evento, Beneficiario, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
@@ -90,6 +90,7 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
     if (porcentaje_descuento !== undefined && valor_descuento === undefined) {
         finalValorDescuento = porcentaje_descuento;
         finalTipoDescuento = 'Porcentaje';
+        finalPorcentajeDescuento = porcentaje_descuento;
     } else if (finalTipoDescuento === 'Porcentaje' && finalValorDescuento !== undefined && finalValorDescuento !== null) {
         // Front nuevo envía "Porcentaje" y valor_descuento: guardamos en porcentaje_descuento por si la app legacy lee
         finalPorcentajeDescuento = Math.round(finalValorDescuento);
@@ -146,7 +147,20 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
             }
-        ]
+        ],
+        attributes: {
+            include: [
+                [
+                    sequelize.literal(`(
+                        SELECT COUNT(*)
+                        FROM beneficiarios AS b
+                        WHERE b.convenio_id = Convenio.id
+                        AND b.deletedAt IS NULL
+                    )`),
+                    'total_beneficiarios'
+                ]
+            ]
+        }
     });
 };
 
@@ -180,6 +194,19 @@ exports.listarConvenios = async (filters = {}) => {
     const data = await Convenio.findAndCountAll({
         where,
         distinct: true, // Asegurar conteo de IDs únicos
+        attributes: {
+            include: [
+                [
+                    sequelize.literal(`(
+                        SELECT COUNT(*)
+                        FROM beneficiarios AS b
+                        WHERE b.convenio_id = Convenio.id
+                        AND b.deletedAt IS NULL
+                    )`),
+                    'total_beneficiarios'
+                ]
+            ]
+        },
         include: [
             {
                 model: Empresa,
@@ -227,10 +254,7 @@ exports.listarActivos = async (filters = {}) => {
             {
                 [Op.or]: [
                     { fecha_termino: { [Op.eq]: null } },
-                    { fecha_termino: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) } } // Comparar con inicio del día o fin?
-                    // Si hoy es 18, y termino es 17 -> hoy > termino.
-                    // Si termino es 18 -> hoy <= termino (si termino incluye hora 23:59:59).
-                    // Para query segura: fecha_termino >= HOY (inicio dia)
+                    { fecha_termino: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) } }
                 ]
             }
         ]
@@ -243,8 +267,8 @@ exports.listarActivos = async (filters = {}) => {
                 model: Empresa,
                 as: 'empresa',
                 attributes: ['id', 'nombre', 'rut_empresa'],
-                required: true, // Debe tener empresa
-                where: { status: 'ACTIVO' }, // Opcional: ¿La empresa también debe estar activa? Asumo que sí por lógica de negocio.
+                required: true,
+                where: { status: 'ACTIVO' },
                 include: [
                     {
                         model: ApiRegistro,
@@ -294,7 +318,20 @@ exports.obtenerConvenio = async (id) => {
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
             }
-        ]
+        ],
+        attributes: {
+            include: [
+                [
+                    sequelize.literal(`(
+                        SELECT COUNT(*)
+                        FROM beneficiarios AS b
+                        WHERE b.convenio_id = Convenio.id
+                        AND b.deletedAt IS NULL
+                    )`),
+                    'total_beneficiarios'
+                ]
+            ]
+        }
     });
 
     if (!convenio) {
@@ -338,17 +375,14 @@ exports.actualizarConvenio = async (id, datos) => {
 
     // Lógica retrocompatibilidad (doble escritura)
     if (porcentaje_descuento !== undefined && valor_descuento === undefined) {
-        // App o Admin Viejo
         convenio.valor_descuento = porcentaje_descuento;
         convenio.tipo_descuento = 'Porcentaje';
         convenio.porcentaje_descuento = porcentaje_descuento;
     } else if (convenio.tipo_descuento === 'Porcentaje') {
-        // Front Nuevo envía tipo = Porcentaje y valor
         if (convenio.valor_descuento !== null) {
             convenio.porcentaje_descuento = Math.round(convenio.valor_descuento);
         }
     } else if (porcentaje_descuento !== undefined) {
-        // Caso fallback explícito del front nuevo o request mixto
         convenio.porcentaje_descuento = porcentaje_descuento;
     }
 
@@ -412,20 +446,12 @@ exports.actualizarConvenio = async (id, datos) => {
         if (hoy > termino) forzarInactivo = true;
     }
 
-    // Aplicar lógica: Si fechas obligan INACTIVO, se setea INACTIVO.
-    // Si fechas permiten ACTIVO, se respeta el status que venga en 'datos' o se mantiene el actual si no viene.
-    // PERO si el usuario intenta poner ACTIVO explicitamente y las fechas no dan, ganan las fechas?
-    // User requeriment: "tiene que en status estar inactivo si esta fuera de fechas" -> Ganan las fechas.
-
     if (forzarInactivo) {
         convenio.status = 'INACTIVO';
     } else {
-        // Si fechas ok, revisamos si el usuario mandó status explícito
         if (status) {
             convenio.status = status;
         }
-        // Si no mandó status, mantenemos el que tenía (salvo que antes fuera inactivo por fechas y ahora fechas ok? 
-        // No auto-activamos salvo que lógica de negocio lo pida. Dejamos el que está).
     }
 
     await convenio.save();
@@ -452,7 +478,20 @@ exports.actualizarConvenio = async (id, datos) => {
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
             }
-        ]
+        ],
+        attributes: {
+            include: [
+                [
+                    sequelize.literal(`(
+                        SELECT COUNT(*)
+                        FROM beneficiarios AS b
+                        WHERE b.convenio_id = Convenio.id
+                        AND b.deletedAt IS NULL
+                    )`),
+                    'total_beneficiarios'
+                ]
+            ]
+        }
     });
 };
 
@@ -499,7 +538,6 @@ exports.verificarLimites = async (convenioId, montoNuevo = 0) => {
 
     // 3. Verificaciones
     if (convenio.limitar_por_monto && tope_monto_descuento) {
-        // Validación estricta: Si ya excedió, o si con este nuevo excede.
         if ((consumo_monto_descuento + montoNuevo) > tope_monto_descuento) {
             throw new BusinessError(`Límite de monto de descuento excedido. Tope: $${tope_monto_descuento}, Usado: $${consumo_monto_descuento}, Intento: $${montoNuevo}`);
         }
@@ -535,7 +573,7 @@ exports.validarPorCodigo = async (codigo) => {
 
     // 1. Validar Fechas
     if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) {
-        throw new BusinessError('El convenio aún no comienza su vigencia'); // Opcional: o NotFound para no dar pistas
+        throw new BusinessError('El convenio aún no comienza su vigencia');
     }
     if (convenio.fecha_termino) {
         const termino = new Date(convenio.fecha_termino);
@@ -545,12 +583,12 @@ exports.validarPorCodigo = async (codigo) => {
         }
     }
 
-    // 2. Validar Monto (Si tiene tope y ya lo alcanzó o superó)
+    // 2. Validar Monto
     if (convenio.tope_monto_descuento !== null && convenio.consumo_monto_descuento >= convenio.tope_monto_descuento) {
         throw new BusinessError('El convenio ha agotado su fondo de descuentos');
     }
 
-    // 3. Validar Stock (Si tiene tope y ya lo alcanzó o superó)
+    // 3. Validar Stock
     if (convenio.tope_cantidad_tickets !== null && convenio.consumo_tickets >= convenio.tope_cantidad_tickets) {
         throw new BusinessError('El convenio ha agotado su stock de uso');
     }
@@ -613,7 +651,6 @@ exports.validarVigencia = async (convenioId) => {
     // Verificar fecha término
     if (convenio.fecha_termino) {
         const fechaTermino = new Date(convenio.fecha_termino);
-        // Ajustar fecha de término al final del día (23:59:59) para incluir el día completo
         fechaTermino.setHours(23, 59, 59, 999);
 
         const hoy = new Date();
@@ -626,11 +663,10 @@ exports.validarVigencia = async (convenioId) => {
         }
     }
 
-    // Verificar fecha inicio (nuevo requerimiento)
+    // Verificar fecha inicio
     if (convenio.fecha_inicio) {
         const fechaInicio = new Date(convenio.fecha_inicio);
         const hoy = new Date();
-        // Si hoy es ANTES de inicio, no está vigente
         if (hoy < fechaInicio) {
             convenio.status = 'INACTIVO';
             await convenio.save();
@@ -670,12 +706,11 @@ exports.verificarDisponibilidadPorId = async (id) => {
         valido: true,
         nombre: convenio.nombre,
         empresa: convenio.empresa ? convenio.empresa.nombre : null,
-        tickets_disponibles: null, // null representa ilimitado
-        monto_disponible: null,    // null representa ilimitado
+        tickets_disponibles: null,
+        monto_disponible: null,
         msj: "hay disponibilidad y el convenio está activo"
     };
 
-    // 1. Validaciones absolutas de estado y fechas
     if (convenio.status === 'INACTIVO') {
         response.valido = false;
         response.msj = 'El convenio se encuentra inactivo';
@@ -698,7 +733,6 @@ exports.verificarDisponibilidadPorId = async (id) => {
         }
     }
 
-    // 2. Cálculos de disponibilidad
     if (convenio.limitar_por_stock && convenio.tope_cantidad_tickets !== null) {
         const restantes = convenio.tope_cantidad_tickets - convenio.consumo_tickets;
         response.tickets_disponibles = restantes > 0 ? restantes : 0;
@@ -731,7 +765,6 @@ exports.desactivarConveniosVencidos = async () => {
     const hoy = new Date();
     const result = { total: 0, details: [] };
 
-    // Convertir hoy a inicio del día para comparación SQL simple
     const inicioHoy = new Date();
     inicioHoy.setHours(0, 0, 0, 0);
 
@@ -739,9 +772,7 @@ exports.desactivarConveniosVencidos = async () => {
         where: {
             status: 'ACTIVO',
             [Op.or]: [
-                // Inicio futuro > hoy
                 { fecha_inicio: { [Op.gt]: hoy } },
-                // Termino pasado (ayer) -> fecha_termino < inicioHoy
                 { fecha_termino: { [Op.lt]: inicioHoy } }
             ]
         }
@@ -772,14 +803,11 @@ exports.desactivarConveniosVencidos = async () => {
 exports.listarDisponibles = async () => {
     const hoy = new Date();
 
-    // Buscar convenios que cumplan todas las condiciones
     const convenios = await Convenio.findAll({
         where: {
             status: 'ACTIVO',
-            // 1. Vigencia por fecha
             fecha_inicio: { [Op.lte]: hoy },
             fecha_termino: { [Op.gte]: hoy },
-            // 2. Disponibilidad de Monto (Monto consumido < Tope OR Tope es NULL)
             [Op.and]: [
                 {
                     [Op.or]: [
@@ -792,7 +820,6 @@ exports.listarDisponibles = async () => {
                         }
                     ]
                 },
-                // 3. Disponibilidad de Stock (Tickets consumidos < Tope OR Tope es NULL)
                 {
                     [Op.or]: [
                         { tope_cantidad_tickets: null },
@@ -835,7 +862,6 @@ exports.actualizarConsumo = async (id, { consumo_tickets, consumo_monto_descuent
 
     if (Object.keys(incrementData).length > 0) {
         await convenio.increment(incrementData);
-        // Volvemos a cargarlo tras el increment para retornar la data real actualizada
         await convenio.reload();
     }
 
@@ -848,7 +874,6 @@ exports.actualizarConsumo = async (id, { consumo_tickets, consumo_monto_descuent
 exports.buscarConveniosPorRuta = async (origen_codigo, destino_codigo) => {
     const hoy = new Date();
 
-    // 1. Buscar convenios activos de tipo Rutas Específicas
     const convenios = await Convenio.findAll({
         where: {
             status: 'ACTIVO',
@@ -883,7 +908,6 @@ exports.buscarConveniosPorRuta = async (origen_codigo, destino_codigo) => {
         ]
     });
 
-    // 2. Filtrar por el campo JSON rutas
     const conveniosFiltrados = convenios.filter(conv => {
         if (conv.rutas && Array.isArray(conv.rutas)) {
             return conv.rutas.some(r =>
@@ -899,7 +923,6 @@ exports.buscarConveniosPorRuta = async (origen_codigo, destino_codigo) => {
 
 /**
  * Reemplaza o agrega rutas al campo JSON de un convenio.
- * Consolidado desde convenioRuta.service.js
  */
 exports.agregarRutasAConvenio = async (convenioId, rutasData, configuracionesData = null) => {
     const convenio = await Convenio.findByPk(convenioId);
@@ -911,7 +934,6 @@ exports.agregarRutasAConvenio = async (convenioId, rutasData, configuracionesDat
 
     const rutasActuales = Array.isArray(convenio.rutas) ? convenio.rutas : [];
 
-    // Normalizar nuevas rutas (Solo origen y destino, sin config interna ya que se rigen por la global)
     const nuevasRutas = rutasData.map(r => ({
         origen_codigo: r.origen_codigo,
         origen_ciudad: r.origen_ciudad,
@@ -919,7 +941,6 @@ exports.agregarRutasAConvenio = async (convenioId, rutasData, configuracionesDat
         destino_ciudad: r.destino_ciudad
     }));
 
-    // Combinar rutas
     let rutasFinales = [...rutasActuales];
     nuevasRutas.forEach(nueva => {
         const index = rutasFinales.findIndex(r => 
@@ -948,7 +969,6 @@ exports.agregarRutasAConvenio = async (convenioId, rutasData, configuracionesDat
 
 /**
  * Obtiene las rutas del campo JSON
- * Consolidado desde convenioRuta.service.js
  */
 exports.obtenerRutasPorConvenio = async (convenioId) => {
     const convenio = await Convenio.findByPk(convenioId);
@@ -957,7 +977,6 @@ exports.obtenerRutasPorConvenio = async (convenioId) => {
 
 /**
  * Elimina una ruta del campo JSON comparando origen y destino
- * Consolidado desde convenioRuta.service.js
  */
 exports.eliminarRutaDeConvenio = async (convenioId, origen_codigo, destino_codigo) => {
     const convenio = await Convenio.findByPk(convenioId);

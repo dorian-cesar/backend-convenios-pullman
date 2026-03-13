@@ -49,6 +49,19 @@ exports.listar = async (req, res, next) => {
     }
 };
 
+exports.listarPorConvenio = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await beneficiarioService.listar({ ...req.query, convenio_id: id });
+        res.json({
+            ...result,
+            data: BeneficiarioDTO.list(result.data)
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.actualizar = async (req, res, next) => {
     try {
         const beneficiario = await beneficiarioService.actualizar(req.params.id, req.body);

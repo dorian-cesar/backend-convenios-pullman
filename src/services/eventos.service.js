@@ -120,6 +120,8 @@ exports.crearCompraEvento = async (data) => {
     numero_ticket,
     pnr,
     tarifa_base,
+    monto_pagado,
+    porcentaje_descuento_aplicado,
     codigo_autorizacion,
     token,
     estado,
@@ -133,31 +135,9 @@ exports.crearCompraEvento = async (data) => {
   const empresa = await Empresa.findByPk(empresa_id);
   if (!empresa) throw new NotFoundError('Empresa no encontrada');
 
-  let porcentajeDescuentoAplicado = 0;
-  let montoPagado = tarifa_base;
-
-  if (convenio_id) {
-    const convenio = await Convenio.findByPk(convenio_id);
-    if (!convenio) throw new NotFoundError('Convenio no encontrado');
-
-    if (convenio.status === 'ACTIVO') {
-      // Lógica de Descuentos (Fase 3: Expandida)
-      if (convenio.tipo_descuento === 'Monto Fijo') {
-        const descuentoUnico = convenio.valor_descuento || 0;
-        montoPagado = Math.max(0, tarifa_base - descuentoUnico);
-        porcentajeDescuentoAplicado = 0;
-      } else if (convenio.tipo_descuento === 'Tarifa Plana') {
-        // TODO: La tarifa plana requerirá evaluar la ruta específica.
-        // Para la migración actual asume 0 descuento si no hay configuración
-        montoPagado = tarifa_base;
-        porcentajeDescuentoAplicado = 0;
-      } else {
-        // Fallback a Porcentaje (Lee la nueva columna, si falla, lee la antigua)
-        porcentajeDescuentoAplicado = convenio.valor_descuento !== null ? convenio.valor_descuento : (convenio.porcentaje_descuento || 0);
-        montoPagado = Math.round(tarifa_base - ((tarifa_base * porcentajeDescuentoAplicado) / 100));
-      }
-    }
-  }
+  // Valores por defecto si no vienen del front (aunque deberían venir)
+  const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
+  const finalMontoPagado = monto_pagado !== undefined ? monto_pagado : tarifa_base;
 
   // (REMOVED) Verificar topes de convenio: A petición del negocio ya no se valida stock/monto al comprar,
   // solo se registra el consumo posteriormente.
@@ -178,8 +158,8 @@ exports.crearCompraEvento = async (data) => {
     numero_ticket,
     pnr,
     tarifa_base,
-    porcentaje_descuento_aplicado: porcentajeDescuentoAplicado,
-    monto_pagado: montoPagado,
+    porcentaje_descuento_aplicado: finalPorcentaje,
+    monto_pagado: finalMontoPagado,
     codigo_autorizacion,
     token,
     estado,
