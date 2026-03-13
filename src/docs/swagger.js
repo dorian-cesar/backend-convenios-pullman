@@ -167,10 +167,7 @@ const options = {
               }
             },
             configuraciones: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/ConvenioRutaConfig'
-              }
+              $ref: '#/components/schemas/ConvenioRutaConfig'
             }
           }
         },
@@ -195,10 +192,7 @@ const options = {
             destino_codigo: { type: 'string', example: '02' },
             destino_ciudad: { type: 'string', example: 'Valparaíso' },
             configuraciones: {
-              type: 'array',
-              items: {
-                $ref: '#/components/schemas/ConvenioRutaConfig'
-              }
+              $ref: '#/components/schemas/ConvenioRutaConfig'
             }
           }
         },
@@ -229,8 +223,7 @@ const options = {
               items: { $ref: '#/components/schemas/ConvenioRuta' }
             },
             configuraciones: {
-              type: 'array',
-              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
+              $ref: '#/components/schemas/ConvenioRutaConfig'
             }
           }
         },
@@ -257,8 +250,7 @@ const options = {
               items: { $ref: '#/components/schemas/ConvenioRuta' }
             },
             configuraciones: {
-              type: 'array',
-              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
+              $ref: '#/components/schemas/ConvenioRutaConfig'
             }
           }
         },
