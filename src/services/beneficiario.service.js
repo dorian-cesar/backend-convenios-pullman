@@ -6,22 +6,22 @@ exports.crear = async (data) => {
     if (data.rut) {
         data.rut = formatRut(data.rut);
     }
-    
+
     // Forzar estado inicial INACTIVO para enrolamiento
     data.status = 'INACTIVO';
-    
+
     const beneficiario = await Beneficiario.create(data);
-    
+
     // Obtener info del convenio para el correo
     const convenio = await Convenio.findByPk(beneficiario.convenio_id);
     if (beneficiario.correo) {
         await emailService.enviarCorreoEnrolamiento(
-            beneficiario.correo, 
-            beneficiario.nombre, 
+            beneficiario.correo,
+            beneficiario.nombre,
             convenio ? convenio.nombre : 'Programa de Beneficios'
         );
     }
-    
+
     return beneficiario;
 };
 
@@ -31,7 +31,7 @@ exports.obtenerPorRut = async (rut, convenio_id = null) => {
     if (convenio_id) {
         where.convenio_id = convenio_id;
     }
-    return await Beneficiario.findOne({ 
+    return await Beneficiario.findOne({
         where,
         include: [
             { model: Convenio, as: 'convenio' }
@@ -58,8 +58,8 @@ exports.listar = async (query = {}) => {
     if (rut) where.rut = formatRut(rut);
     if (empresa_id) includeConvenioWhere.empresa_id = empresa_id;
 
-    const includeConvenio = { 
-        model: Convenio, 
+    const includeConvenio = {
+        model: Convenio,
         as: 'convenio',
         attributes: ['id', 'nombre'],
         where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
@@ -78,8 +78,8 @@ exports.listar = async (query = {}) => {
         limit: parseInt(limit),
         offset: parseInt(offset),
         order: [['createdAt', 'DESC']],
-        include: [{ 
-            model: Convenio, 
+        include: [{
+            model: Convenio,
             as: 'convenio',
             attributes: [], // No cargar columnas, solo para el INNER JOIN
             where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
@@ -96,7 +96,7 @@ exports.listar = async (query = {}) => {
             where: { id: ids },
             include: [includeConvenio]
         });
-        
+
         // 4. Ordenar en memoria (Node.js) para evadir las limitaciones del sort_buffer de MySQL
         rows.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
     }
@@ -121,11 +121,11 @@ exports.actualizar = async (id, data) => {
     // Disparar correos según cambio de estado
     if (updated.correo) {
         const nombreConvenio = updated.convenio ? updated.convenio.nombre : 'Programa de Beneficios';
-        
+
         // Caso Aceptación: Pasa de cualquier estado a ACTIVO
         if (oldStatus !== 'ACTIVO' && updated.status === 'ACTIVO') {
             await emailService.enviarCorreoAceptacion(updated.correo, updated.nombre, nombreConvenio);
-        } 
+        }
         // Caso Rechazo: El nuevo estado es RECHAZADO y se provee una razón (obligatoria para el correo)
         else if (updated.status === 'RECHAZADO' && updated.razon_rechazo && updated.razon_rechazo !== beneficiario.razon_rechazo) {
             await emailService.enviarCorreoRechazo(updated.correo, updated.nombre, updated.razon_rechazo, nombreConvenio);
@@ -149,7 +149,7 @@ exports.activar = async (id) => {
     if (!beneficiario) return null;
 
     const updated = await beneficiario.update({ status: 'ACTIVO' });
-    
+
     if (updated.correo) {
         const nombreConvenio = beneficiario.convenio ? beneficiario.convenio.nombre : 'Programa de Beneficios';
         await emailService.enviarCorreoAceptacion(updated.correo, updated.nombre, nombreConvenio);
