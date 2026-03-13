@@ -176,11 +176,14 @@ const options = {
         },
         ConvenioRutaConfig: {
           type: 'object',
+          description: 'Configuración de precios para el convenio o una ruta específica',
           properties: {
-            tipo_viaje: { type: 'string', example: 'Solo Ida' },
-            tipo_asiento: { type: 'string', example: 'Semi Cama' },
-            precio_solo_ida: { type: 'number', example: 15000, nullable: true },
-            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true },
+            valor_ida: { type: 'number', example: 15000, description: 'Precio de solo ida. Obligatorio si el alcance es por rutas.' },
+            valor_ida_vuelta: { type: 'number', example: 25000, nullable: true, description: 'Precio de ida y vuelta. Solo se puede setear si existe valor_ida.' },
+            tipo_viaje: { type: 'string', example: 'Solo Ida', deprecated: true },
+            tipo_asiento: { type: 'string', example: 'Semi Cama', deprecated: true },
+            precio_solo_ida: { type: 'number', example: 15000, nullable: true, deprecated: true },
+            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true, deprecated: true },
             max_pasajes: { type: 'integer', example: 5 }
           }
         },
@@ -207,8 +210,8 @@ const options = {
             empresa_id: { type: 'integer', example: 1 },
             codigo: { type: 'string', example: "PROMO2026" },
             tipo_consulta: { type: 'string', enum: ['API_EXTERNA', 'CODIGO_DESCUENTO'], default: 'CODIGO_DESCUENTO' },
-            tipo_alcance: { type: 'string', enum: ['Global', 'Rutas Especificas'], default: 'Global' },
-            tipo_descuento: { type: 'string', enum: ['Porcentaje', 'Monto Fijo', 'Tarifa Plana'], default: 'Porcentaje' },
+            tipo_alcance: { type: 'string', enum: ['Global', 'Rutas Especificas'], default: 'Global', description: 'Si es "Rutas Especificas", se fuerza tipo_descuento a "Tarifa Plana".' },
+            tipo_descuento: { type: 'string', enum: ['Porcentaje', 'Monto Fijo', 'Tarifa Plana'], default: 'Porcentaje', description: 'Obligatorio "Tarifa Plana" si el alcance es por rutas.' },
             valor_descuento: { type: 'number', example: 10000 },
             porcentaje_descuento: { type: 'integer', example: 10 },
             endpoint: { type: 'string', example: "/api/integraciones/araucana/validar" },
