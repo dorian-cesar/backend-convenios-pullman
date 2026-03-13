@@ -135,6 +135,11 @@ exports.crearCompraEvento = async (data) => {
   const empresa = await Empresa.findByPk(empresa_id);
   if (!empresa) throw new NotFoundError('Empresa no encontrada');
 
+  if (convenio_id) {
+    const convenio = await Convenio.findByPk(convenio_id);
+    if (!convenio) throw new NotFoundError('Convenio no encontrado');
+  }
+
   // Valores por defecto si no vienen del front (aunque deberían venir)
   const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
   const finalMontoPagado = monto_pagado !== undefined ? monto_pagado : tarifa_base;
