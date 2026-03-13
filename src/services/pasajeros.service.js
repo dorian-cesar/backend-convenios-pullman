@@ -420,10 +420,23 @@ exports.validarYRegistrarPasajero = async ({ rut, nombres, apellidos, correo, te
   } else {
     // ACTUALIZAR (Solo si es necesario para reactivar o asignar convenio)
     const updateData = {};
-    if (convenio) updateData.convenio_id = convenio.id;
-    if (empresa) updateData.empresa_id = empresa.id;
-    if (nombres && nombres !== 'Sin Nombre') updateData.nombres = nombres;
-    if (apellidos && apellidos !== 'Sin Apellido') updateData.apellidos = apellidos;
+    
+    // Protección: Solo asignar si el pasajero NO tiene ya un convenio/empresa asignado
+    // Esto evita que validaciones posteriores (ej. Adulto Mayor) pisen convenios explicitos (ej. Araucana)
+    if (convenio && !pasajero.convenio_id) {
+      updateData.convenio_id = convenio.id;
+    }
+    
+    if (empresa && !pasajero.empresa_id) {
+      updateData.empresa_id = empresa.id;
+    }
+
+    if (nombres && nombres !== 'Sin Nombre' && (!pasajero.nombres || pasajero.nombres === 'Sin Nombre')) {
+      updateData.nombres = nombres;
+    }
+    if (apellidos && apellidos !== 'Sin Apellido' && (!pasajero.apellidos || pasajero.apellidos === 'Sin Apellido')) {
+      updateData.apellidos = apellidos;
+    }
 
     // Reactivar si estaba inactivo
     if (pasajero.status !== 'ACTIVO') updateData.status = 'ACTIVO';
