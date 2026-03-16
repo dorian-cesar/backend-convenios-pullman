@@ -34,7 +34,10 @@ const rutaSchema = Joi.object({
     destino_ciudad: Joi.string().max(100).required().messages({
         'any.required': 'La destino_ciudad es obligatoria'
     }),
-    configuraciones: rutaConfigSchema.optional()
+    configuraciones: Joi.alternatives().try(
+        rutaConfigSchema,
+        Joi.array().items(rutaConfigSchema)
+    ).optional()
 });
 
 // --- Esquemas de Endpoints ---

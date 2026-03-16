@@ -105,7 +105,8 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         const globalConfig = Array.isArray(configuraciones) ? configuraciones[0] : configuraciones;
         const hasGlobalValorIda = globalConfig && (globalConfig.valor_ida !== undefined && globalConfig.valor_ida !== null);
         const firstRoute = (Array.isArray(rutas) && rutas.length > 0) ? rutas[0] : null;
-        const hasRouteValorIda = firstRoute && firstRoute.configuraciones && (firstRoute.configuraciones.valor_ida !== undefined && firstRoute.configuraciones.valor_ida !== null);
+        const routeConfig = firstRoute && (Array.isArray(firstRoute.configuraciones) ? firstRoute.configuraciones[0] : firstRoute.configuraciones);
+        const hasRouteValorIda = routeConfig && (routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null);
 
         if (!hasGlobalValorIda && !hasRouteValorIda) {
             throw new BusinessError('Para convenios por rutas, el valor de ida es obligatorio (ya sea global o por ruta específica)');
@@ -115,7 +116,7 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         if (hasGlobalValorIda) {
             finalValorDescuento = globalConfig.valor_ida;
         } else if (hasRouteValorIda) {
-            finalValorDescuento = firstRoute.configuraciones.valor_ida;
+            finalValorDescuento = routeConfig.valor_ida;
         }
     }
 
@@ -427,7 +428,8 @@ exports.actualizarConvenio = async (id, datos) => {
         // Validar que al menos haya una configuración de valor_ida (Global o en la primera ruta)
         const hasGlobalValorIda = configActual && (configActual.valor_ida !== undefined && configActual.valor_ida !== null);
         const firstRoute = (Array.isArray(rutasActuales) && rutasActuales.length > 0) ? rutasActuales[0] : null;
-        const hasRouteValorIda = firstRoute && firstRoute.configuraciones && (firstRoute.configuraciones.valor_ida !== undefined && firstRoute.configuraciones.valor_ida !== null);
+        const routeConfig = firstRoute && (Array.isArray(firstRoute.configuraciones) ? firstRoute.configuraciones[0] : firstRoute.configuraciones);
+        const hasRouteValorIda = routeConfig && (routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null);
 
         if (!hasGlobalValorIda && !hasRouteValorIda) {
             throw new BusinessError('Para convenios por rutas, el valor de ida es obligatorio (ya sea global o por ruta específica)');
@@ -437,7 +439,7 @@ exports.actualizarConvenio = async (id, datos) => {
         if (hasGlobalValorIda) {
             convenio.valor_descuento = configActual.valor_ida;
         } else if (hasRouteValorIda) {
-            convenio.valor_descuento = firstRoute.configuraciones.valor_ida;
+            convenio.valor_descuento = routeConfig.valor_ida;
         }
     }
 
