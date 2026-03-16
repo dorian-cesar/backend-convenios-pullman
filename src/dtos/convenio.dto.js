@@ -13,7 +13,7 @@ class ConvenioDTO {
         this.status = convenio.status;
 
         this.tipo_consulta = convenio.tipo;
-        this.api_url_id = convenio.api_consulta_id;
+        this.api_consulta_id = convenio.api_consulta_id;
         this.beneficio = !!convenio.beneficio;
         this.imagenes = convenio.imagenes || null;
 

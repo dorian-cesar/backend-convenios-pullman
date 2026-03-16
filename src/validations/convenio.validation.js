@@ -49,7 +49,6 @@ const crearConvenio = {
         empresa_id: Joi.number().integer().required(),
         tipo_consulta: Joi.string().valid('API_EXTERNA', 'CODIGO_DESCUENTO').default('CODIGO_DESCUENTO'),
         api_consulta_id: Joi.number().integer().allow(null).optional(),
-        api_url_id: Joi.number().integer().allow(null).optional(),
         endpoint: Joi.string().allow(null, '').optional(),
         tope_monto_descuento: Joi.number().integer().min(0).allow(null),
         tope_cantidad_tickets: Joi.number().integer().min(0).allow(null),
