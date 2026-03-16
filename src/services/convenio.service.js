@@ -103,20 +103,20 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
 
         // Validar que al menos haya una configuración de valor_ida (Global o en la primera ruta)
         const globalConfig = Array.isArray(configuraciones) ? configuraciones[0] : configuraciones;
-        const hasGlobalValorIda = globalConfig && (globalConfig.valor_ida !== undefined && globalConfig.valor_ida !== null);
+        const hasGlobalValorIda = globalConfig && ((globalConfig.valor_ida !== undefined && globalConfig.valor_ida !== null) || (globalConfig.precio_solo_ida !== undefined && globalConfig.precio_solo_ida !== null));
         const firstRoute = (Array.isArray(rutas) && rutas.length > 0) ? rutas[0] : null;
         const routeConfig = firstRoute && (Array.isArray(firstRoute.configuraciones) ? firstRoute.configuraciones[0] : firstRoute.configuraciones);
-        const hasRouteValorIda = routeConfig && (routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null);
+        const hasRouteValorIda = routeConfig && ((routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null) || (routeConfig.precio_solo_ida !== undefined && routeConfig.precio_solo_ida !== null));
 
         if (!hasGlobalValorIda && !hasRouteValorIda) {
             throw new BusinessError('Para convenios por rutas, el valor de ida es obligatorio (ya sea global o por ruta específica)');
         }
 
-        // Sincronizar valor_descuento con el primer valor_ida encontrado para mantener consistencia legacy
+        // Sincronizar valor_descuento con el primer valor_ida o precio_solo_ida encontrado para mantener consistencia legacy
         if (hasGlobalValorIda) {
-            finalValorDescuento = globalConfig.valor_ida;
+            finalValorDescuento = globalConfig.valor_ida !== undefined && globalConfig.valor_ida !== null ? globalConfig.valor_ida : globalConfig.precio_solo_ida;
         } else if (hasRouteValorIda) {
-            finalValorDescuento = routeConfig.valor_ida;
+            finalValorDescuento = routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null ? routeConfig.valor_ida : routeConfig.precio_solo_ida;
         }
     }
 
@@ -425,11 +425,11 @@ exports.actualizarConvenio = async (id, datos) => {
         const configActual = Array.isArray(convenio.configuraciones) ? convenio.configuraciones[0] : convenio.configuraciones;
         const rutasActuales = convenio.rutas;
 
-        // Validar que al menos haya una configuración de valor_ida (Global o en la primera ruta)
-        const hasGlobalValorIda = configActual && (configActual.valor_ida !== undefined && configActual.valor_ida !== null);
+        // Validar que al menos haya una configuración de valor_ida o precio_solo_ida (Global o en la primera ruta)
+        const hasGlobalValorIda = configActual && ((configActual.valor_ida !== undefined && configActual.valor_ida !== null) || (configActual.precio_solo_ida !== undefined && configActual.precio_solo_ida !== null));
         const firstRoute = (Array.isArray(rutasActuales) && rutasActuales.length > 0) ? rutasActuales[0] : null;
         const routeConfig = firstRoute && (Array.isArray(firstRoute.configuraciones) ? firstRoute.configuraciones[0] : firstRoute.configuraciones);
-        const hasRouteValorIda = routeConfig && (routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null);
+        const hasRouteValorIda = routeConfig && ((routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null) || (routeConfig.precio_solo_ida !== undefined && routeConfig.precio_solo_ida !== null));
 
         if (!hasGlobalValorIda && !hasRouteValorIda) {
             throw new BusinessError('Para convenios por rutas, el valor de ida es obligatorio (ya sea global o por ruta específica)');
@@ -437,9 +437,9 @@ exports.actualizarConvenio = async (id, datos) => {
 
         // Sincronizar valor_descuento
         if (hasGlobalValorIda) {
-            convenio.valor_descuento = configActual.valor_ida;
+            convenio.valor_descuento = configActual.valor_ida !== undefined && configActual.valor_ida !== null ? configActual.valor_ida : configActual.precio_solo_ida;
         } else if (hasRouteValorIda) {
-            convenio.valor_descuento = routeConfig.valor_ida;
+            convenio.valor_descuento = routeConfig.valor_ida !== undefined && routeConfig.valor_ida !== null ? routeConfig.valor_ida : routeConfig.precio_solo_ida;
         }
     }
 
