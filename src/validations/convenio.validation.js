@@ -69,7 +69,7 @@ const crearConvenio = {
         beneficio: Joi.boolean().default(false),
         imagenes: Joi.array().items(Joi.string()).allow(null),
         rutas: Joi.array().items(rutaSchema).optional(),
-        configuraciones: rutaConfigSchema.optional()
+        configuraciones: Joi.array().items(rutaConfigSchema).optional()
     }).messages({
         'object.min': 'Debe proporcionar al menos un campo para actualizar'
     })
@@ -96,7 +96,7 @@ const actualizarConvenio = {
         beneficio: Joi.boolean(),
         imagenes: Joi.array().items(Joi.string()).allow(null),
         rutas: Joi.array().items(rutaSchema).allow(null),
-        configuraciones: rutaConfigSchema.allow(null)
+        configuraciones: Joi.array().items(rutaConfigSchema).allow(null)
     }).min(1),
 };
 

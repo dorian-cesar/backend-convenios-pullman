@@ -151,9 +151,6 @@ const options = {
             limitar_por_stock: { type: 'boolean', example: false },
             limitar_por_monto: { type: 'boolean', example: false },
             beneficio: { type: 'boolean', example: false },
-            beneficio_nombre: { type: 'string', example: 'Descuento Estudiante', description: 'Nombre del beneficio si el convenio es de tipo beneficio' },
-            beneficio_endpoint_registro: { type: 'string', example: '/api/beneficiarios', description: 'Endpoint interno o externo al cual enviar los datos de registro (RUT, Nombre, convenio_id)' },
-            beneficio_endpoint_validacion: { type: 'string', example: '/api/integraciones/beneficiarios/validar', description: 'Endpoint al cual enviar RUt y convenio_id para validar el beneficio' },
             imagenes: {
               type: 'array',
               items: { type: 'string' },
@@ -177,10 +174,10 @@ const options = {
           properties: {
             valor_ida: { type: 'number', example: 15000, description: 'Precio de solo ida. Obligatorio si el alcance es por rutas (puede ir global o por ruta específica).' },
             valor_ida_vuelta: { type: 'number', example: 25000, nullable: true, description: 'Precio de ida y vuelta. Solo se puede setear si existe valor_ida en la misma configuración.' },
-            tipo_viaje: { type: 'string', example: 'Solo Ida', deprecated: true },
-            tipo_asiento: { type: 'string', example: 'Semi Cama', deprecated: true },
-            precio_solo_ida: { type: 'number', example: 15000, nullable: true, deprecated: true },
-            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true, deprecated: true },
+            tipo_viaje: { type: 'string', example: 'Solo Ida' },
+            tipo_asiento: { type: 'string', example: 'Semi Cama' },
+            precio_solo_ida: { type: 'number', example: 15000, nullable: true },
+            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true },
             max_pasajes: { type: 'integer', example: 5 }
           }
         },
@@ -220,10 +217,35 @@ const options = {
             imagenes: { type: 'array', items: { type: 'string' } },
             rutas: {
               type: 'array',
-              items: { $ref: '#/components/schemas/ConvenioRuta' }
+              items: { $ref: '#/components/schemas/ConvenioRuta' },
+              example: [
+                {
+                  origen_codigo: "01",
+                  origen_ciudad: "Santiago",
+                  destino_codigo: "02",
+                  destino_ciudad: "Puerto Montt",
+                  configuraciones: {
+                    valor_ida: 80000,
+                    max_pasajes: 2
+                  }
+                },
+                {
+                  origen_codigo: "05",
+                  origen_ciudad: "Temuco",
+                  destino_codigo: "01",
+                  destino_ciudad: "Santiago",
+                  configuraciones: {
+                    valor_ida: 60000,
+                    valor_ida_vuelta: 100000,
+                    max_pasajes: 3
+                  }
+                }
+              ]
             },
             configuraciones: {
-              $ref: '#/components/schemas/ConvenioRutaConfig'
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' },
+              description: 'Configuración de precios global opcional. No es necesaria si cada ruta tiene su propia configuración.'
             }
           }
         },
@@ -339,7 +361,8 @@ const options = {
             nombre: { type: 'string', example: 'Juan Perez' },
             nombre_beneficio: { type: 'string', example: 'Estudiante Regular', description: 'Nombre descriptivo del beneficio o programa asociado' },
             rut: { type: 'string', example: '11.111.111-1' },
-            convenio_id: { type: 'integer', example: 158 },            telefono: { type: 'string', example: '+56912345678' },
+            convenio_id: { type: 'integer', example: 158 },
+            telefono: { type: 'string', example: '+56912345678' },
             correo: { type: 'string', example: 'juan@email.com' },
             direccion: { type: 'string', example: 'Calle Falsa 123' },
             imagenes: {
@@ -356,7 +379,8 @@ const options = {
             nombre: { type: 'string', example: 'Juan Perez' },
             nombre_beneficio: { type: 'string', example: 'Estudiante Regular' },
             rut: { type: 'string', example: '11.111.111-1' },
-            convenio_id: { type: 'integer', example: 158 },            telefono: { type: 'string', example: '+56912345678' },
+            convenio_id: { type: 'integer', example: 158 },
+            telefono: { type: 'string', example: '+56912345678' },
             correo: { type: 'string', example: 'juan@email.com' },
             direccion: { type: 'string', example: 'Calle Falsa 123' },
             imagenes: {

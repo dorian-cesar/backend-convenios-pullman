@@ -102,7 +102,8 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         finalTipoDescuento = 'Tarifa Plana';
 
         // Validar que al menos haya una configuración de valor_ida (Global o en la primera ruta)
-        const hasGlobalValorIda = configuraciones && (configuraciones.valor_ida !== undefined && configuraciones.valor_ida !== null);
+        const globalConfig = Array.isArray(configuraciones) ? configuraciones[0] : configuraciones;
+        const hasGlobalValorIda = globalConfig && (globalConfig.valor_ida !== undefined && globalConfig.valor_ida !== null);
         const firstRoute = (Array.isArray(rutas) && rutas.length > 0) ? rutas[0] : null;
         const hasRouteValorIda = firstRoute && firstRoute.configuraciones && (firstRoute.configuraciones.valor_ida !== undefined && firstRoute.configuraciones.valor_ida !== null);
 
@@ -112,7 +113,7 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
 
         // Sincronizar valor_descuento con el primer valor_ida encontrado para mantener consistencia legacy
         if (hasGlobalValorIda) {
-            finalValorDescuento = configuraciones.valor_ida;
+            finalValorDescuento = globalConfig.valor_ida;
         } else if (hasRouteValorIda) {
             finalValorDescuento = firstRoute.configuraciones.valor_ida;
         }
@@ -420,7 +421,7 @@ exports.actualizarConvenio = async (id, datos) => {
         // REGLA: Forzar Tarifa Plana
         convenio.tipo_descuento = 'Tarifa Plana';
 
-        const configActual = convenio.configuraciones;
+        const configActual = Array.isArray(convenio.configuraciones) ? convenio.configuraciones[0] : convenio.configuraciones;
         const rutasActuales = convenio.rutas;
 
         // Validar que al menos haya una configuración de valor_ida (Global o en la primera ruta)
