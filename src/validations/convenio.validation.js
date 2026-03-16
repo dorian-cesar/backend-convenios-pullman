@@ -8,8 +8,6 @@ const rutaConfigSchema = Joi.object({
     tipo_asiento: Joi.string().valid('Semi Cama', 'Cama', 'Premium', 'Ejecutivo').optional().messages({
         'any.only': 'El tipo_asiento debe ser "Semi Cama", "Cama", "Premium" o "Ejecutivo"'
     }),
-    valor_ida: Joi.number().min(0).allow(null).optional(),
-    valor_ida_vuelta: Joi.number().min(0).allow(null).optional(),
     precio_solo_ida: Joi.number().min(0).allow(null).optional().messages({
         'number.min': 'El precio_solo_ida no puede ser negativo'
     }),

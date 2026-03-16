@@ -164,7 +164,8 @@ const options = {
               }
             },
             configuraciones: {
-              $ref: '#/components/schemas/ConvenioRutaConfig'
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
             }
           }
         },
@@ -172,12 +173,10 @@ const options = {
           type: 'object',
           description: 'Configuración de precios para el convenio o una ruta específica',
           properties: {
-            valor_ida: { type: 'number', example: 15000, description: 'Precio de solo ida. Obligatorio si el alcance es por rutas (puede ir global o por ruta específica).' },
-            valor_ida_vuelta: { type: 'number', example: 25000, nullable: true, description: 'Precio de ida y vuelta. Solo se puede setear si existe valor_ida en la misma configuración.' },
+            precio_solo_ida: { type: 'number', example: 15000, description: 'Precio de solo ida. Obligatorio si el alcance es por rutas (puede ir global o por ruta específica).' },
+            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true, description: 'Precio de ida y vuelta.' },
             tipo_viaje: { type: 'string', example: 'Solo Ida' },
             tipo_asiento: { type: 'string', example: 'Semi Cama' },
-            precio_solo_ida: { type: 'number', example: 15000, nullable: true },
-            precio_ida_vuelta: { type: 'number', example: 25000, nullable: true },
             max_pasajes: { type: 'integer', example: 5 }
           }
         },
@@ -189,7 +188,8 @@ const options = {
             destino_codigo: { type: 'string', example: '02' },
             destino_ciudad: { type: 'string', example: 'Valparaíso' },
             configuraciones: {
-              $ref: '#/components/schemas/ConvenioRutaConfig'
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
             }
           }
         },
@@ -224,21 +224,25 @@ const options = {
                   origen_ciudad: "Santiago",
                   destino_codigo: "02",
                   destino_ciudad: "Puerto Montt",
-                  configuraciones: {
-                    valor_ida: 80000,
-                    max_pasajes: 2
-                  }
+                  configuraciones: [
+                    {
+                      precio_solo_ida: 80000,
+                      max_pasajes: 2
+                    }
+                  ]
                 },
                 {
                   origen_codigo: "05",
                   origen_ciudad: "Temuco",
                   destino_codigo: "01",
                   destino_ciudad: "Santiago",
-                  configuraciones: {
-                    valor_ida: 60000,
-                    valor_ida_vuelta: 100000,
-                    max_pasajes: 3
-                  }
+                  configuraciones: [
+                    {
+                      precio_solo_ida: 60000,
+                      precio_ida_vuelta: 100000,
+                      max_pasajes: 3
+                    }
+                  ]
                 }
               ]
             },
@@ -272,7 +276,8 @@ const options = {
               items: { $ref: '#/components/schemas/ConvenioRuta' }
             },
             configuraciones: {
-              $ref: '#/components/schemas/ConvenioRutaConfig'
+              type: 'array',
+              items: { $ref: '#/components/schemas/ConvenioRutaConfig' }
             }
           }
         },
