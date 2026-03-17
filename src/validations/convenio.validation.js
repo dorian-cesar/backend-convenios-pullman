@@ -72,7 +72,7 @@ const crearConvenio = {
         beneficio: Joi.boolean().default(false),
         imagenes: Joi.array().items(Joi.string()).allow(null),
         rutas: Joi.array().items(rutaSchema).optional(),
-        configuraciones: Joi.array().items(rutaConfigSchema).optional()
+        // configuraciones: Joi.array().items(rutaConfigSchema).optional()
     }).unknown(true)
 };
 
