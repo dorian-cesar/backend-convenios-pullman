@@ -35,7 +35,6 @@ class ConvenioDTO {
         this.tipo_alcance = convenio.tipo_alcance || 'Global';
         this.tipo_descuento = convenio.tipo_descuento || 'Porcentaje';
         this.valor_descuento = convenio.valor_descuento;
-        this.porcentaje_descuento = convenio.porcentaje_descuento || 0;
         this.codigo = convenio.codigo;
         this.limitar_por_stock = !!convenio.limitar_por_stock;
         this.limitar_por_monto = !!convenio.limitar_por_monto;

@@ -55,7 +55,7 @@ const crearConvenio = {
         tipo_alcance: Joi.string().valid('Global', 'Rutas Especificas').default('Global'),
         tipo_descuento: Joi.string().valid('Porcentaje', 'Monto Fijo', 'Tarifa Plana').default('Porcentaje'),
         valor_descuento: Joi.number().precision(2).allow(null),
-        porcentaje_descuento: Joi.number().integer().min(0).max(100).default(0),
+        porcentaje_descuento: Joi.number().integer().min(0).max(100).optional(),
         codigo: Joi.when('tipo_consulta', {
             is: 'CODIGO_DESCUENTO',
             then: Joi.string().required(),

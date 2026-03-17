@@ -84,16 +84,11 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
     let finalValorDescuento = valor_descuento;
     let finalTipoDescuento = tipo_descuento || 'Porcentaje';
     let finalTipoAlcance = tipo_alcance || 'Global';
-    let finalPorcentajeDescuento = porcentaje_descuento || 0;
 
     // Si mandan porcentaje_descuento (Front viejo) pero no mandan el nuevo payload
     if (porcentaje_descuento !== undefined && valor_descuento === undefined) {
         finalValorDescuento = porcentaje_descuento;
         finalTipoDescuento = 'Porcentaje';
-        finalPorcentajeDescuento = porcentaje_descuento;
-    } else if (finalTipoDescuento === 'Porcentaje' && finalValorDescuento !== undefined && finalValorDescuento !== null) {
-        // Front nuevo envía "Porcentaje" y valor_descuento: guardamos en porcentaje_descuento por si la app legacy lee
-        finalPorcentajeDescuento = Math.round(finalValorDescuento);
     }
 
     // Validaciones según el tipo de alcance
@@ -127,7 +122,6 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         api_consulta_id: finalApiConsultaId,
         tope_monto_descuento,
         tope_cantidad_tickets,
-        porcentaje_descuento: finalPorcentajeDescuento,
         tipo_alcance: finalTipoAlcance,
         tipo_descuento: finalTipoDescuento,
         valor_descuento: finalValorDescuento,
@@ -391,17 +385,10 @@ exports.actualizarConvenio = async (id, datos) => {
     if (tipo_descuento !== undefined) convenio.tipo_descuento = tipo_descuento;
     if (valor_descuento !== undefined) convenio.valor_descuento = valor_descuento;
 
-    // Lógica retrocompatibilidad (doble escritura)
+    // Lógica retrocompatibilidad (solo si mandan campo viejo sin el nuevo)
     if (porcentaje_descuento !== undefined && valor_descuento === undefined) {
         convenio.valor_descuento = porcentaje_descuento;
         convenio.tipo_descuento = 'Porcentaje';
-        convenio.porcentaje_descuento = porcentaje_descuento;
-    } else if (convenio.tipo_descuento === 'Porcentaje') {
-        if (convenio.valor_descuento !== null) {
-            convenio.porcentaje_descuento = Math.round(convenio.valor_descuento);
-        }
-    } else if (porcentaje_descuento !== undefined) {
-        convenio.porcentaje_descuento = porcentaje_descuento;
     }
 
     const finalTipo = tipo !== undefined ? tipo : convenio.tipo;

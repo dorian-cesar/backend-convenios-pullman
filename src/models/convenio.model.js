@@ -129,11 +129,7 @@ module.exports = (sequelize, DataTypes) => {
                     // pero por ahora solo eliminamos la prohibición de que sea nulo.
                 }
                 if ((this.tipo_descuento === 'Porcentaje' || this.tipo_descuento === 'Monto Fijo') && this.valor_descuento === null) {
-                    // Permitimos el paso momentáneo si tienen porcentaje_descuento configurado a nivel antiguo, 
-                    // para no romper la app en el ínterin de migración.
-                    if (this.porcentaje_descuento === null || this.porcentaje_descuento === undefined) {
-                        throw new Error(`El valor_descuento es obligatorio cuando el tipo_descuento es ${this.tipo_descuento}`);
-                    }
+                    throw new Error(`El valor_descuento es obligatorio cuando el tipo_descuento es ${this.tipo_descuento}`);
                 }
             }
         }
