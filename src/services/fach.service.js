@@ -34,7 +34,7 @@ const getIncludeOptions = () => [
 exports.crear = async (data) => {
     const rutFormateado = formatRut(data.rut);
 
-    const existe = await Fach.findByPk(rutFormateado, { paranoid: false });
+    const existe = await Fach.findOne({ where: { rut: rutFormateado }, paranoid: false });
     if (existe) {
         if (existe.deletedAt) {
             throw new Error('El RUT ya existe pero está inactivo (eliminado lógicamente). Restáurelo o cambie su estado en lugar de crearlo de nuevo.');
@@ -83,7 +83,8 @@ exports.obtenerTodos = async (filters = {}) => {
  */
 exports.obtenerPorRut = async (rutOriginal) => {
     const rut = formatRut(rutOriginal);
-    const fachReg = await Fach.findByPk(rut, {
+    const fachReg = await Fach.findOne({
+        where: { rut },
         include: getIncludeOptions()
     });
 
