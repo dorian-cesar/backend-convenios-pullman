@@ -11,13 +11,21 @@ const rutaConfigSchema = Joi.object({
     precio_solo_ida: Joi.number().min(0).allow(null).optional().messages({
         'number.min': 'El precio_solo_ida no puede ser negativo'
     }),
-    precio_ida_vuelta: Joi.number().min(0).allow(null).optional().messages({
-        'number.min': 'El precio_ida_vuelta no puede ser negativo'
-    }),
+    precio_ida_vuelta: Joi.number().min(0).allow(null)
+        .when('tipo_viaje', {
+            is: 'Ida y Vuelta',
+            then: Joi.required(),
+            otherwise: Joi.forbidden()
+        })
+        .messages({
+            'number.min': 'El precio_ida_vuelta no puede ser negativo',
+            'any.required': 'El precio_ida_vuelta es obligatorio para viajes de Ida y Vuelta',
+            'any.unknown': 'El precio_ida_vuelta no es permitido para viajes de Solo Ida'
+        }),
     max_pasajes: Joi.number().integer().min(1).allow(null).optional().messages({
         'number.min': 'El max_pasajes debe ser al menos 1'
     })
-});
+}).unknown(true);
 
 const rutaSchema = Joi.object({
     origen_codigo: Joi.string().max(10).required().messages({
@@ -32,11 +40,10 @@ const rutaSchema = Joi.object({
     destino_ciudad: Joi.string().max(100).required().messages({
         'any.required': 'La destino_ciudad es obligatoria'
     }),
-    configuraciones: Joi.alternatives().try(
-        rutaConfigSchema,
-        Joi.array().items(rutaConfigSchema)
-    ).optional()
-});
+    configuraciones: Joi.array().items(rutaConfigSchema).optional().messages({
+        'array.base': 'configuraciones debe ser un arreglo de objetos'
+    })
+}).unknown(true);
 
 // --- Esquemas de Endpoints ---
 
@@ -47,6 +54,7 @@ const crearConvenio = {
             'any.required': 'El nombre es obligatorio'
         }),
         empresa_id: Joi.number().integer().required(),
+        status: Joi.string().valid('ACTIVO', 'INACTIVO').default('ACTIVO'),
         tipo_consulta: Joi.string().valid('API_EXTERNA', 'CODIGO_DESCUENTO').default('CODIGO_DESCUENTO'),
         api_consulta_id: Joi.number().integer().allow(null).optional(),
         endpoint: Joi.string().allow(null, '').optional(),
@@ -56,23 +64,16 @@ const crearConvenio = {
         tipo_descuento: Joi.string().valid('Porcentaje', 'Monto Fijo', 'Tarifa Plana').default('Porcentaje'),
         valor_descuento: Joi.number().precision(2).allow(null),
         porcentaje_descuento: Joi.number().integer().min(0).max(100).optional(),
-        codigo: Joi.when('tipo_consulta', {
-            is: 'CODIGO_DESCUENTO',
-            then: Joi.string().required(),
-            otherwise: Joi.any().valid(null)
-        }),
+        codigo: Joi.string().allow(null, ''),
         limitar_por_stock: Joi.boolean().default(false),
         limitar_por_monto: Joi.boolean().default(false),
-        status: Joi.string().valid('ACTIVO', 'INACTIVO').default('ACTIVO'),
         fecha_inicio: Joi.date().iso().allow(null),
         fecha_termino: Joi.date().iso().allow(null),
         beneficio: Joi.boolean().default(false),
         imagenes: Joi.array().items(Joi.string()).allow(null),
         rutas: Joi.array().items(rutaSchema).optional(),
         configuraciones: Joi.array().items(rutaConfigSchema).optional()
-    }).messages({
-        'object.min': 'Debe proporcionar al menos un campo para actualizar'
-    })
+    }).unknown(true)
 };
 
 const actualizarConvenio = {
@@ -97,7 +98,7 @@ const actualizarConvenio = {
         imagenes: Joi.array().items(Joi.string()).allow(null),
         rutas: Joi.array().items(rutaSchema).allow(null),
         configuraciones: Joi.array().items(rutaConfigSchema).allow(null)
-    }).min(1),
+    }).min(1).unknown(true),
 };
 
 const getConvenio = {
@@ -127,7 +128,7 @@ const agregarRutasMassivas = {
         configuraciones: Joi.array().items(rutaConfigSchema).optional().messages({
             'array.min': 'Debe haber al menos 1 configuración global'
         })
-    })
+    }).unknown(true)
 };
 
 const actualizarConsumo = {
