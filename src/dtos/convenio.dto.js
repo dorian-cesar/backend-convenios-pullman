@@ -54,8 +54,24 @@ class ConvenioDTO {
         this.total_beneficiarios = convenio.getDataValue ? convenio.getDataValue('total_beneficiarios') : (convenio.total_beneficiarios || 0);
 
         // Rutas y Configuraciones (Campos JSON directos)
-        this.rutas = convenio.rutas || [];
-        this.configuraciones = convenio.configuraciones || [];
+        // Si tipo_viaje es "Solo Ida", no exponer precio_ida_vuelta
+        const limpiarConfiguraciones = (configs) => {
+            if (!Array.isArray(configs)) return configs;
+            return configs.map(cfg => {
+                if (cfg.tipo_viaje === 'Solo Ida') {
+                    const { precio_ida_vuelta, ...resto } = cfg;
+                    return resto;
+                }
+                return cfg;
+            });
+        };
+
+        this.rutas = (convenio.rutas || []).map(ruta => ({
+            ...ruta,
+            configuraciones: limpiarConfiguraciones(ruta.configuraciones)
+        }));
+        this.configuraciones = limpiarConfiguraciones(convenio.configuraciones || []);
+
     }
 
     static fromArray(convenios) {

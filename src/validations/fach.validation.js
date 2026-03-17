@@ -49,7 +49,8 @@ const schemas = {
             .required()
             .messages({
                 'string.pattern.base': 'El RUT debe tener el formato 12345678-9 (sin puntos, e incluir el guion)'
-            })
+            }),
+        convenio_id: Joi.number().integer().positive().allow(null).optional()
     })
 };
 
