@@ -65,7 +65,7 @@ exports.enviarCorreoAceptacion = async (correoDestino, nombre, nombreConvenio) =
         subject: `¡Solicitud Aprobada!: ${nombreConvenio}`,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
-                <h2 style="color: #0d904f;">¡Excelentes noticias, ${nombre}!</h2>
+                <h2 style="color: #0d904f;">¡Excelentes noticias ${nombre}!</h2>
                 <p>Tu solicitud para el convenio <strong>${nombreConvenio}</strong> ha sido <strong>APROBADA</strong>.</p>
                 <p>Desde ahora ya puedes disfrutar de tus beneficios al comprar tus pasajes.</p>
                 <br>
