@@ -92,11 +92,18 @@ exports.activar = async (req, res, next) => {
         if (!beneficiario) {
             return res.status(404).json({ message: 'Beneficiario no encontrado' });
         }
-        res.json(new BeneficiarioDTO(beneficiario));
+        
+        const nombreConvenio = beneficiario.convenio ? beneficiario.convenio.nombre : 'Programa de Beneficios';
+        
+        res.json({
+            nombre: beneficiario.nombre,
+            mensaje: `El usuario ${beneficiario.nombre} fue activado en el convenio ${nombreConvenio}`
+        });
     } catch (error) {
         next(error);
     }
 };
+
 exports.rechazar = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -110,8 +117,12 @@ exports.rechazar = async (req, res, next) => {
         if (!beneficiario) {
             return res.status(404).json({ message: 'Beneficiario no encontrado' });
         }
-        res.json(new BeneficiarioDTO(beneficiario));
+        res.json({
+            nombre: beneficiario.nombre,
+            mensaje: `El usuario ${beneficiario.nombre} se rechazó por ${razon_rechazo}`
+        });
     } catch (error) {
+
         next(error);
     }
 };

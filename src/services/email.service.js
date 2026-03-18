@@ -101,17 +101,18 @@ exports.enviarCorreoRechazo = async (correoDestino, nombre, razonRechazo, nombre
         subject: `Actualización de solicitud: ${nombreConvenio}`,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
-                <h2 style="color: #333;">Actualización de tu solicitud</h2>
+                <h2 style="color: #d93025;">Actualización de tu solicitud</h2>
                 <p>Hola <strong>${nombre}</strong>,</p>
-                <p>Te informamos que tu solicitud para el convenio <strong>${nombreConvenio}</strong> ha sido rechazada por el siguiente motivo:</p>
-                <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <p>Tu usuario ha sido rechazado por el siguiente motivo:</p>
+                <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 20px 0; font-weight: bold;">
                     ${razonRechazo}
                 </div>
-                <p>Si crees que hubo un error o deseas volver a postular con nuevos antecedentes, puedes hacerlo a través de nuestra plataforma.</p>
+                <p>Comuníquese al correo <a href="mailto:clientes@pullmanbus.cl">clientes@pullmanbus.cl</a> para más información.</p>
                 <br>
                 <p>Saludos,<br><strong>Equipo Pullman Bus</strong></p>
             </div>
         `,
+
     };
 
     try {

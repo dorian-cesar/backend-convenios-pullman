@@ -166,7 +166,34 @@ router.put('/:id', validate(beneficiarioValidation.actualizarBeneficiario), bene
  *         description: Beneficiario eliminado
  */
 router.delete('/:id', validate(beneficiarioValidation.getBeneficiario), beneficiarioController.eliminar);
-router.patch('/:id/activar', beneficiarioController.activar);
+/**
+ * @openapi
+ * /api/beneficiarios/activar/{id}:
+ *   patch:
+ *     summary: Activar un beneficiario (enrolamiento)
+ *     tags: [Beneficiarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Beneficiario activado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 nombre:
+ *                   type: string
+ *                 mensaje:
+ *                   type: string
+ */
+router.patch('/activar/:id', beneficiarioController.activar);
 
 /**
  * @openapi
@@ -197,7 +224,6 @@ router.patch('/:id/activar', beneficiarioController.activar);
  *               status:
  *                 type: string
  *                 example: "RECHAZADO"
-
  *     responses:
  *       200:
  *         description: Beneficiario rechazado
@@ -207,6 +233,7 @@ router.patch('/:id/activar', beneficiarioController.activar);
  *               $ref: '#/components/schemas/Beneficiario'
  */
 router.patch('/rechazar/:id', validate(beneficiarioValidation.rechazarBeneficiario), beneficiarioController.rechazar);
+
 
 
 /**
