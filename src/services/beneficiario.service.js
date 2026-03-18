@@ -94,8 +94,10 @@ exports.listar = async (query = {}) => {
     if (ids.length > 0) {
         rows = await Beneficiario.findAll({
             where: { id: ids },
-            include: [includeConvenio]
+            include: [includeConvenio],
+            attributes: { exclude: ['imagenes'] }
         });
+
 
         // 4. Ordenar en memoria (Node.js) para evadir las limitaciones del sort_buffer de MySQL
         rows.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));

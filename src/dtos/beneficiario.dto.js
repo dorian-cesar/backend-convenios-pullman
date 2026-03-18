@@ -8,8 +8,14 @@ class BeneficiarioDTO {
         this.correo = beneficiario.correo;
         this.direccion = beneficiario.direccion;
         this.status = beneficiario.status;
-        this.imagenes = beneficiario.imagenes || null;
+        
+        // Solo incluir imágenes si el campo existe en el objeto original (exclusión dinámica)
+        if (beneficiario.imagenes !== undefined) {
+            this.imagenes = beneficiario.imagenes || null;
+        }
+        
         this.razon_rechazo = beneficiario.razon_rechazo || null;
+
 
         // Incluir datos del convenio si están disponibles
         if (beneficiario.convenio) {
