@@ -1,11 +1,23 @@
 const { Beneficiario, Empresa, Convenio } = require('../models');
 const { formatRut } = require('../utils/rut.utils');
 const emailService = require('./email.service');
+const AppError = require('../exceptions/AppError');
+
 
 exports.crear = async (data) => {
     if (data.rut) {
         data.rut = formatRut(data.rut);
     }
+
+    // Verificar si ya existe un registro para este convenio
+    const existente = await Beneficiario.findOne({
+        where: { rut: data.rut, convenio_id: data.convenio_id }
+    });
+
+    if (existente) {
+        throw new AppError('Usted ya se encuentra registrado en este convenio', 400);
+    }
+
 
     // Forzar estado inicial INACTIVO para enrolamiento
     data.status = 'INACTIVO';
