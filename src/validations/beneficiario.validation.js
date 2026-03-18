@@ -54,9 +54,25 @@ const getPorRut = {
     })
 };
 
+const rechazarBeneficiario = {
+    params: Joi.object().keys({
+        id: Joi.number().integer().required(),
+    }),
+    body: Joi.object().keys({
+        razon_rechazo: Joi.string().required().min(5).messages({
+            'any.required': 'La razón de rechazo es obligatoria',
+            'string.min': 'La razón de rechazo debe tener al menos 5 caracteres'
+        }),
+        status: Joi.string().valid('RECHAZADO').optional()
+    })
+};
+
+
 module.exports = {
     crearBeneficiario,
     actualizarBeneficiario,
     getBeneficiario,
-    getPorRut
+    getPorRut,
+    rechazarBeneficiario
 };
+

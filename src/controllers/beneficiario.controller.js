@@ -97,3 +97,21 @@ exports.activar = async (req, res, next) => {
         next(error);
     }
 };
+exports.rechazar = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { razon_rechazo } = req.body;
+        
+        if (!razon_rechazo) {
+            return res.status(400).json({ message: 'La razón de rechazo es obligatoria' });
+        }
+
+        const beneficiario = await beneficiarioService.rechazar(id, razon_rechazo);
+        if (!beneficiario) {
+            return res.status(404).json({ message: 'Beneficiario no encontrado' });
+        }
+        res.json(new BeneficiarioDTO(beneficiario));
+    } catch (error) {
+        next(error);
+    }
+};

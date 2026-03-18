@@ -170,6 +170,47 @@ router.patch('/:id/activar', beneficiarioController.activar);
 
 /**
  * @openapi
+ * /api/beneficiarios/rechazar/{id}:
+ *   patch:
+ *     summary: Rechazar un beneficiario (enrolamiento)
+ *     tags: [Beneficiarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - razon_rechazo
+ *             properties:
+ *               razon_rechazo:
+ *                 type: string
+ *                 example: "Faltan documentos"
+ *               status:
+ *                 type: string
+ *                 example: "RECHAZADO"
+
+ *     responses:
+ *       200:
+ *         description: Beneficiario rechazado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Beneficiario'
+ */
+router.patch('/rechazar/:id', validate(beneficiarioValidation.rechazarBeneficiario), beneficiarioController.rechazar);
+
+
+/**
+ * @openapi
  * /api/beneficiarios/convenio/{id}:
  *   get:
  *     summary: Listar beneficiarios por ID de convenio

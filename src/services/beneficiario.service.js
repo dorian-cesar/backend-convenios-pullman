@@ -157,3 +157,21 @@ exports.activar = async (id) => {
 
     return updated;
 };
+exports.rechazar = async (id, razon_rechazo) => {
+    const beneficiario = await Beneficiario.findByPk(id, {
+        include: [{ model: Convenio, as: 'convenio' }]
+    });
+    if (!beneficiario) return null;
+
+    const updated = await beneficiario.update({ 
+        status: 'RECHAZADO',
+        razon_rechazo: razon_rechazo 
+    });
+
+    if (updated.correo) {
+        const nombreConvenio = beneficiario.convenio ? beneficiario.convenio.nombre : 'Programa de Beneficios';
+        await emailService.enviarCorreoRechazo(updated.correo, updated.nombre, razon_rechazo, nombreConvenio);
+    }
+
+    return updated;
+};
