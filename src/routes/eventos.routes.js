@@ -219,6 +219,10 @@ router.get('/:id/actual', eventosController.obtenerEventoActual);
  *         name: numero_ticket
  *         schema: { type: string }
  *       - in: query
+ *         name: estado
+ *         schema: { type: string }
+ *         description: Filtrar por estado del evento (ej. confirmado, anulado)
+ *       - in: query
  *         name: page
  *         schema: { type: integer, default: 1 }
  *       - in: query

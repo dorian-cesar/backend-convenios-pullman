@@ -1,5 +1,8 @@
 const { Router } = require('express');
 const authController = require('../controllers/auth.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
+const validate = require('../middlewares/validate.middleware');
+const authValidation = require('../validations/auth.validation');
 
 const router = Router();
 
@@ -49,10 +52,12 @@ router.post('/login', authController.login);
  * @openapi
  * /api/auth/register:
  *   post:
- *     summary: Registrar usuario (crea un SUPER_USUARIO por defecto)
+ *     summary: Registrar un nuevo usuario (ADMIN ONLY)
  *     tags:
  *       - Auth
- *     security: []
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -86,6 +91,6 @@ router.post('/login', authController.login);
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  */
-router.post('/register', authController.register);
+router.post('/register', authMiddleware, validate(authValidation.register), authController.register);
 
 module.exports = router;

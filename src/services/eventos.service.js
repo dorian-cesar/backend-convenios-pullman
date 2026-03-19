@@ -282,6 +282,7 @@ exports.listarEventos = async (filters = {}) => {
   if (otherFilters.convenio_id) where.convenio_id = otherFilters.convenio_id;
   if (otherFilters.pnr) where.pnr = otherFilters.pnr;
   if (otherFilters.numero_ticket) where.numero_ticket = otherFilters.numero_ticket;
+  if (otherFilters.estado) where.estado = otherFilters.estado;
 
   const sortField = sortBy || 'fecha_evento';
   const sortOrder = (order && order.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
