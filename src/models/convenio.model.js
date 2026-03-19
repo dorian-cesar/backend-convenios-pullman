@@ -116,6 +116,19 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'
+        },
+        // Campos de Auditoría
+        created_by: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        updated_by: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        deleted_by: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     }, {
         tableName: 'convenios',

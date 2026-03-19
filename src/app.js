@@ -15,6 +15,12 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
 }));
 
+// Contexto Asíncrono para Auditoría
+const { context } = require('./utils/context');
+app.use((req, res, next) => {
+    context.run({ userId: null }, next);
+});
+
 // Middlewares base
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));

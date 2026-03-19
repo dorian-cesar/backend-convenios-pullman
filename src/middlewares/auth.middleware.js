@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const AuthError = require('../exceptions/AuthError');
 const { ApiKey } = require('../models');
+const { setUserId } = require('../utils/context');
 
 module.exports = async (req, res, next) => {
   try {
@@ -33,6 +34,7 @@ module.exports = async (req, res, next) => {
         }
 
         req.user = jwt.verify(token, JWT_SECRET);
+        setUserId(req.user.id);
         return next();
       } catch (err) {
         // console.error('JWT Verification Error:', err.message); // Debug log
@@ -62,10 +64,11 @@ module.exports = async (req, res, next) => {
 
       // Populate a minimal user object for convenience, if needed
       req.user = {
-        id: 'API_KEY',
+        id: 'API_KEY_' + apiKeyRecord.id, // Para diferenciar de IDs de usuarios numéricos
         name: apiKeyRecord.name,
         isApiKey: true
       };
+      setUserId(req.user.id);
 
       return next();
     }

@@ -123,6 +123,19 @@ module.exports = (sequelize, DataTypes) => {
         confirmed_pnrs: {
             type: DataTypes.JSON,
             allowNull: true
+        },
+        // Campos de Auditoría
+        created_by: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        updated_by: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        deleted_by: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
 
     }, {

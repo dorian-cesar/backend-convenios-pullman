@@ -67,6 +67,19 @@ module.exports = (sequelize, DataTypes) => {
     telefono: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    // Campos de Auditoría
+    created_by: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    updated_by: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    deleted_by: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
 
   }, {
