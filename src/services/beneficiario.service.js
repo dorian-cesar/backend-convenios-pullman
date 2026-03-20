@@ -8,6 +8,11 @@ exports.crear = async (data) => {
     if (data.rut) {
         data.rut = formatRut(data.rut);
     }
+    
+    // Convertir correo vacío a null para evitar problemas
+    if (data.correo === '') {
+        data.correo = null;
+    }
 
     // Verificar si ya existe un registro para este convenio
     const existente = await Beneficiario.findOne({
@@ -136,6 +141,10 @@ exports.actualizar = async (id, data) => {
         include: [{ model: Convenio, as: 'convenio' }]
     });
     if (!beneficiario) return null;
+
+    if (data.correo === '') {
+        data.correo = null;
+    }
 
     const oldStatus = beneficiario.status;
     const updated = await beneficiario.update(data);
