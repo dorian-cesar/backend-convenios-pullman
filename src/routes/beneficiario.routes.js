@@ -57,6 +57,21 @@ router.post('/', validate(beneficiarioValidation.crearBeneficiario), beneficiari
  *         schema:
  *           type: integer
  *         description: Filtrar por empresa asociada al convenio
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de beneficiario
+ *       - in: query
+ *         name: correo
+ *         schema:
+ *           type: string
+ *         description: Filtrar por correo electrónico
+ *       - in: query
+ *         name: rut
+ *         schema:
+ *           type: string
+ *         description: Filtrar por RUT del beneficiario
  *     responses:
  *       200:
  *         description: Lista de beneficiarios

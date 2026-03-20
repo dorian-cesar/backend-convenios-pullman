@@ -73,11 +73,13 @@ exports.obtenerPorId = async (id) => {
 };
 
 exports.listar = async (query = {}) => {
-    const { limit = 10, page = 1, convenio_id, status, rut, empresa_id } = query;
+    const { limit = 10, page = 1, convenio_id, status, rut, empresa_id, id, correo } = query;
     const offset = (page - 1) * limit;
     const where = {};
     const includeConvenioWhere = {};
 
+    if (id) where.id = id;
+    if (correo) where.correo = correo;
     if (convenio_id) where.convenio_id = convenio_id;
     if (status) where.status = status;
     if (rut) where.rut = formatRut(rut);
