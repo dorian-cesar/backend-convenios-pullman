@@ -22,7 +22,15 @@ exports.crear = async (data) => {
     // Forzar estado inicial INACTIVO para enrolamiento
     data.status = 'INACTIVO';
 
-    const beneficiario = await Beneficiario.create(data);
+    let beneficiario;
+    try {
+        beneficiario = await Beneficiario.create(data);
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            throw new AppError('Usted ya se encuentra registrado en este convenio', 400);
+        }
+        throw error;
+    }
 
     // Obtener info del convenio para el correo
     const convenio = await Convenio.findByPk(beneficiario.convenio_id);
@@ -177,9 +185,9 @@ exports.rechazar = async (id, razon_rechazo) => {
     });
     if (!beneficiario) return null;
 
-    const updated = await beneficiario.update({ 
+    const updated = await beneficiario.update({
         status: 'RECHAZADO',
-        razon_rechazo: razon_rechazo 
+        razon_rechazo: razon_rechazo
     });
 
     if (updated.correo) {
