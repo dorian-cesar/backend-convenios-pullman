@@ -50,13 +50,53 @@ router.post('/', validate(beneficiarioValidation.crearBeneficiario), beneficiari
  *       - in: query
  *         name: convenio_id
  *         schema:
- *           type: integer
- *         description: Filtrar por convenio asociado
+ *           type: array
+ *           items:
+ *             type: integer
+ *         style: form
+ *         explode: true
+ *         description: Filtrar por convenio asociado (acepta múltiples valores)
  *       - in: query
  *         name: empresa_id
  *         schema:
- *           type: integer
- *         description: Filtrar por empresa asociada al convenio
+ *           type: array
+ *           items:
+ *             type: integer
+ *         style: form
+ *         explode: true
+ *         description: Filtrar por empresa asociada al convenio (acepta múltiples valores)
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: integer
+ *         style: form
+ *         explode: true
+ *         description: Filtrar por ID de beneficiario (acepta múltiples valores)
+ *       - in: query
+ *         name: correo
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         style: form
+ *         explode: true
+ *         description: Filtrar por correo (acepta múltiples valores)
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         style: form
+ *         explode: true
+ *         description: Filtrar por estado (acepta múltiples valores)
+ *       - in: query
+ *         name: rut
+ *         schema:
+ *           type: string
+ *         description: Filtrar por RUT del beneficiario
  *     responses:
  *       200:
  *         description: Lista de beneficiarios
