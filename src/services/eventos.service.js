@@ -140,6 +140,11 @@ exports.crearCompraEvento = async (data) => {
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
   }
 
+  // Validar si el estado viene vacio entonces escribir en el estado "revisar"
+  if (estado === "") {
+    estado = "revisar";
+  }
+
   // Valores por defecto si no vienen del front (aunque deberían venir)
   const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
   const finalMontoPagado = monto_pagado !== undefined ? monto_pagado : tarifa_base;

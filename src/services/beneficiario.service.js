@@ -73,17 +73,28 @@ exports.obtenerPorId = async (id) => {
 };
 
 exports.listar = async (query = {}) => {
+    // También volvemos a incluir id y correo que se habían perdido en el archivo local
+
     const { limit = 10, page = 1, convenio_id, status, rut, empresa_id, id, correo } = query;
     const offset = (page - 1) * limit;
     const where = {};
     const includeConvenioWhere = {};
 
-    if (id) where.id = id;
-    if (correo) where.correo = correo;
-    if (convenio_id) where.convenio_id = convenio_id;
-    if (status) where.status = status;
+    // Helper para permitir tanto strings separados por coma como arrays directamente (?empresa_id=1&empresa_id=2 o ?empresa_id=1,2)
+    const parseArrayParam = (param) => {
+        if (!param) return param;
+        if (Array.isArray(param)) return param;
+        if (typeof param === 'string' && param.includes(',')) return param.split(',');
+        return param;
+    };
+
+    if (id) where.id = parseArrayParam(id);
+    if (correo) where.correo = parseArrayParam(correo);
+    if (convenio_id) where.convenio_id = parseArrayParam(convenio_id);
+    if (status) where.status = parseArrayParam(status);
+
     if (rut) where.rut = formatRut(rut);
-    if (empresa_id) includeConvenioWhere.empresa_id = empresa_id;
+    if (empresa_id) includeConvenioWhere.empresa_id = parseArrayParam(empresa_id);
 
     const includeConvenio = {
         model: Convenio,
