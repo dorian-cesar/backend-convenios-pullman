@@ -140,10 +140,8 @@ exports.crearCompraEvento = async (data) => {
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
   }
 
-  // Validar si el estado viene vacio entonces escribir en el estado "revisar"
-  if (estado === "") {
-    estado = "revisar";
-  }
+  // Normalizar estado para evitar que quede en blanco (null, undefined o "")
+  const finalEstado = (estado === null || estado === undefined || estado === "") ? "revisar" : estado;
 
   // Valores por defecto si no vienen del front (aunque deberían venir)
   const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
@@ -170,9 +168,8 @@ exports.crearCompraEvento = async (data) => {
     tarifa_base,
     porcentaje_descuento_aplicado: finalPorcentaje,
     monto_pagado: finalMontoPagado,
-    codigo_autorizacion,
     token,
-    estado,
+    estado: finalEstado,
     fecha_evento: new Date().toISOString()
   };
 
@@ -220,7 +217,11 @@ exports.crearDevolucionEvento = async (data) => {
     tipo_pago
   } = data;
 
-  const finalEstado = estado || status;
+  let finalEstado = estado || status;
+  // Normalizar estado para evitar que quede en blanco (null, undefined o "")
+  if (finalEstado === null || finalEstado === undefined || finalEstado === "") {
+    finalEstado = "revisar";
+  }
 
   if (!numero_ticket && !pnr) {
     throw new BusinessError('Debe proporcionar numero_ticket o pnr para realizar una devolución');
