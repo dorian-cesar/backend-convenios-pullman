@@ -56,7 +56,7 @@ const obtenerToken = async () => {
 
     } catch (error) {
         console.error('[Los Andes] Error obteniendo token:', error.message);
-        let errorMsg = 'Error de comunicación con servicio de autenticación de Caja Los Andes.';
+        let errorMsg = 'Error de comunicación con servicio de autenticación de Caja Los Andes (v3).';
         if (error.response) {
             console.error('[Los Andes] Detalle error Auth status:', error.response.status);
             errorMsg += ` Status: ${error.response.status}.`;
@@ -85,7 +85,7 @@ exports.consultarAfiliacion = async (rut) => {
 
     } catch (error) {
         console.error('[Los Andes] Error consultando afiliación:', error.message);
-        let errorMsg = 'Error consultando servicio externo de Caja Los Andes.';
+        let errorMsg = 'Error consultando servicio externo de Caja Los Andes (v3).';
         if (error.response) {
             console.error('[Los Andes] Detalle error Consulta status:', error.response.status);
             console.error('[Los Andes] Detalle error Consulta data:', error.response.data);
