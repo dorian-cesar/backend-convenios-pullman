@@ -68,9 +68,14 @@ exports.consultarAfiliacion = async (rut) => {
 
     } catch (error) {
         console.error('[Los Andes] Error consultando afiliación:', error.message);
+        let errorMsg = 'Error consultando servicio externo de Caja Los Andes.';
         if (error.response) {
-            console.error('[Los Andes] Detalle error Consulta:', error.response.data);
+            console.error('[Los Andes] Detalle error Consulta status:', error.response.status);
+            console.error('[Los Andes] Detalle error Consulta data:', error.response.data);
+            errorMsg += ` Status: ${error.response.status}. Data: ${JSON.stringify(error.response.data)}`;
+        } else {
+            errorMsg += ` ${error.message}`;
         }
-        throw new BusinessError('Error consultando servicio externo de Caja Los Andes.');
+        throw new BusinessError(errorMsg);
     }
 };
