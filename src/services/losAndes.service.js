@@ -2,21 +2,33 @@ const axios = require('axios');
 const BusinessError = require('../exceptions/BusinessError');
 require('dotenv').config();
 
+const GET_TOKEN_URL = process.env.GET_TOKEN_ANDES;
+const CONSULTA_RUT_URL = process.env.CONSULTA_RUT_ANDES;
+const KEY_ANDES = process.env.KEY_ANDES;
+const SECRET_ANDES = process.env.SECRET_ANDES;
+
+// Variables para caché de token
+let cachedToken = null;
+let tokenExpiresAt = null;
+
 /**
  * Obtener token de autenticación para Caja Los Andes
  * Utiliza Basic Auth con Key y Secret
  */
 const obtenerToken = async () => {
     try {
-        const key = process.env.KEY_ANDES;
-        const secret = process.env.SECRET_ANDES;
-        const url = process.env.GET_TOKEN_ANDES;
-
-        if (!key || !secret) {
-            throw new Error('KEY_ANDES o SECRET_ANDES no están definidos en el entorno.');
+        // 1. Verificar si tenemos un token válido en caché (con margen de 1 minuto)
+        const ahora = new Date();
+        if (cachedToken && tokenExpiresAt && ahora < (tokenExpiresAt - 60000)) {
+            return cachedToken;
         }
 
-        const authString = Buffer.from(`${key}:${secret}`).toString('base64');
+        if (!KEY_ANDES || !SECRET_ANDES || !GET_TOKEN_URL) {
+            throw new Error('Variables de entorno (KEY, SECRET o URL) no definidas para Los Andes.');
+        }
+
+        const authString = Buffer.from(`${KEY_ANDES}:${SECRET_ANDES}`).toString('base64');
+        const url = GET_TOKEN_URL;
 
         const params = new URLSearchParams();
         params.append('grant_type', 'client_credentials');
@@ -29,7 +41,14 @@ const obtenerToken = async () => {
         });
 
         if (response.data && response.data.access_token) {
-            return response.data.access_token;
+            // Guardar en caché
+            cachedToken = response.data.access_token;
+            
+            // Calcular expiración (por defecto 3600s si no viene en la respuesta)
+            const expiresIn = (response.data.expires_in || 3600) * 1000; 
+            tokenExpiresAt = new Date(Date.now() + expiresIn);
+
+            return cachedToken;
         } else {
             console.error('[Los Andes] Respuesta Auth inesperada:', response.data);
             throw new Error('No se pudo obtener el token de acceso.');
@@ -53,8 +72,7 @@ const obtenerToken = async () => {
 exports.consultarAfiliacion = async (rut) => {
     // El RUT debe venir limpio (solo números, sin DV) según la documentación de la API
     const token = await obtenerToken();
-    const baseUrl = process.env.CONSULTA_RUT_ANDES;
-    const url = `${baseUrl}/${rut}/estado`;
+    const url = `${CONSULTA_RUT_URL}/${rut}/estado`;
 
     try {
         const response = await axios.get(url, {
