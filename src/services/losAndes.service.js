@@ -43,20 +43,19 @@ const obtenerToken = async () => {
         if (response.data && response.data.access_token) {
             // Guardar en caché
             cachedToken = response.data.access_token;
-            
+
             // Calcular expiración (por defecto 3600s si no viene en la respuesta)
-            const expiresIn = (response.data.expires_in || 3600) * 1000; 
+            const expiresIn = (response.data.expires_in || 3600) * 1000;
             tokenExpiresAt = new Date(Date.now() + expiresIn);
 
             return cachedToken;
         } else {
-            console.error('[Los Andes] Respuesta Auth inesperada:', response.data);
             throw new Error('No se pudo obtener el token de acceso.');
         }
 
     } catch (error) {
         console.error('[Los Andes] Error obteniendo token:', error.message);
-        let errorMsg = 'Error de comunicación con servicio de autenticación de Caja Los Andes (v3).';
+        let errorMsg = 'Error de comunicación con servicio de autenticación de Caja Los Andes.';
         if (error.response) {
             console.error('[Los Andes] Detalle error Auth status:', error.response.status);
             errorMsg += ` Status: ${error.response.status}.`;
@@ -70,7 +69,6 @@ const obtenerToken = async () => {
  * @param {string} rut - RUT sin puntos, sin guión y sin DV (ej: 12345678)
  */
 exports.consultarAfiliacion = async (rut) => {
-    console.log(`[DEBUG] Iniciando consulta Los Andes para RUT: ${rut} (VERSION V4 - PROBANDO DESPLIEGUE)`);
     // El RUT debe venir limpio (solo números, sin DV) según la documentación de la API
     const token = await obtenerToken();
     const url = `${CONSULTA_RUT_URL}/${rut}/estado`;
@@ -86,11 +84,9 @@ exports.consultarAfiliacion = async (rut) => {
 
     } catch (error) {
         console.error('[Los Andes] Error consultando afiliación:', error.message);
-        let errorMsg = 'Error consultando servicio externo de Caja Los Andes (v3).';
+        let errorMsg = 'Error consultando servicio externo de Caja Los Andes.';
         if (error.response) {
-            console.error('[Los Andes] Detalle error Consulta status:', error.response.status);
-            console.error('[Los Andes] Detalle error Consulta data:', error.response.data);
-            errorMsg += ` Status: ${error.response.status}. Data: ${JSON.stringify(error.response.data)}`;
+            errorMsg += ` Status: ${error.response.status}.`;
         } else {
             errorMsg += ` ${error.message}`;
         }
