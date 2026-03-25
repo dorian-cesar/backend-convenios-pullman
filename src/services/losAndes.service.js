@@ -2,23 +2,21 @@ const axios = require('axios');
 const BusinessError = require('../exceptions/BusinessError');
 require('dotenv').config();
 
-const GET_TOKEN_URL = process.env.GET_TOKEN_ANDES || 'https://api-dev.cajalosandes.cl/oauth/token';
-const CONSULTA_RUT_URL = process.env.CONSULTA_RUT_ANDES || 'https://api-dev.cajalosandes.cl/apoyo/afiliaciones/v2';
-const KEY_ANDES = process.env.KEY_ANDES;
-const SECRET_ANDES = process.env.SECRET_ANDES;
-
 /**
  * Obtener token de autenticación para Caja Los Andes
  * Utiliza Basic Auth con Key y Secret
  */
 const obtenerToken = async () => {
     try {
-        if (!KEY_ANDES || !SECRET_ANDES) {
+        const key = process.env.KEY_ANDES;
+        const secret = process.env.SECRET_ANDES;
+        const url = process.env.GET_TOKEN_ANDES;
+
+        if (!key || !secret) {
             throw new Error('KEY_ANDES o SECRET_ANDES no están definidos en el entorno.');
         }
 
-        const authString = Buffer.from(`${KEY_ANDES}:${SECRET_ANDES}`).toString('base64');
-        const url = GET_TOKEN_URL;
+        const authString = Buffer.from(`${key}:${secret}`).toString('base64');
 
         const params = new URLSearchParams();
         params.append('grant_type', 'client_credentials');
@@ -55,7 +53,8 @@ const obtenerToken = async () => {
 exports.consultarAfiliacion = async (rut) => {
     // El RUT debe venir limpio (solo números, sin DV) según la documentación de la API
     const token = await obtenerToken();
-    const url = `${CONSULTA_RUT_URL}/${rut}/estado`;
+    const baseUrl = process.env.CONSULTA_RUT_ANDES;
+    const url = `${baseUrl}/${rut}/estado`;
 
     try {
         const response = await axios.get(url, {
