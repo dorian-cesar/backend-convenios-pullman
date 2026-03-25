@@ -13,10 +13,6 @@ const SECRET_ANDES = process.env.SECRET_ANDES;
  */
 const obtenerToken = async () => {
     try {
-        console.log('[Los Andes] KEY_ANDES exists:', !!KEY_ANDES);
-        console.log('[Los Andes] SECRET_ANDES exists:', !!SECRET_ANDES);
-        console.log('[Los Andes] Auth URL:', GET_TOKEN_URL);
-
         if (!KEY_ANDES || !SECRET_ANDES) {
             throw new Error('KEY_ANDES o SECRET_ANDES no están definidos en el entorno.');
         }
@@ -44,16 +40,9 @@ const obtenerToken = async () => {
     } catch (error) {
         console.error('[Los Andes] Error obteniendo token:', error.message);
         let errorMsg = 'Error de comunicación con servicio de autenticación de Caja Los Andes.';
-        
-        // Información extra para depuración en el mensaje de error
-        const debugInfo = ` (KEY: ${!!KEY_ANDES}, SECRET: ${!!SECRET_ANDES}, URL: ${GET_TOKEN_URL})`;
-        
         if (error.response) {
             console.error('[Los Andes] Detalle error Auth status:', error.response.status);
-            console.error('[Los Andes] Detalle error Auth data:', error.response.data);
-            errorMsg += ` Status: ${error.response.status}.${debugInfo}`;
-        } else {
-            errorMsg += ` ${error.message}.${debugInfo}`;
+            errorMsg += ` Status: ${error.response.status}.`;
         }
         throw new BusinessError(errorMsg);
     }
