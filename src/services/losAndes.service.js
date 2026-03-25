@@ -70,6 +70,7 @@ const obtenerToken = async () => {
  * @param {string} rut - RUT sin puntos, sin guión y sin DV (ej: 12345678)
  */
 exports.consultarAfiliacion = async (rut) => {
+    console.log(`[DEBUG] Iniciando consulta Los Andes para RUT: ${rut} (VERSION V4 - PROBANDO DESPLIEGUE)`);
     // El RUT debe venir limpio (solo números, sin DV) según la documentación de la API
     const token = await obtenerToken();
     const url = `${CONSULTA_RUT_URL}/${rut}/estado`;
