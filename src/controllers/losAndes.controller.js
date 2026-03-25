@@ -17,9 +17,11 @@ exports.validar = async (req, res, next) => {
         // 1. Consultar API Externa de Caja Los Andes
         const resultadoExterno = await losAndesService.consultarAfiliacion(rutNum);
 
-        // Validar respuesta según formato observado: { ok: true, result: { ... } }
-        // Si el endpoint de /estado retorna un campo diferente, lo capturamos aquí.
-        const esAfiliadoValido = resultadoExterno && resultadoExterno.ok === true;
+        // Validar respuesta según formato: { ok: true, result: { estadoEnCaracterDeAfiliado: 'Afiliado' } }
+        const esAfiliadoValido = resultadoExterno && 
+                               resultadoExterno.ok === true && 
+                               resultadoExterno.result && 
+                               resultadoExterno.result.estadoEnCaracterDeAfiliado === 'Afiliado';
 
         if (esAfiliadoValido) {
             // --- ES AFILIADO ---
