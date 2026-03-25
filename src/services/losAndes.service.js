@@ -49,13 +49,13 @@ const obtenerToken = async () => {
 };
 
 /**
- * Consultar tipo de afiliación en Caja Los Andes
+ * Consultar estado de persona en Caja Los Andes
  * @param {string} rut - RUT sin puntos, sin guión y sin DV (ej: 12345678)
  */
 exports.consultarAfiliacion = async (rut) => {
     // El RUT debe venir limpio (solo números, sin DV) según la documentación de la API
     const token = await obtenerToken();
-    const url = `${CONSULTA_RUT_URL}/${rut}/tipo`;
+    const url = `${CONSULTA_RUT_URL}/${rut}/estado`;
 
     try {
         const response = await axios.get(url, {
