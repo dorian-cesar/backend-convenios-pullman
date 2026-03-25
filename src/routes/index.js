@@ -19,6 +19,7 @@ const fachRoutes = require('./fach.routes');
 const rolesRoutes = require('./roles.routes');
 const apiRegistroRoutes = require('./apiRegistro.routes');
 const beneficiarioRoutes = require('./beneficiario.routes');
+const losAndesRoutes = require('./losAndes.routes');
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.use('/convenios', convenioRoutes);
 router.use('/kpis', kpiRoutes);
 router.use('/integraciones/beneficiarios', integracionBeneficiariosRoutes);
 router.use('/integraciones', araucanaRoutes);
+router.use('/integraciones', losAndesRoutes);
 router.use('/apis-consulta', apiConsultaRoutes);
 router.use('/apis-registro', apiRegistroRoutes);
 router.use('/beneficiarios', beneficiarioRoutes);

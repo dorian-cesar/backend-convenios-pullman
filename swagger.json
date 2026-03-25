@@ -824,6 +824,75 @@
         }
       }
     },
+    "/api/integraciones/los-andes/validar": {
+      "post": {
+        "summary": "Validar afiliación Caja Los Andes",
+        "description": "Consulta API externa de Caja Los Andes. Si es afiliado, asocia al pasajero y retorna descuentos.",
+        "tags": [
+          "Integraciones"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "rut"
+                ],
+                "properties": {
+                  "rut": {
+                    "type": "string",
+                    "example": "12345678-9"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "afiliado": {
+                      "type": "boolean"
+                    },
+                    "mensaje": {
+                      "type": "string"
+                    },
+                    "pasajero": {
+                      "type": "object"
+                    },
+                    "empresa": {
+                      "type": "string"
+                    },
+                    "descuentos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "convenio": {
+                            "type": "string"
+                          },
+                          "porcentaje": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/login": {
       "post": {
         "summary": "Login de usuario",
