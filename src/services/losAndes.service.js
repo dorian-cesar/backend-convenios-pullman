@@ -13,6 +13,14 @@ const SECRET_ANDES = process.env.SECRET_ANDES;
  */
 const obtenerToken = async () => {
     try {
+        console.log('[Los Andes] KEY_ANDES exists:', !!KEY_ANDES);
+        console.log('[Los Andes] SECRET_ANDES exists:', !!SECRET_ANDES);
+        console.log('[Los Andes] Auth URL:', GET_TOKEN_URL);
+
+        if (!KEY_ANDES || !SECRET_ANDES) {
+            throw new Error('KEY_ANDES o SECRET_ANDES no están definidos en el entorno.');
+        }
+
         const authString = Buffer.from(`${KEY_ANDES}:${SECRET_ANDES}`).toString('base64');
         const url = GET_TOKEN_URL;
 
