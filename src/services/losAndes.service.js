@@ -44,10 +44,16 @@ const obtenerToken = async () => {
     } catch (error) {
         console.error('[Los Andes] Error obteniendo token:', error.message);
         let errorMsg = 'Error de comunicación con servicio de autenticación de Caja Los Andes.';
+        
+        // Información extra para depuración en el mensaje de error
+        const debugInfo = ` (KEY: ${!!KEY_ANDES}, SECRET: ${!!SECRET_ANDES}, URL: ${GET_TOKEN_URL})`;
+        
         if (error.response) {
             console.error('[Los Andes] Detalle error Auth status:', error.response.status);
             console.error('[Los Andes] Detalle error Auth data:', error.response.data);
-            errorMsg += ` Status: ${error.response.status}.`;
+            errorMsg += ` Status: ${error.response.status}.${debugInfo}`;
+        } else {
+            errorMsg += ` ${error.message}.${debugInfo}`;
         }
         throw new BusinessError(errorMsg);
     }
