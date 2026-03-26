@@ -6,6 +6,7 @@ class UsuarioDTO {
         this.rut = usuario.rut;
         this.status = usuario.status;
         this.telefono = usuario.telefono;
+        this.empresa_id = usuario.empresa_id;
 
         // Extraer el primer rol (o todos si hay múltiples)
         if (usuario.Rols && usuario.Rols.length > 0) {

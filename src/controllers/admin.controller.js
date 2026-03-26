@@ -8,7 +8,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 
 exports.crearUsuario = async (req, res, next) => {
   try {
-    const { correo, password, rol, rol_id, nombre, rut, telefono } = req.body;
+    const { correo, password, rol, rol_id, nombre, rut, telefono, empresa_id } = req.body;
 
     if (!correo || !password) {
       throw new BusinessError('Correo y password son requeridos');
@@ -32,6 +32,9 @@ exports.crearUsuario = async (req, res, next) => {
     if (!rolRecord) {
       throw new BusinessError('Rol inválido o inactivo');
     }
+    
+    // Solo el usuario con rol USUARIO es al que le quiero poder relacionar con una empresa
+    const finalEmpresaId = (rolRecord.nombre === 'USUARIO') ? (empresa_id || null) : null;
 
     const hash = await bcrypt.hash(password, 10);
 
@@ -40,7 +43,8 @@ exports.crearUsuario = async (req, res, next) => {
       password_hash: hash,
       nombre,
       rut,
-      telefono
+      telefono,
+      empresa_id: finalEmpresaId
     });
 
     await usuario.addRol(rolRecord, { through: { status: 'ACTIVO' } });
@@ -75,7 +79,7 @@ exports.listarUsuarios = async (req, res, next) => {
 
     const data = await Usuario.findAndCountAll({
       where,
-      attributes: ['id', 'correo', 'nombre', 'rut', 'status', 'telefono', 'createdAt'],
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status', 'telefono', 'empresa_id', 'createdAt'],
       include: [{ model: Rol, attributes: ['id', 'nombre'] }],
       order: [[sortField, sortOrder]],
       limit: limitVal,
@@ -95,7 +99,7 @@ exports.obtenerUsuario = async (req, res, next) => {
   try {
     const { id } = req.params;
     const usuario = await Usuario.findByPk(id, {
-      attributes: ['id', 'correo', 'nombre', 'rut', 'status'],
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status', 'empresa_id'],
       include: [{ model: Rol, attributes: ['id', 'nombre'] }]
     });
     if (!usuario) throw new NotFoundError('Usuario no encontrado');
@@ -108,7 +112,7 @@ exports.obtenerUsuario = async (req, res, next) => {
 exports.actualizarUsuario = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { correo, password, rol, rol_id, status } = req.body;
+    const { correo, password, rol, rol_id, status, empresa_id } = req.body;
 
     const usuario = await Usuario.findByPk(id);
     if (!usuario) throw new NotFoundError('Usuario no encontrado');
@@ -130,10 +134,23 @@ exports.actualizarUsuario = async (req, res, next) => {
       await usuario.setRols([rolRecord], { through: { status: 'ACTIVO' } });
     }
 
+    // Recalcular lógica de empresa_id basada en el rol actual tras actualización
+    const currentRols = await usuario.getRols();
+    const isUsuarioRole = currentRols.some(r => r.nombre === 'USUARIO');
+    
+    // Si mandan empresa_id y el rol es USUARIO, se actualiza. Si no, se fuerza null.
+    if (isUsuarioRole) {
+      if (typeof empresa_id !== 'undefined') {
+        usuario.empresa_id = empresa_id;
+      }
+    } else {
+      usuario.empresa_id = null;
+    }
+
     await usuario.save();
 
     const updated = await Usuario.findByPk(id, {
-      attributes: ['id', 'correo', 'nombre', 'rut', 'status'],
+      attributes: ['id', 'correo', 'nombre', 'rut', 'status', 'empresa_id'],
       include: [{ model: Rol, attributes: ['id', 'nombre'] }]
     });
 

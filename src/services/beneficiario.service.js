@@ -179,6 +179,20 @@ exports.actualizar = async (id, data) => {
     return updated;
 };
 
+exports.actualizarParcial = async (id, data) => {
+    const beneficiario = await Beneficiario.findByPk(id);
+    if (!beneficiario) return null;
+
+    // Si se envían imágenes, las mezclamos con las existentes
+    if (data.imagenes) {
+        const imagenesExistentes = beneficiario.imagenes || {};
+        data.imagenes = { ...imagenesExistentes, ...data.imagenes };
+    }
+
+    const updated = await beneficiario.update(data);
+    return updated;
+};
+
 exports.eliminar = async (id) => {
     const beneficiario = await Beneficiario.findByPk(id);
     if (!beneficiario) return null;

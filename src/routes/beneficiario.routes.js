@@ -38,6 +38,41 @@ router.use(authMiddleware);
  *               $ref: '#/components/schemas/Beneficiario'
  */
 router.post('/', validate(beneficiarioValidation.crearBeneficiario), beneficiarioController.crear);
+router.patch('/:id', beneficiarioController.actualizarParcial);
+
+/**
+ * @openapi
+ * /api/beneficiarios/{id}:
+ *   patch:
+ *     summary: Actualizar parcialmente un beneficiario (especialmente para imágenes)
+ *     tags: [Beneficiarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               imagenes:
+ *                 type: object
+ *                 description: Objeto con las imágenes base64. Se mezclarán con las existentes.
+ *     responses:
+ *       200:
+ *         description: Beneficiario actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Beneficiario'
+ */
+
 /**
  * @openapi
  * /api/beneficiarios:
