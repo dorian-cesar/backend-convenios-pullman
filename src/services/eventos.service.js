@@ -94,7 +94,7 @@ exports.obtenerHistorialEventos = async (identifier) => {
       'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
       'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
       'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
-      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_devolucion', 'fecha_evento',
+      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_descuento', 'monto_devolucion', 'fecha_evento',
       'codigo_autorizacion', 'token', 'estado', 'createdAt', 'updatedAt'
     ]
   });
@@ -147,6 +147,12 @@ exports.crearCompraEvento = async (data) => {
   const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
   const finalMontoPagado = monto_pagado !== undefined ? monto_pagado : tarifa_base;
 
+  // Calcular monto_descuento = tarifa_base - monto_pagado
+  // Validando que tarifa_base y monto_pagado sean números
+  const base = Number(tarifa_base) || 0;
+  const pagado = Number(finalMontoPagado) || 0;
+  const finalMontoDescuento = Math.max(0, base - pagado);
+
   // (REMOVED) Verificar topes de convenio: A petición del negocio ya no se valida stock/monto al comprar,
   // solo se registra el consumo posteriormente.
 
@@ -168,6 +174,7 @@ exports.crearCompraEvento = async (data) => {
     tarifa_base,
     porcentaje_descuento_aplicado: finalPorcentaje,
     monto_pagado: finalMontoPagado,
+    monto_descuento: finalMontoDescuento,
     token,
     estado: finalEstado,
     fecha_evento: new Date().toISOString()
@@ -307,7 +314,7 @@ exports.listarEventos = async (filters = {}) => {
       'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
       'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
       'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
-      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_devolucion', 'fecha_evento',
+      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_descuento', 'monto_devolucion', 'fecha_evento',
       'codigo_autorizacion', 'token', 'estado', 'confirmed_pnrs', 'createdAt', 'updatedAt'
     ]
   });
@@ -357,7 +364,7 @@ exports.obtenerEvento = async (id) => {
       'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
       'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
       'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
-      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_devolucion', 'fecha_evento',
+      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_descuento', 'monto_devolucion', 'fecha_evento',
       'codigo_autorizacion', 'token', 'estado', 'confirmed_pnrs', 'createdAt', 'updatedAt'
     ]
   });
