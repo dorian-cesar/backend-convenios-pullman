@@ -160,6 +160,20 @@ exports.actualizar = async (id, data) => {
     return updated;
 };
 
+exports.actualizarParcial = async (id, data) => {
+    const beneficiario = await Beneficiario.findByPk(id);
+    if (!beneficiario) return null;
+
+    // Si se envían imágenes, las mezclamos con las existentes
+    if (data.imagenes) {
+        const imagenesExistentes = beneficiario.imagenes || {};
+        data.imagenes = { ...imagenesExistentes, ...data.imagenes };
+    }
+
+    const updated = await beneficiario.update(data);
+    return updated;
+};
+
 exports.eliminar = async (id) => {
     const beneficiario = await Beneficiario.findByPk(id);
     if (!beneficiario) return null;
@@ -188,9 +202,9 @@ exports.rechazar = async (id, razon_rechazo) => {
     });
     if (!beneficiario) return null;
 
-    const updated = await beneficiario.update({ 
+    const updated = await beneficiario.update({
         status: 'RECHAZADO',
-        razon_rechazo: razon_rechazo 
+        razon_rechazo: razon_rechazo
     });
 
     if (updated.correo) {

@@ -92,9 +92,9 @@ exports.activar = async (req, res, next) => {
         if (!beneficiario) {
             return res.status(404).json({ message: 'Beneficiario no encontrado' });
         }
-        
+
         const nombreConvenio = beneficiario.convenio ? beneficiario.convenio.nombre : 'Programa de Beneficios';
-        
+
         res.json({
             nombre: beneficiario.nombre,
             mensaje: `El usuario ${beneficiario.nombre} fue activado en el convenio ${nombreConvenio}`
@@ -108,7 +108,7 @@ exports.rechazar = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { razon_rechazo } = req.body;
-        
+
         if (!razon_rechazo) {
             return res.status(400).json({ message: 'La razón de rechazo es obligatoria' });
         }
@@ -123,6 +123,25 @@ exports.rechazar = async (req, res, next) => {
         });
     } catch (error) {
 
+        next(error);
+    }
+};
+
+exports.actualizarParcial = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const beneficiario = await beneficiarioService.actualizarParcial(id, req.body);
+        
+        if (!beneficiario) {
+            return res.status(404).json({ message: 'Beneficiario no encontrado' });
+        }
+
+        res.json({
+            success: true,
+            message: 'Beneficiario actualizado exitosamente',
+            data: beneficiario
+        });
+    } catch (error) {
         next(error);
     }
 };
