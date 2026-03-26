@@ -1,6 +1,9 @@
 const { Router } = require('express');
 const losAndesController = require('../controllers/losAndes.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 const router = Router();
+
+router.use(authMiddleware);
 
 /**
  * @swagger
