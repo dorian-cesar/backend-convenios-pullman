@@ -67,7 +67,7 @@ exports.enviarCorreoAceptacion = async (correoDestino, nombre, nombreConvenio) =
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
                 <h2 style="color: #0d904f;">¡Excelentes noticias ${nombre}!</h2>
                 <p>Tu solicitud para el convenio <strong>${nombreConvenio}</strong> ha sido <strong>APROBADA</strong>.</p>
-                <p>Desde ahora puedes disfrutar de tus beneficios al comprar tus pasajes a traves de nuestro sitio web <a href="https://www.convenios.pullmanbus.cl">www.convenios.pullmanbus.cl</a>.</p>
+                <p>Desde ahora puedes disfrutar de tus beneficios al comprar tus pasajes a través de nuestro sitio web <a href="https://www.convenios.pullmanbus.cl">www.convenios.pullmanbus.cl</a>.</p>
                 <br>
                 <p>Saludos,<br><strong>Equipo Pullman Bus</strong></p>
             </div>
