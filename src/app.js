@@ -7,10 +7,27 @@ const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 
 // CORS
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://backend-dev-convenios.dev-wit.com',
+    'https://convenios.pullmanbus.cl'
+];
+
 app.use(cors({
-    origin: '*', // En producción limitar
+    origin: function (origin, callback) {
+        // Permitir peticiones sin origen (como apps móviles o curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+            callback(null, true);
+        } else {
+            callback(new Error('No permitido por CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 app.use(compression());
