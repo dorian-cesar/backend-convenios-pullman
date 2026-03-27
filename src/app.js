@@ -6,17 +6,14 @@ const cors = require('cors');
 const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 
-app.use(compression());
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./docs/swagger');
-
-// CORS
 // CORS
 app.use(cors({
     origin: '*', // En producción limitar
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
 }));
+
+app.use(compression());
 
 // Contexto Asíncrono para Auditoría
 const { context } = require('./utils/context');
