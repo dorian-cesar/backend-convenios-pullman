@@ -32,6 +32,12 @@ const router = Router();
  *           type: integer
  *           default: 10
  *         description: Cantidad de elementos por página
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVO, INACTIVO]
+ *         description: Filtrar por estado (ACTIVO/INACTIVO)
  *     responses:
  *       200:
  *         description: Lista de carabineros paginada
