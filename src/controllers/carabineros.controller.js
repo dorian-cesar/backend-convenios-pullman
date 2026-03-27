@@ -80,10 +80,16 @@ exports.validar = async (req, res) => {
 
 exports.getAll = async (req, res) => {
     try {
-        const { page, limit } = req.query;
+        const { page, limit, status } = req.query;
         const { offset, limit: limitVal } = getPagination(page, limit);
 
+        const where = {};
+        if (status) {
+            where.status = status;
+        }
+
         const data = await Carabinero.findAndCountAll({
+            where,
             limit: limitVal,
             offset: offset,
             order: [['rut', 'ASC']]
