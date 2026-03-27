@@ -1,9 +1,12 @@
 process.env.TZ = 'America/Santiago';
 const express = require('express');
+const compression = require('compression');
 const routes = require('./routes');
 const cors = require('cors');
 const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
+
+app.use(compression());
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./docs/swagger');
 
