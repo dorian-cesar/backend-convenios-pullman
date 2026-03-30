@@ -6,25 +6,15 @@ const cors = require('cors');
 const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 
-// CORS
-const allowedOrigins = [
-    '*'
-];
+app.use(compression());
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./docs/swagger');
 
+// CORS
 app.use(cors({
-    origin: function (origin, callback) {
-        // Permitir peticiones sin origen (como apps móviles o curl)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-            callback(null, true);
-        } else {
-            callback(new Error('No permitido por CORS'));
-        }
-    },
+    origin: '*', // En producción limitar
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-    credentials: true,
-    optionsSuccessStatus: 200
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
 }));
 
 app.use(compression());
