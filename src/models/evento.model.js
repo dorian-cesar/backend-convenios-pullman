@@ -115,7 +115,8 @@ module.exports = (sequelize, DataTypes) => {
         // 💳 TRANSBANK FIELDS
         codigo_autorizacion: {
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: true,
+            field: 'codigo_autorizacion'
         },
         token: {
             type: DataTypes.STRING,
