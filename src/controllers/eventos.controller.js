@@ -32,7 +32,19 @@ exports.crearDevolucion = async (req, res, next) => {
  */
 exports.listar = async (req, res, next) => {
   try {
-    const result = await eventosService.listarEventos(req.query);
+    // Extraemos todos los parámetros posibles para la búsqueda avanzada
+    const { 
+      page, limit, sortBy, order, 
+      id, search, rut, pnr, numero_ticket, estado,
+      startDate, endDate, tipo_evento, empresa_id, convenio_id
+    } = req.query;
+
+    const result = await eventosService.listarEventos({
+      page, limit, sortBy, order, 
+      id, search, rut, pnr, numero_ticket, estado,
+      startDate, endDate, tipo_evento, empresa_id, convenio_id
+    });
+
     const response = {
       ...result,
       rows: EventoDTO.fromArray(result.rows)

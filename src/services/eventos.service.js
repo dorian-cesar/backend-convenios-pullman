@@ -273,16 +273,15 @@ exports.listarEventos = async (filters = {}) => {
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
 
-  if (otherFilters.rut) {
-    const pasajero = await Pasajero.findOne({ where: { rut: otherFilters.rut } });
-    if (pasajero) {
-      where.pasajero_id = pasajero.id;
-    } else {
-      // If filtering by a RUT that doesn't exist, throw 404 as requested
-      throw new NotFoundError(`No se encontró el pasajero con RUT: ${otherFilters.rut}`);
-    }
+  // Filtrado por fecha (Rango)
+  if (otherFilters.startDate || otherFilters.endDate) {
+    where.fecha_evento = {};
+    if (otherFilters.startDate) where.fecha_evento[Op.gte] = otherFilters.startDate;
+    if (otherFilters.endDate) where.fecha_evento[Op.lte] = otherFilters.endDate;
   }
 
+  // Filtros directos en el modelo Evento
+  if (otherFilters.id) where.id = otherFilters.id;
   if (otherFilters.tipo_evento) where.tipo_evento = otherFilters.tipo_evento;
   if (otherFilters.empresa_id) where.empresa_id = otherFilters.empresa_id;
   if (otherFilters.pasajero_id) where.pasajero_id = otherFilters.pasajero_id;
@@ -291,13 +290,30 @@ exports.listarEventos = async (filters = {}) => {
   if (otherFilters.numero_ticket) where.numero_ticket = otherFilters.numero_ticket;
   if (otherFilters.estado) where.estado = otherFilters.estado;
 
+  // Filtros en el modelo Pasajero (Include)
+  const passengerWhere = {};
+  if (otherFilters.rut) {
+    passengerWhere.rut = { [Op.like]: `%${otherFilters.rut}%` };
+  }
+  if (otherFilters.search) {
+    passengerWhere[Op.or] = [
+      { nombres: { [Op.like]: `%${otherFilters.search}%` } },
+      { apellidos: { [Op.like]: `%${otherFilters.search}%` } }
+    ];
+  }
+
   const sortField = sortBy || 'fecha_evento';
   const sortOrder = (order && order.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
 
   const data = await Evento.findAndCountAll({
     where,
     include: [
-      { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
+      { 
+        model: Pasajero, 
+        where: Object.keys(passengerWhere).length > 0 ? passengerWhere : null,
+        required: Object.keys(passengerWhere).length > 0, // Filtro estricto si hay búsqueda por pasajero
+        attributes: ['id', 'rut', 'nombres', 'apellidos'] 
+      },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
     ],
