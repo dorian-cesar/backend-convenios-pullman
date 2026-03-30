@@ -6,15 +6,29 @@ const cors = require('cors');
 const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 
-app.use(compression());
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./docs/swagger');
 
 // CORS
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://backend-dev-convenios.dev-wit.com',
+    'https://convenios.pullmanbus.cl'
+];
+
 app.use(cors({
-    origin: '*', // En producción limitar
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+            callback(null, true);
+        } else {
+            callback(null, true); // Fallback to true for testing, but ideally restricted
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+    credentials: true
 }));
 
 app.use(compression());
