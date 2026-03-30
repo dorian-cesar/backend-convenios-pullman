@@ -6,7 +6,7 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'API Convenios Pullman',
-      version: '1.2.0', // Refactor Pasajeros v2
+      version: '1.3.0', // Exportación Masiva de Beneficiarios
       description: 'Documentación del backend de convenios Pullman (Enterprise)'
     },
     servers: [
@@ -30,7 +30,8 @@ const options = {
       { name: 'Carabineros', description: 'Validación de convenio Carabineros' },
       { name: 'Beneficiarios', description: 'Gestión unificada de beneficiarios y sus programas (Ej. Escuela Militar)' },
       { name: 'APIs Registro', description: 'Catálogo de APIs para registro de beneficiarios externos' },
-      { name: 'APIs Consulta', description: 'Catálogo de APIs para verificación de beneficiarios' }
+      { name: 'APIs Consulta', description: 'Catálogo de APIs para verificación de beneficiarios' },
+      { name: 'Exportaciones', description: 'Descarga masiva de datos en formatos legibles (CSV/Excel)' }
     ],
     components: {
       securitySchemes: {

@@ -20,6 +20,7 @@ const rolesRoutes = require('./roles.routes');
 const apiRegistroRoutes = require('./apiRegistro.routes');
 const beneficiarioRoutes = require('./beneficiario.routes');
 const losAndesRoutes = require('./losAndes.routes');
+const exportRoutes = require('./export.routes');
 
 const router = Router();
 
@@ -42,5 +43,6 @@ router.use('/pasajeros-frecuentes', pasajerosFrecuentesRoutes);
 router.use('/carabineros', carabinerosRoutes);
 router.use('/fach', fachRoutes);
 router.use('/roles', rolesRoutes);
+router.use('/export', exportRoutes);
 
 module.exports = router;
