@@ -89,14 +89,7 @@ exports.obtenerHistorialEventos = async (identifier) => {
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
     ],
-    order: [['fecha_evento', 'ASC'], ['id', 'ASC']],
-    attributes: [
-      'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
-      'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
-      'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
-      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_descuento', 'monto_devolucion', 'fecha_evento',
-      'codigo_autorizacion', 'token', 'estado', 'createdAt', 'updatedAt'
-    ]
+    order: [['fecha_evento', 'ASC'], ['id', 'ASC']]
   });
 
   return eventos;
@@ -175,6 +168,7 @@ exports.crearCompraEvento = async (data) => {
     porcentaje_descuento_aplicado: finalPorcentaje,
     monto_pagado: finalMontoPagado,
     monto_descuento: finalMontoDescuento,
+    codigo_autorizacion,
     token,
     estado: finalEstado,
     fecha_evento: new Date().toISOString()
@@ -309,14 +303,7 @@ exports.listarEventos = async (filters = {}) => {
     ],
     order: [[sortField, sortOrder]],
     limit: limitVal,
-    offset,
-    attributes: [
-      'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
-      'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
-      'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
-      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_descuento', 'monto_devolucion', 'fecha_evento',
-      'codigo_autorizacion', 'token', 'estado', 'confirmed_pnrs', 'createdAt', 'updatedAt'
-    ]
+    offset
   });
 
   // Enriquecer los arreglos confirmed_pnrs con numero_asiento y monto_pagado
@@ -359,13 +346,6 @@ exports.obtenerEvento = async (id) => {
       { model: Pasajero, attributes: ['id', 'rut', 'nombres', 'apellidos'] },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
-    ],
-    attributes: [
-      'id', 'tipo_evento', 'tipo_pago', 'pasajero_id', 'empresa_id', 'convenio_id',
-      'ciudad_origen', 'ciudad_destino', 'fecha_viaje', 'numero_asiento', 'numero_ticket',
-      'pnr', 'hora_salida', 'terminal_origen', 'terminal_destino', 'tarifa_base',
-      'porcentaje_descuento_aplicado', 'monto_pagado', 'monto_descuento', 'monto_devolucion', 'fecha_evento',
-      'codigo_autorizacion', 'token', 'estado', 'confirmed_pnrs', 'createdAt', 'updatedAt'
     ]
   });
 
