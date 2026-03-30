@@ -1,8 +1,14 @@
 process.env.TZ = 'America/Santiago';
 const express = require('express');
-const compression = require('compression');
 const routes = require('./routes');
 const cors = require('cors');
+
+let compression;
+try {
+    compression = require('compression');
+} catch (e) {
+    console.warn('WARNING: compression module not found. Running without GZIP compression.');
+}
 const errorMiddleware = require('./middlewares/error.middleware');
 const app = express();
 
@@ -31,7 +37,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(compression());
+if (compression) app.use(compression());
 
 // Contexto Asíncrono para Auditoría
 const { context } = require('./utils/context');
