@@ -8,10 +8,7 @@ const app = express();
 
 // CORS
 const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://backend-dev-convenios.dev-wit.com',
-    'https://convenios.pullmanbus.cl'
+    '*'
 ];
 
 app.use(cors({
