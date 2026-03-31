@@ -119,7 +119,8 @@ exports.crearCompraEvento = async (data) => {
     token,
     estado,
     tipo_pago,
-    confirmed_pnrs
+    confirmed_pnrs,
+    respuesta_kupos
   } = data;
 
   const pasajero = await Pasajero.findByPk(pasajero_id);
@@ -173,6 +174,7 @@ exports.crearCompraEvento = async (data) => {
     codigo_autorizacion,
     token,
     estado: finalEstado,
+    respuesta_kupos,
     fecha_evento: new Date().toISOString()
   };
 

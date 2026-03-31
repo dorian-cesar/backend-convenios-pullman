@@ -130,6 +130,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.JSON,
             allowNull: true
         },
+        respuesta_kupos: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            comment: 'Guarda la respuesta íntegra del servidor externo (Kupos)'
+        },
         // Campos de Auditoría
         created_by: {
             type: DataTypes.STRING,
