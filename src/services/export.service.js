@@ -77,6 +77,56 @@ exports.exportarTodosLosBeneficiarios = async () => {
 
     // Unir todo con saltos de línea (Usamos \ufeff para que Excel detecte UTF-8)
     const csvContent = '\ufeff' + [encabezados, ...filas].join('\n');
+    return csvContent;
+};
 
+/**
+ * Genera un archivo CSV con todos los convenios activos.
+ * Formato: ID;Nombre;Empresa;Tipo;Codigo;Descuento;Consumo_Tickets;Consumo_Monto...
+ */
+exports.exportarConveniosActivos = async () => {
+    const convenios = await Convenio.findAll({
+        include: [{ model: Empresa, as: 'empresa', attributes: ['nombre'] }],
+        where: { status: 'ACTIVO' },
+        order: [['id', 'ASC']]
+    });
+
+    const encabezados = [
+        'ID',
+        'Nombre',
+        'Empresa',
+        'Fecha_Inicio',
+        'Fecha_Termino',
+        'Tipo_Consulta',
+        'Codigo',
+        'Tipo_Alcance',
+        'Tipo_Descuento',
+        'Valor_Descuento',
+        'Tope_Monto',
+        'Tope_Tickets',
+        'Consumo_Tickets',
+        'Consumo_Monto_Descuento'
+    ].join(';');
+
+    const filas = convenios.map(c => {
+        return [
+            c.id,
+            `"${c.nombre}"`,
+            `"${c.empresa?.nombre || 'N/A'}"`,
+            c.fecha_inicio ? c.fecha_inicio.toISOString().split('T')[0] : 'N/A',
+            c.fecha_termino ? c.fecha_termino.toISOString().split('T')[0] : 'N/A',
+            `"${c.tipo}"`,
+            `"${c.codigo || ''}"`,
+            `"${c.tipo_alcance}"`,
+            `"${c.tipo_descuento}"`,
+            c.valor_descuento || 0,
+            c.tope_monto_descuento || 'Ilimitado',
+            c.tope_cantidad_tickets || 'Ilimitado',
+            c.consumo_tickets,
+            c.consumo_monto_descuento
+        ].join(';');
+    });
+
+    const csvContent = '\ufeff' + [encabezados, ...filas].join('\n');
     return csvContent;
 };
