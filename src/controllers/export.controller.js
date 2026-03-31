@@ -21,13 +21,13 @@ exports.descargarTodosLosBeneficiarios = async (req, res, next) => {
 };
 
 /**
- * Descarga masiva de todos los convenios activos en formato CSV.
+ * Descarga masiva de TODOS los convenios en formato CSV.
  */
-exports.descargarConveniosActivos = async (req, res, next) => {
+exports.descargarTodosLosConvenios = async (req, res, next) => {
     try {
-        const csvContent = await exportService.exportarConveniosActivos();
+        const csvContent = await exportService.exportarTodosLosConvenios();
 
-        const fileName = `convenios_activos_${new Date().toISOString().split('T')[0]}.csv`;
+        const fileName = `todos_los_convenios_${new Date().toISOString().split('T')[0]}.csv`;
 
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
@@ -36,6 +36,26 @@ exports.descargarConveniosActivos = async (req, res, next) => {
 
     } catch (error) {
         console.error('Error al generar exportación de convenios:', error);
+        next(error);
+    }
+};
+
+/**
+ * Descarga masiva de TODOS los eventos (boletos) en formato CSV.
+ */
+exports.descargarTodosLosEventos = async (req, res, next) => {
+    try {
+        const csvContent = await exportService.exportarTodosLosEventos();
+
+        const fileName = `todos_los_boletos_${new Date().toISOString().split('T')[0]}.csv`;
+
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+
+        return res.status(200).send(csvContent);
+
+    } catch (error) {
+        console.error('Error al generar exportación de boletos:', error);
         next(error);
     }
 };

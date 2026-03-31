@@ -21,7 +21,6 @@ const router = Router();
  *             schema:
  *               type: string
  *               format: binary
- *               example: "RUT;Email;Convenio;Empresa\n12345678-9;test@test.com;Convenio 1;Empresa A\n..."
  */
 router.get('/beneficiarios', authMiddleware, exportController.descargarTodosLosBeneficiarios);
 
@@ -29,20 +28,40 @@ router.get('/beneficiarios', authMiddleware, exportController.descargarTodosLosB
  * @openapi
  * /api/export/convenios:
  *   get:
- *     summary: Descargar lista de todos los convenios activos
- *     description: Retorna un archivo CSV con toda la información técnica y métricas de consumo de los convenios en estado ACTIVO.
+ *     summary: Descargar lista de todos los convenios (activos e inactivos)
+ *     description: Retorna un archivo CSV con toda la información técnica y métricas de consumo de TODOS los convenios.
  *     tags: [Exportaciones]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Archivo CSV de convenios generado exitosamente.
+ *         description: Archivo CSV de todos los convenios generado exitosamente.
  *         content:
  *           text/csv:
  *             schema:
  *               type: string
  *               format: binary
  */
-router.get('/convenios', authMiddleware, exportController.descargarConveniosActivos);
+router.get('/convenios', authMiddleware, exportController.descargarTodosLosConvenios);
+
+/**
+ * @openapi
+ * /api/export/eventos:
+ *   get:
+ *     summary: Descargar lista de todos los boletos (eventos)
+ *     description: Retorna un archivo CSV con la totalidad de los registros de la tabla eventos (boletos), incluyendo datos de pasajeros, montos y estados.
+ *     tags: [Exportaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Archivo CSV de boletos generado exitosamente.
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
+router.get('/eventos', authMiddleware, exportController.descargarTodosLosEventos);
 
 module.exports = router;
