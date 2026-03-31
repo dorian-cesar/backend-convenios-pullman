@@ -1,8 +1,8 @@
 const { Beneficiario, Carabinero, Fach, Convenio, Empresa } = require('../models');
 
 /**
- * Genera un archivo CSV con todos los beneficiarios de todas las tablas.
- * Formato: Empresa, Convenio, RUT
+ * Genera un archivo CSV con todos los beneficiarios activos.
+ * Formato: RUT;Email;ID_Convenio;ID_Empresa
  */
 exports.exportarTodosLosBeneficiarios = async () => {
     // 1. Obtener beneficiarios (Adulto Mayor, Estudiante, Pasajero Frecuente)
@@ -10,27 +10,22 @@ exports.exportarTodosLosBeneficiarios = async () => {
         include: [{
             model: Convenio,
             as: 'convenio',
-            include: [{ model: Empresa, as: 'empresa' }]
+            attributes: ['id', 'empresa_id']
         }],
-        attributes: ['rut']
+        where: { status: 'ACTIVO' },
+        attributes: ['rut', 'correo']
     });
 
     // 2. Obtener Carabineros
     const carabineros = await Carabinero.findAll({
-        include: [
-            { model: Empresa, as: 'empresa' },
-            { model: Convenio, as: 'convenio' }
-        ],
-        attributes: ['rut']
+        where: { status: 'ACTIVO' },
+        attributes: ['rut', 'convenio_id', 'empresa_id']
     });
 
     // 3. Obtener Fach
     const fach = await Fach.findAll({
-        include: [
-            { model: Empresa, as: 'empresa' },
-            { model: Convenio, as: 'convenio' }
-        ],
-        attributes: ['rut']
+        where: { status: 'ACTIVO' },
+        attributes: ['rut', 'convenio_id', 'empresa_id']
     });
 
     // 4. Consolidar datos
@@ -39,34 +34,37 @@ exports.exportarTodosLosBeneficiarios = async () => {
     // Mapear beneficiarios base
     beneficiariosBase.forEach(b => {
         listaConsolidada.push({
-            empresa: b.convenio?.empresa?.nombre || 'N/A',
-            convenio: b.convenio?.nombre || 'N/A',
-            rut: b.rut
+            rut: b.rut,
+            email: b.correo || '',
+            id_convenio: b.convenio?.id || '',
+            id_empresa: b.convenio?.empresa_id || ''
         });
     });
 
     // Mapear carabineros
     carabineros.forEach(c => {
         listaConsolidada.push({
-            empresa: c.empresa?.nombre || 'CARABINEROS DE CHILE',
-            convenio: c.convenio?.nombre || 'CONVENIO CARABINEROS',
-            rut: c.rut
+            rut: c.rut,
+            email: '', // No disponible en esta tabla
+            id_convenio: c.convenio_id || '',
+            id_empresa: c.empresa_id || ''
         });
     });
 
     // Mapear fach
     fach.forEach(f => {
         listaConsolidada.push({
-            empresa: f.empresa?.nombre || 'FUERZA AEREA DE CHILE',
-            convenio: f.convenio?.nombre || 'CONVENIO FACH',
-            rut: f.rut
+            rut: f.rut,
+            email: '', // No disponible en esta tabla
+            id_convenio: f.convenio_id || '',
+            id_empresa: f.empresa_id || ''
         });
     });
 
     // 5. Construir CSV
-    const encabezados = 'Empresa;Convenio;RUT';
+    const encabezados = 'RUT;Email;ID_Convenio;ID_Empresa';
     const filas = listaConsolidada.map(item => 
-        `"${item.empresa}";"${item.convenio}";"${item.rut}"`
+        `"${item.rut}";"${item.email}";"${item.id_convenio}";"${item.id_empresa}"`
     );
 
     // Unir todo con saltos de línea (Usamos \ufeff para que Excel detecte UTF-8)

@@ -140,6 +140,8 @@ exports.crearCompraEvento = async (data) => {
   const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
   const finalMontoPagado = monto_pagado !== undefined ? monto_pagado : tarifa_base;
 
+  console.log(`[EVENTO] Iniciando creación de COMPRA - Pasajero: ${pasajero_id}, PNR: ${pnr}, Ticket: ${numero_ticket}`);
+
   // Calcular monto_descuento = tarifa_base - monto_pagado
   // Validando que tarifa_base y monto_pagado sean números
   const base = Number(tarifa_base) || 0;
@@ -180,6 +182,7 @@ exports.crearCompraEvento = async (data) => {
   }
 
   const evento = await Evento.create(eventoDataToSave);
+  console.log(`[EVENTO] COMPRA guardada exitosamente - ID: ${evento.id}`);
 
   /* 
   // -- RE-PARSING --
@@ -234,6 +237,8 @@ exports.crearDevolucionEvento = async (data) => {
   if (numero_ticket) criteria.numero_ticket = numero_ticket;
   if (pnr) criteria.pnr = pnr;
 
+  console.log(`[EVENTO] Iniciando DEVOLUCION - Criterio: ${JSON.stringify(criteria)}`);
+
   const eventoActual = await this.obtenerEventoActual(criteria);
 
   // En lugar de crear un nuevo evento, actualizamos el evento original encontrado
@@ -246,6 +251,7 @@ exports.crearDevolucionEvento = async (data) => {
   if (tipo_pago !== undefined) eventoGuardado.tipo_pago = tipo_pago;
 
   await eventoGuardado.save();
+  console.log(`[EVENTO] DEVOLUCION aplicada exitosamente - Registro actualizado ID: ${eventoGuardado.id}`);
   return await this.obtenerEvento(eventoGuardado.id);
 
   /* 
