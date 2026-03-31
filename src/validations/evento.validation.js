@@ -24,7 +24,8 @@ const crearCompra = {
         token: Joi.string().allow(null, '').optional(),
         estado: Joi.string().allow(null, '').optional(),
         tipo_pago: Joi.string().allow(null, '').optional(),
-        confirmed_pnrs: Joi.array().items(Joi.string()).optional()
+        confirmed_pnrs: Joi.array().items(Joi.string()).optional(),
+        respuesta_kupos: Joi.any().optional()
     })
 };
 
@@ -40,7 +41,8 @@ const crearDevolucion = {
         status: Joi.string().allow(null, '').optional(),
         codigo_autorizacion: Joi.string().allow(null, '').optional(),
         token: Joi.string().allow(null, '').optional(),
-        tipo_pago: Joi.string().allow(null, '').optional()
+        tipo_pago: Joi.string().allow(null, '').optional(),
+        respuesta_kupos: Joi.any().optional()
     }).or('numero_ticket', 'pnr') // Se elimina evento_origen_id, ticket o pnr referencian la compra original
 };
 
