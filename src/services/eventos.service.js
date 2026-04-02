@@ -7,6 +7,30 @@ const EventoYaDevueltoError = require('../exceptions/EventoYaDevueltoError');
 const convenioService = require('./convenio.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 const { Op } = require('sequelize');
+const axios = require('axios');
+
+/**
+ * Consulta Kupos para obtener el operator_pnr de un ticket.
+ * Retorna el operator_pnr si lo encuentra, o null si falla / no existe.
+ */
+const fetchOperatorPnrFromKupos = async (numeroTicket) => {
+  if (!numeroTicket) return null;
+  if (!process.env.KUPOS_API_KEY || !process.env.KUPOS_API_URL) return null;
+
+  try {
+    const response = await axios.get(process.env.KUPOS_API_URL, {
+      params: { pnr_number: numeroTicket, api_key: process.env.KUPOS_API_KEY },
+      timeout: 5000
+    });
+    const ticketDetails = response.data?.result?.ticket_details;
+    if (ticketDetails && ticketDetails.length > 0 && ticketDetails[0].operator_pnr) {
+      return ticketDetails[0].operator_pnr;
+    }
+  } catch (err) {
+    console.warn(`[KUPOS] No se pudo obtener operator_pnr para ticket ${numeroTicket}: ${err.message}`);
+  }
+  return null;
+};
 
 /**
  * Calcular monto con descuento
@@ -143,6 +167,20 @@ exports.crearCompraEvento = async (data) => {
 
   console.log(`[EVENTO] Iniciando creación de COMPRA - Pasajero: ${pasajero_id}, PNR: ${pnr}, Ticket: ${numero_ticket}`);
 
+  // Si el PNR viene vacío, null o '0', consultar Kupos para obtener el operator_pnr real
+  const pnrVacio = !pnr || pnr === '0' || pnr === 0;
+  let finalPnr = pnr;
+  if (pnrVacio && numero_ticket) {
+    console.log(`[KUPOS] PNR vacío/cero para ticket ${numero_ticket}, consultando Kupos...`);
+    const operatorPnr = await fetchOperatorPnrFromKupos(numero_ticket);
+    if (operatorPnr) {
+      console.log(`[KUPOS] operator_pnr obtenido: ${operatorPnr} para ticket ${numero_ticket}`);
+      finalPnr = operatorPnr;
+    } else {
+      console.warn(`[KUPOS] No se obtuvo operator_pnr para ticket ${numero_ticket}, se guarda con PNR original.`);
+    }
+  }
+
   // Calcular monto_descuento = tarifa_base - monto_pagado
   // Validando que tarifa_base y monto_pagado sean números
   const base = Number(tarifa_base) || 0;
@@ -166,7 +204,7 @@ exports.crearCompraEvento = async (data) => {
     terminal_destino,
     numero_asiento,
     numero_ticket,
-    pnr,
+    pnr: finalPnr,
     tarifa_base,
     porcentaje_descuento_aplicado: finalPorcentaje,
     monto_pagado: finalMontoPagado,
@@ -184,7 +222,7 @@ exports.crearCompraEvento = async (data) => {
   }
 
   const evento = await Evento.create(eventoDataToSave);
-  console.log(`[EVENTO] COMPRA guardada exitosamente - ID: ${evento.id}`);
+  console.log(`[EVENTO] COMPRA guardada exitosamente - ID: ${evento.id}, PNR final: ${finalPnr}`);
 
   /* 
   // -- RE-PARSING --
