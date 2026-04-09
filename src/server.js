@@ -15,6 +15,17 @@ async function startServer() {
     await sequelize.sync({ alter: false, force: false });
     logger.info('🗄️ Modelos sincronizados');
 
+    // Cargar modelos dinámicos registrados
+    const { RegistroTablaClienteCorporativo } = require('./models');
+    const definirModeloDinamico = require('./utils/definirModeloDinamico');
+    const tablasDinamicas = await RegistroTablaClienteCorporativo.findAll({ where: { status: 'ACTIVO' } });
+    tablasDinamicas.forEach(t => {
+      definirModeloDinamico(sequelize, t.nombre_tabla);
+    });
+    if (tablasDinamicas.length > 0) {
+      logger.info(`📋 ${tablasDinamicas.length} modelos dinámicos de clientes corporativos cargados`);
+    }
+
     // Job: Limpieza de convenios vencidos (cada 1 hora)
     const convenioService = require('./services/convenio.service');
     setInterval(async () => {

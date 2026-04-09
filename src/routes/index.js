@@ -21,6 +21,8 @@ const apiRegistroRoutes = require('./apiRegistro.routes');
 const beneficiarioRoutes = require('./beneficiario.routes');
 const losAndesRoutes = require('./losAndes.routes');
 const exportRoutes = require('./export.routes');
+const registroTablaClienteCorporativoRoutes = require('./registroTablaClienteCorporativo.routes');
+const clienteCorporativoTablaEmpresaRoutes = require('./clienteCorporativoTablaEmpresa.routes');
 
 const router = Router();
 
@@ -44,5 +46,7 @@ router.use('/carabineros', carabinerosRoutes);
 router.use('/fach', fachRoutes);
 router.use('/roles', rolesRoutes);
 router.use('/export', exportRoutes);
+router.use('/tablas-clientes-corporativos', registroTablaClienteCorporativoRoutes);
+router.use('/tablas-clientes-corporativos', clienteCorporativoTablaEmpresaRoutes);
 
 module.exports = router;

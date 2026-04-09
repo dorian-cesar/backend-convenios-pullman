@@ -19,6 +19,7 @@ const Carabinero = require('./carabinero.model')(sequelize, Sequelize.DataTypes)
 const Fach = require('./fach.model')(sequelize, Sequelize.DataTypes);
 const ApiRegistro = require('./apiRegistro.model')(sequelize, Sequelize.DataTypes);
 const Beneficiario = require('./beneficiario.model')(sequelize, Sequelize.DataTypes);
+const RegistroTablaClienteCorporativo = require('./registroTablaClienteCorporativo.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -88,6 +89,11 @@ Fach.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 Convenio.hasMany(Beneficiario, { foreignKey: 'convenio_id', as: 'beneficiarios' });
 Beneficiario.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
+// REGISTRO_TABLA_CLIENTE_CORPORATIVO Relations
+RegistroTablaClienteCorporativo.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+RegistroTablaClienteCorporativo.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
+RegistroTablaClienteCorporativo.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsulta' });
+
 
 module.exports = {
   sequelize,
@@ -108,5 +114,6 @@ module.exports = {
   Fach,
   ApiRegistro,
   ApiRegistro,
-  Beneficiario
+  Beneficiario,
+  RegistroTablaClienteCorporativo
 };
