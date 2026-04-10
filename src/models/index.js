@@ -89,6 +89,10 @@ Fach.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 Convenio.hasMany(Beneficiario, { foreignKey: 'convenio_id', as: 'beneficiarios' });
 Beneficiario.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });
 
+// EMPRESA -> BENEFICIARIO (1:N)
+Empresa.hasMany(Beneficiario, { foreignKey: 'empresa_id', as: 'beneficiarios' });
+Beneficiario.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+
 // REGISTRO_TABLA_CLIENTE_CORPORATIVO Relations
 RegistroTablaClienteCorporativo.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
 RegistroTablaClienteCorporativo.belongsTo(Convenio, { foreignKey: 'convenio_id', as: 'convenio' });

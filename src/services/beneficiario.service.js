@@ -18,6 +18,14 @@ exports.crear = async (data) => {
         data.imagenes = null;
     }
 
+    // Automatización: Obtener empresa_id desde el convenio si no viene en el payload
+    if (!data.empresa_id && data.convenio_id) {
+        const convenio = await Convenio.findByPk(data.convenio_id);
+        if (convenio) {
+            data.empresa_id = convenio.empresa_id;
+        }
+    }
+
     // Verificar si ya existe un registro para este convenio
     const existente = await Beneficiario.findOne({
         where: { rut: data.rut, convenio_id: data.convenio_id }

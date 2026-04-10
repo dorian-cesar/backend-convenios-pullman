@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false // Obligatorio: Liga al Convenio con beneficio=true
         },
+        empresa_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
         nombre: {
             type: DataTypes.STRING,
             allowNull: false
@@ -54,6 +58,14 @@ module.exports = (sequelize, DataTypes) => {
         razon_rechazo: {
             type: DataTypes.STRING,
             allowNull: true
+        },
+        nombre_beneficio: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        tipo_beneficio: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     }, {
         tableName: 'beneficiarios',
@@ -72,6 +84,10 @@ module.exports = (sequelize, DataTypes) => {
         Beneficiario.belongsTo(models.Convenio, {
             foreignKey: 'convenio_id',
             as: 'convenio'
+        });
+        Beneficiario.belongsTo(models.Empresa, {
+            foreignKey: 'empresa_id',
+            as: 'empresa'
         });
     };
 
