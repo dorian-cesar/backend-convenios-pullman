@@ -30,8 +30,6 @@ exports.validar = async (req, res, next) => {
             let [pasajero] = await Pasajero.findOrCreate({
                 where: { rut: rut },
                 defaults: {
-                    nombres: 'Afiliado',
-                    apellidos: 'Los Andes',
                     status: 'ACTIVO'
                 }
             });
