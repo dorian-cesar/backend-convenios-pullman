@@ -150,13 +150,21 @@ exports.crearCompraEvento = async (data) => {
   const pasajero = await Pasajero.findByPk(pasajero_id);
   if (!pasajero) throw new NotFoundError('Pasajero no encontrado');
 
-  const empresa = await Empresa.findByPk(empresa_id);
-  if (!empresa) throw new NotFoundError('Empresa no encontrada');
+  let finalEmpresaId = empresa_id;
 
   if (convenio_id) {
     const convenio = await Convenio.findByPk(convenio_id);
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
+    
+    // Si hay discrepancia entre lo enviado y el convenio, forzamos el id del convenio
+    if (convenio.empresa_id !== parseInt(empresa_id)) {
+      console.warn(`[EVENTO] Discrepancia de empresa_id detectada: El convenio ${convenio_id} pertenece a la empresa ${convenio.empresa_id}, pero se recibió ${empresa_id}. Corrigiendo automáticamente.`);
+      finalEmpresaId = convenio.empresa_id;
+    }
   }
+
+  const empresa = await Empresa.findByPk(finalEmpresaId);
+  if (!empresa) throw new NotFoundError('Empresa no encontrada');
 
   // Normalizar estado para evitar que quede en blanco (null, undefined o "")
   const finalEstado = (estado === null || estado === undefined || estado === "") ? "revisar" : estado;
@@ -194,7 +202,7 @@ exports.crearCompraEvento = async (data) => {
     tipo_evento: 'COMPRA',
     tipo_pago,
     pasajero_id,
-    empresa_id,
+    empresa_id: finalEmpresaId,
     convenio_id,
     ciudad_origen,
     ciudad_destino,
