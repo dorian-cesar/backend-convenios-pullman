@@ -16,7 +16,7 @@ const crearBeneficiario = {
         telefono: Joi.string().allow('', null),
         correo: Joi.string().email({ tlds: { allow: false } }).allow('', null),
         direccion: Joi.string().allow('', null),
-        imagenes: Joi.object().unknown(true).allow(null),
+        imagenes: Joi.object().unknown(true).allow(null, '').optional(),
         status: Joi.string().valid('ACTIVO', 'INACTIVO', 'RECHAZADO').default('INACTIVO'),
         razon_rechazo: Joi.string().allow('', null)
     })
@@ -33,7 +33,7 @@ const actualizarBeneficiario = {
         telefono: Joi.string().allow('', null),
         correo: Joi.string().email({ tlds: { allow: false } }).allow('', null),
         direccion: Joi.string().allow('', null),
-        imagenes: Joi.object().unknown(true).allow(null),
+        imagenes: Joi.object().unknown(true).allow(null, '').optional(),
         status: Joi.string().valid('ACTIVO', 'INACTIVO', 'RECHAZADO'),
         razon_rechazo: Joi.string().allow('', null)
     }).min(1)

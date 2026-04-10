@@ -9,9 +9,13 @@ exports.crear = async (data) => {
         data.rut = formatRut(data.rut);
     }
     
-    // Convertir correo vacío a null para evitar problemas
     if (data.correo === '') {
         data.correo = null;
+    }
+
+    // Convertir imagenes vacías a null para evitar problemas con JSON
+    if (data.imagenes === '') {
+        data.imagenes = null;
     }
 
     // Verificar si ya existe un registro para este convenio
@@ -157,6 +161,10 @@ exports.actualizar = async (id, data) => {
 
     if (data.correo === '') {
         data.correo = null;
+    }
+
+    if (data.imagenes === '') {
+        data.imagenes = null;
     }
 
     const oldStatus = beneficiario.status;
