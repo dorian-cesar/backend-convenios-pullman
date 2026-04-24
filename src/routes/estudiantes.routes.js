@@ -225,8 +225,8 @@ const authMiddleware = require('../middlewares/auth.middleware');
 const { crearEstudiante, actualizarEstudiante, getEstudiante, getPorRut } = require('../validations/estudiante.validation');
 const validate = require('../middlewares/validate.middleware');
 
-router.use(authMiddleware);
 router.post('/', validate(crearEstudiante), estudiantesController.crear);
+router.use(authMiddleware);
 router.get('/', estudiantesController.listar);
 router.get('/:id', validate(getEstudiante), estudiantesController.obtener);
 router.get('/rut/:rut', validate(getPorRut), estudiantesController.obtenerPorRut);

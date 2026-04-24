@@ -230,8 +230,8 @@ const authMiddleware = require('../middlewares/auth.middleware');
 const { crearPasajeroFrecuente, actualizarPasajeroFrecuente, getPasajeroFrecuente, getPorRut } = require('../validations/pasajeroFrecuente.validation');
 const validate = require('../middlewares/validate.middleware');
 
-router.use(authMiddleware);
 router.post('/', validate(crearPasajeroFrecuente), pasajerosFrecuentesController.crear);
+router.use(authMiddleware);
 router.get('/', pasajerosFrecuentesController.listar);
 router.get('/:id', validate(getPasajeroFrecuente), pasajerosFrecuentesController.obtener);
 router.get('/rut/:rut', validate(getPorRut), pasajerosFrecuentesController.obtenerPorRut);

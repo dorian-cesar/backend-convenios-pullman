@@ -6,19 +6,6 @@ const { crearConvenio, actualizarConvenio, validarCodigoConvenio, agregarRutasMa
 
 const router = Router();
 
-// Todas las rutas requieren autenticación (JWT o API Key)
-router.use(authMiddleware);
-
-
-
-
-/**
- * @openapi
- * tags:
- *   name: Convenios
- *   description: Gestión de convenios empresariales
- */
-
 // Endpoint público para listar convenios
 router.get('/', convenioController.listar);
 
@@ -176,6 +163,20 @@ router.get('/disponibles', convenioController.listarDisponibles);
  */
 router.get('/buscar/rutas', convenioController.buscarPorRuta);
 
+// Todas las rutas requieren autenticación (JWT o API Key)
+router.use(authMiddleware);
+
+
+
+
+/**
+ * @openapi
+ * tags:
+ *   name: Convenios
+ *   description: Gestión de convenios empresariales
+ */
+
+
 // Rutas protegidas (Ya lo son todas)
 
 /**
@@ -205,6 +206,11 @@ router.get('/buscar/rutas', convenioController.buscarPorRuta);
  *           type: string
  *           enum: [ACTIVO, INACTIVO]
  *         description: Filtrar por estado
+ *       - in: query
+ *         name: beneficio
+ *         schema:
+ *           type: boolean
+ *         description: Filtrar convenios que sean de tipo beneficio
  *       - in: query
  *         name: page
  *         schema:

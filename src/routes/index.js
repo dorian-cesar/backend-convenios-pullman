@@ -41,6 +41,7 @@ router.use('/apis-consulta', apiConsultaRoutes);
 router.use('/apis-registro', apiRegistroRoutes);
 router.use('/beneficiarios', beneficiarioRoutes);
 router.use('/adultos-mayores', adultosMayoresRoutes);
+router.use('/estudiantes', estudiantesRoutes);
 router.use('/pasajeros-frecuentes', pasajerosFrecuentesRoutes);
 router.use('/carabineros', carabinerosRoutes);
 router.use('/fach', fachRoutes);
