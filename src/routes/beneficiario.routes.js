@@ -13,16 +13,12 @@ const router = Router();
  *   description: Gestión unificada de personas beneficiarias y sus programas correspondientes
  */
 
-router.use(authMiddleware);
-
 /**
  * @openapi
  * /api/beneficiarios:
  *   post:
- *     summary: Crear un nuevo registro de beneficiario
+ *     summary: Crear un nuevo registro de beneficiario (Enrolamiento Público)
  *     tags: [Beneficiarios]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -38,6 +34,10 @@ router.use(authMiddleware);
  *               $ref: '#/components/schemas/Beneficiario'
  */
 router.post('/', validate(beneficiarioValidation.crearBeneficiario), beneficiarioController.crear);
+
+router.use(authMiddleware);
+
+
 router.patch('/:id', beneficiarioController.actualizarParcial);
 
 /**

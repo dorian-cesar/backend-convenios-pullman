@@ -5,6 +5,7 @@ const AppError = require('../exceptions/AppError');
 
 
 exports.crear = async (data) => {
+    console.log('[Beneficiario Service] Crear - Iniciando proceso para RUT:', data.rut);
     if (data.rut) {
         data.rut = formatRut(data.rut);
     }
@@ -20,6 +21,7 @@ exports.crear = async (data) => {
 
     // Automatización: Obtener empresa_id desde el convenio si no viene en el payload
     if (!data.empresa_id && data.convenio_id) {
+        console.log('[Beneficiario Service] Buscando empresa para convenio:', data.convenio_id);
         const convenio = await Convenio.findByPk(data.convenio_id);
         if (convenio) {
             data.empresa_id = convenio.empresa_id;
@@ -32,6 +34,7 @@ exports.crear = async (data) => {
     });
 
     if (existente) {
+        console.warn('[Beneficiario Service] Beneficiario ya existe:', data.rut);
         throw new AppError('Usted ya se encuentra registrado en este convenio', 400);
     }
 
@@ -41,8 +44,11 @@ exports.crear = async (data) => {
 
     let beneficiario;
     try {
+        console.log('[Beneficiario Service] Creando registro en BD...');
         beneficiario = await Beneficiario.create(data);
+        console.log('[Beneficiario Service] Registro creado ID:', beneficiario.id);
     } catch (error) {
+        console.error('[Beneficiario Service] Error al crear en BD:', error.message);
         if (error.name === 'SequelizeUniqueConstraintError') {
             throw new AppError('Usted ya se encuentra registrado en este convenio', 400);
         }
@@ -50,13 +56,18 @@ exports.crear = async (data) => {
     }
 
     // Obtener info del convenio para el correo
-    const convenio = await Convenio.findByPk(beneficiario.convenio_id);
-    if (beneficiario.correo) {
-        await emailService.enviarCorreoEnrolamiento(
-            beneficiario.correo,
-            beneficiario.nombre,
-            convenio ? convenio.nombre : 'Programa de Beneficios'
-        );
+    try {
+        const convenio = await Convenio.findByPk(beneficiario.convenio_id);
+        if (beneficiario.correo) {
+            console.log('[Beneficiario Service] Enviando correo de enrolamiento a:', beneficiario.correo);
+            await emailService.enviarCorreoEnrolamiento(
+                beneficiario.correo,
+                beneficiario.nombre,
+                convenio ? convenio.nombre : 'Programa de Beneficios'
+            );
+        }
+    } catch (mailError) {
+        console.error('[Beneficiario Service] Error (no fatal) enviando correo:', mailError.message);
     }
 
     return beneficiario;
@@ -249,3 +260,4 @@ exports.rechazar = async (id, razon_rechazo) => {
 
     return updated;
 };
+

@@ -24,7 +24,13 @@ module.exports = (err, req, res, next) => {
 
   // Log critical/unknown errors
   if (!err.statusCode && !err.status) {
-    logger.error(err);
+    try {
+      logger.error(err.message || err);
+      if (err.stack) logger.error(err.stack);
+    } catch (logErr) {
+      console.error('Logger failed:', logErr);
+      console.error('Original Error:', err.message || err);
+    }
   }
 
   const statusCode = err.statusCode || err.status || 500;

@@ -4,9 +4,16 @@ const BeneficiarioDTO = require('../dtos/beneficiario.dto');
 
 exports.crear = async (req, res, next) => {
     try {
+        console.log('[Beneficiario Controller] Crear - Inicio:', {
+            rut: req.body.rut,
+            convenio_id: req.body.convenio_id,
+            has_imagenes: !!req.body.imagenes
+        });
         const beneficiario = await beneficiarioService.crear(req.body);
+        console.log('[Beneficiario Controller] Crear - Éxito:', beneficiario.id);
         res.status(201).json(new BeneficiarioDTO(beneficiario));
     } catch (error) {
+        console.error('[Beneficiario Controller] Crear - Error:', error.message);
         next(error);
     }
 };
@@ -145,3 +152,4 @@ exports.actualizarParcial = async (req, res, next) => {
         next(error);
     }
 };
+
