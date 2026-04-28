@@ -10,10 +10,10 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 
 /**
- * Consulta Kupos para obtener el operator_pnr de un ticket.
- * Retorna el operator_pnr si lo encuentra, o null si falla / no existe.
+ * Consulta Kupos para obtener información detallada del ticket (operator_pnr y status).
+ * Retorna el objeto con los datos o null si falla / no existe.
  */
-const fetchOperatorPnrFromKupos = async (numeroTicket) => {
+const fetchTicketInfoFromKupos = async (numeroTicket) => {
   if (!numeroTicket) return null;
   if (!process.env.KUPOS_API_KEY || !process.env.KUPOS_API_URL) return null;
 
@@ -23,14 +23,20 @@ const fetchOperatorPnrFromKupos = async (numeroTicket) => {
       timeout: 5000
     });
     const ticketDetails = response.data?.result?.ticket_details;
-    if (ticketDetails && ticketDetails.length > 0 && ticketDetails[0].operator_pnr) {
-      return ticketDetails[0].operator_pnr;
+    if (ticketDetails && ticketDetails.length > 0) {
+      return {
+        operator_pnr: ticketDetails[0].operator_pnr,
+        status: ticketDetails[0].status
+      };
     }
   } catch (err) {
-    console.warn(`[KUPOS] No se pudo obtener operator_pnr para ticket ${numeroTicket}: ${err.message}`);
+    console.warn(`[KUPOS] No se pudo obtener información para ticket ${numeroTicket}: ${err.message}`);
   }
   return null;
 };
+
+exports.fetchTicketInfoFromKupos = fetchTicketInfoFromKupos;
+
 
 /**
  * Calcular monto con descuento
@@ -167,7 +173,7 @@ exports.crearCompraEvento = async (data) => {
   if (!empresa) throw new NotFoundError('Empresa no encontrada');
 
   // Normalizar estado para evitar que quede en blanco (null, undefined o "")
-  const finalEstado = (estado === null || estado === undefined || estado === "") ? "revisar" : estado;
+  let finalEstado = (estado === null || estado === undefined || estado === "") ? "revisar" : estado;
 
   // Valores por defecto si no vienen del front (aunque deberían venir)
   const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
@@ -175,17 +181,24 @@ exports.crearCompraEvento = async (data) => {
 
   console.log(`[EVENTO] Iniciando creación de COMPRA - Pasajero: ${pasajero_id}, PNR: ${pnr}, Ticket: ${numero_ticket}`);
 
-  // Si el PNR viene vacío, null o '0', consultar Kupos para obtener el operator_pnr real
-  const pnrVacio = !pnr || pnr === '0' || pnr === 0;
   let finalPnr = pnr;
-  if (pnrVacio && numero_ticket) {
-    console.log(`[KUPOS] PNR vacío/cero para ticket ${numero_ticket}, consultando Kupos...`);
-    const operatorPnr = await fetchOperatorPnrFromKupos(numero_ticket);
-    if (operatorPnr) {
-      console.log(`[KUPOS] operator_pnr obtenido: ${operatorPnr} para ticket ${numero_ticket}`);
-      finalPnr = operatorPnr;
+  // Siempre consultar Kupos para validar el operator_pnr real y sincronizar el estado
+  if (numero_ticket) {
+    console.log(`[KUPOS] Consultando Kupos para ticket ${numero_ticket}...`);
+    const kuposInfo = await fetchTicketInfoFromKupos(numero_ticket);
+    if (kuposInfo) {
+      // 1. Sincronizar PNR
+      if (kuposInfo.operator_pnr) {
+        console.log(`[KUPOS] operator_pnr obtenido: ${kuposInfo.operator_pnr} para ticket ${numero_ticket}`);
+        finalPnr = kuposInfo.operator_pnr;
+      }
+      // 2. Sincronizar Estado
+      if (kuposInfo.status && kuposInfo.status !== finalEstado) {
+        console.log(`[KUPOS] Actualizando estado de '${finalEstado}' a '${kuposInfo.status}' según Kupos`);
+        finalEstado = kuposInfo.status;
+      }
     } else {
-      console.warn(`[KUPOS] No se obtuvo operator_pnr para ticket ${numero_ticket}, se guarda con PNR original.`);
+      console.warn(`[KUPOS] No se obtuvo información para ticket ${numero_ticket}, se guardan datos originales.`);
     }
   }
 
@@ -463,4 +476,23 @@ exports.eliminarEvento = async (id) => {
 
   await evento.destroy();
   return evento;
+};
+
+/**
+ * Actualizar estado y PNR de un evento desde Kupos
+ */
+exports.actualizarEstadoEvento = async (id, nuevoEstado, nuevoPnr) => {
+  const evento = await Evento.findByPk(id);
+  if (evento) {
+    let modified = false;
+    if (nuevoEstado && evento.estado !== nuevoEstado) {
+      evento.estado = nuevoEstado;
+      modified = true;
+    }
+    if (nuevoPnr && evento.pnr !== nuevoPnr) {
+      evento.pnr = nuevoPnr;
+      modified = true;
+    }
+    if (modified) await evento.save();
+  }
 };

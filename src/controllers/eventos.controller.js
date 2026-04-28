@@ -139,6 +139,38 @@ exports.buscar = async (req, res, next) => {
     };
 
     const result = await eventosService.listarEventos(filters);
+    
+    // Sincronización en tiempo real con Kupos para los resultados encontrados
+    if (result.rows && result.rows.length > 0) {
+      for (let i = 0; i < result.rows.length; i++) {
+        const evento = result.rows[i];
+        
+        const ticketConsultar = evento.numero_ticket || evento.pnr;
+        if (ticketConsultar) {
+          const kuposInfo = await eventosService.fetchTicketInfoFromKupos(ticketConsultar);
+          if (kuposInfo) {
+            let modified = false;
+            
+            // Sincronizar PNR
+            if (kuposInfo.operator_pnr && evento.pnr !== kuposInfo.operator_pnr) {
+              evento.pnr = kuposInfo.operator_pnr;
+              modified = true;
+            }
+            // Sincronizar Estado
+            if (kuposInfo.status && evento.estado !== kuposInfo.status) {
+              evento.estado = kuposInfo.status;
+              modified = true;
+            }
+            
+            // Si hubo cambios, impactar base de datos
+            if (modified) {
+              await eventosService.actualizarEstadoEvento(evento.id, evento.estado, evento.pnr);
+            }
+          }
+        }
+      }
+    }
+
     const response = {
       ...result,
       rows: EventoDTO.fromArray(result.rows)
