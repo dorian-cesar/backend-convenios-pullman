@@ -24,10 +24,27 @@ const fetchTicketInfoFromKupos = async (numeroTicket) => {
     });
     const ticketDetails = response.data?.result?.ticket_details;
     if (ticketDetails && ticketDetails.length > 0) {
-      return {
-        operator_pnr: ticketDetails[0].operator_pnr,
-        status: ticketDetails[0].status
-      };
+      const rawStatus = ticketDetails[0].status || ticketDetails[0].ticket_status;
+      let mappedStatus = null;
+      
+      // Mapear estados de Kupos a nuestros estados internos
+      if (rawStatus) {
+        const lowerStatus = rawStatus.toLowerCase();
+        if (lowerStatus === 'canceled' || lowerStatus === 'cancelled') {
+          mappedStatus = 'anulado';
+        } else if (lowerStatus === 'confirmed') {
+          mappedStatus = 'confirmado';
+        }
+        // Si Kupos devuelve cualquier otra cosa, NO lo mapeamos
+        // para evitar sobrescribir nuestros estados locales (expirado, error_confirmacion)
+      }
+      
+      const result = { operator_pnr: ticketDetails[0].operator_pnr };
+      if (mappedStatus) {
+        result.status = mappedStatus;
+      }
+      
+      return result;
     }
   } catch (err) {
     console.warn(`[KUPOS] No se pudo obtener información para ticket ${numeroTicket}: ${err.message}`);
@@ -194,8 +211,20 @@ exports.crearCompraEvento = async (data) => {
       }
       // 2. Sincronizar Estado
       if (kuposInfo.status && kuposInfo.status !== finalEstado) {
-        console.log(`[KUPOS] Actualizando estado de '${finalEstado}' a '${kuposInfo.status}' según Kupos`);
-        finalEstado = kuposInfo.status;
+        if (kuposInfo.status === 'anulado') {
+          // Si Kupos dice anulado, validamos nuestro estado actual
+          if (['expirado', 'error_confirmacion', 'anulado'].includes(finalEstado)) {
+            console.log(`[KUPOS] Kupos devolvió 'anulado' pero se respeta el estado local '${finalEstado}'`);
+          } else {
+            // Si es 'confirmado', 'revisar' u otro, lo pasamos a 'anulado'
+            console.log(`[KUPOS] Actualizando estado de '${finalEstado}' a 'anulado' según Kupos`);
+            finalEstado = 'anulado';
+          }
+        } else {
+          // Si Kupos dice 'confirmado' (u otro), lo actualizamos normal
+          console.log(`[KUPOS] Actualizando estado de '${finalEstado}' a '${kuposInfo.status}' según Kupos`);
+          finalEstado = kuposInfo.status;
+        }
       }
     } else {
       console.warn(`[KUPOS] No se obtuvo información para ticket ${numero_ticket}, se guardan datos originales.`);

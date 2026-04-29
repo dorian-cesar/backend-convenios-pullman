@@ -158,8 +158,16 @@ exports.buscar = async (req, res, next) => {
             }
             // Sincronizar Estado
             if (kuposInfo.status && evento.estado !== kuposInfo.status) {
-              evento.estado = kuposInfo.status;
-              modified = true;
+              if (kuposInfo.status === 'anulado') {
+                // Respetar estados locales de error
+                if (!['expirado', 'error_confirmacion', 'anulado'].includes(evento.estado)) {
+                  evento.estado = 'anulado';
+                  modified = true;
+                }
+              } else {
+                evento.estado = kuposInfo.status;
+                modified = true;
+              }
             }
             
             // Si hubo cambios, impactar base de datos
