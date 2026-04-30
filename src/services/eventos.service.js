@@ -5,6 +5,7 @@ const ReglaDeNegocioError = require('../exceptions/ReglaDeNegocioError');
 const EventoInvalidoError = require('../exceptions/EventoInvalidoError');
 const EventoYaDevueltoError = require('../exceptions/EventoYaDevueltoError');
 const convenioService = require('./convenio.service');
+const emailService = require('./email.service');
 const { getPagination, getPagingData } = require('../utils/pagination.utils');
 const { Op } = require('sequelize');
 const axios = require('axios');
@@ -273,6 +274,13 @@ exports.crearCompraEvento = async (data) => {
 
   const evento = await Evento.create(eventoDataToSave);
   console.log(`[EVENTO] COMPRA guardada exitosamente - ID: ${evento.id}, PNR final: ${finalPnr}`);
+
+  // Notificación para eventos expirados
+  if (evento.estado === 'expirado') {
+    emailService.enviarNotificacionEventoExpirado(evento).catch(err => {
+      console.error('[EVENTO] Error enviando notificación de evento expirado:', err.message);
+    });
+  }
 
   /* 
   // -- RE-PARSING --

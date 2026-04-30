@@ -124,3 +124,56 @@ exports.enviarCorreoRechazo = async (correoDestino, nombre, razonRechazo, nombre
         return false;
     }
 };
+
+/**
+ * Envía un correo de notificación técnica cuando se genera un evento con estado 'expirado'.
+ * @param {Object} evento - El objeto del evento creado.
+ */
+exports.enviarNotificacionEventoExpirado = async (evento) => {
+    if (!process.env.SENDGRID_API_KEY) {
+        logger.warn('SendGrid API Key no configurada. No se enviará la notificación de evento expirado.');
+        return false;
+    }
+
+    const toEmails = process.env.EMAIL_NOTIFICACION_EXPIRADOS ? process.env.EMAIL_NOTIFICACION_EXPIRADOS.split(',').map(e => e.trim()) : [];
+    if (toEmails.length === 0) {
+        logger.warn('No hay correos configurados en EMAIL_NOTIFICACION_EXPIRADOS.');
+        return false;
+    }
+
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'no-reply@pullman.cl';
+
+    const msg = {
+        to: toEmails,
+        from: fromEmail,
+        subject: `⚠️ Alerta: Evento Expirado detectado - Ticket ${evento.numero_ticket || 'N/A'}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ffcc00; border-radius: 5px; background-color: #fffbef;">
+                <h2 style="color: #856404;">Notificación de Evento Expirado</h2>
+                <p>Se ha registrado un evento con estado <strong>EXPIRADO</strong> en el sistema.</p>
+                <hr>
+                <p><strong>Detalles del Evento:</strong></p>
+                <ul style="list-style: none; padding: 0;">
+                    <li><strong>ID Evento:</strong> ${evento.id}</li>
+                    <li><strong>Ticket:</strong> ${evento.numero_ticket || 'N/A'}</li>
+                    <li><strong>PNR:</strong> ${evento.pnr || 'N/A'}</li>
+                    <li><strong>Pasajero ID:</strong> ${evento.pasajero_id}</li>
+                    <li><strong>Convenio ID:</strong> ${evento.convenio_id}</li>
+                    <li><strong>Tarifa Base:</strong> ${evento.tarifa_base}</li>
+                    <li><strong>Monto Pagado:</strong> ${evento.monto_pagado}</li>
+                    <li><strong>Fecha Evento:</strong> ${evento.fecha_evento}</li>
+                </ul>
+                <p style="font-size: 0.9em; color: #666;">Este es un correo automático generado por el backend.</p>
+            </div>
+        `,
+    };
+
+    try {
+        await sgMail.send(msg);
+        logger.info(`Notificación de evento expirado enviada a: ${toEmails.join(', ')}`);
+        return true;
+    } catch (error) {
+        logger.error(`Error al enviar notificación de evento expirado:`, error);
+        return false;
+    }
+};
