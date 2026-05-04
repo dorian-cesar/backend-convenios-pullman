@@ -20,6 +20,7 @@ const Fach = require('./fach.model')(sequelize, Sequelize.DataTypes);
 const ApiRegistro = require('./apiRegistro.model')(sequelize, Sequelize.DataTypes);
 const Beneficiario = require('./beneficiario.model')(sequelize, Sequelize.DataTypes);
 const RegistroTablaClienteCorporativo = require('./registroTablaClienteCorporativo.model')(sequelize, Sequelize.DataTypes);
+// const Categoria = require('./categoria.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -39,6 +40,16 @@ Usuario.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 
 // EMPRESA -> CONVENIO (1:N)
 Empresa.hasMany(Convenio, { foreignKey: 'empresa_id', as: 'convenios', onDelete: 'NO ACTION' });
 Convenio.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa', onDelete: 'NO ACTION' });
+
+/*
+// EMPRESA -> CATEGORIA (1:N)
+Empresa.hasMany(Categoria, { foreignKey: 'empresa_id', as: 'categorias', onDelete: 'CASCADE' });
+Categoria.belongsTo(Empresa, { foreignKey: 'empresa_id', as: 'empresa' });
+
+// CATEGORIA -> CONVENIO (1:N)
+Categoria.hasMany(Convenio, { foreignKey: 'categoria_id', as: 'convenios', onDelete: 'SET NULL' });
+Convenio.belongsTo(Categoria, { foreignKey: 'categoria_id', as: 'categoria' });
+*/
 
 // EMPRESA -> PASAJERO (1:N)
 Empresa.hasMany(Pasajero, { foreignKey: 'empresa_id', as: 'pasajeros', onDelete: 'NO ACTION' });
@@ -117,7 +128,7 @@ module.exports = {
   Carabinero,
   Fach,
   ApiRegistro,
-  ApiRegistro,
   Beneficiario,
-  RegistroTablaClienteCorporativo
+  RegistroTablaClienteCorporativo,
+  // Categoria
 };

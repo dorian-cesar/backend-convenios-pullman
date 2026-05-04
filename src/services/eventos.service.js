@@ -1,4 +1,5 @@
-const { Evento, Pasajero, Empresa, Convenio } = require('../models');
+const { Evento, Pasajero, Empresa, Convenio, RegistroTablaClienteCorporativo, Fach, Carabinero, Estudiante, AdultoMayor, PasajeroFrecuente, sequelize } = require('../models');
+const definirModeloDinamico = require('../utils/definirModeloDinamico');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
 const ReglaDeNegocioError = require('../exceptions/ReglaDeNegocioError');
@@ -180,6 +181,41 @@ exports.crearCompraEvento = async (data) => {
     const convenio = await Convenio.findByPk(convenio_id);
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
     
+    // VALIDACIÓN DE SEGURIDAD: Verificar si el convenio requiere membresía/nómina
+    console.log(`[EVENTO] Validando membresía para convenio: ${convenio.nombre} (ID: ${convenio_id})`);
+
+    // 1. Verificación en Tablas Corporativas Dinámicas
+    const registroCorp = await RegistroTablaClienteCorporativo.findOne({ where: { convenio_id } });
+    if (registroCorp) {
+      const ModeloNomina = definirModeloDinamico(sequelize, registroCorp.nombre_tabla);
+      const estaEnNomina = await ModeloNomina.findOne({ 
+        where: { rut: pasajero.rut, status: 'ACTIVO' } 
+      });
+
+      if (!estaEnNomina) {
+        throw new BusinessError(`El pasajero ${pasajero.rut} no pertenece a la nómina autorizada para el convenio ${convenio.nombre}`);
+      }
+      console.log(`[EVENTO] Membresía corporativa validada para ${pasajero.rut}`);
+    }
+
+    // 2. Verificación en Tablas Estáticas (FACh, Carabineros, etc.)
+    // Nota: Buscamos por nombre de convenio o empresa si no hay registro corporativo dinámico
+    const nombreLower = convenio.nombre.toLowerCase();
+    
+    if (nombreLower.includes('fach')) {
+      const registroFach = await Fach.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
+      if (!registroFach) throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en FACH.`);
+    } else if (nombreLower.includes('carabinero')) {
+      const registroCarab = await Carabinero.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
+      if (!registroCarab) throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en Carabineros.`);
+    } else if (nombreLower.includes('estudiante') || nombreLower.includes('tne')) {
+      const registroEst = await Estudiante.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
+      if (!registroEst) throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de estudiante activo.`);
+    } else if (nombreLower.includes('adulto mayor')) {
+      const registroAM = await AdultoMayor.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
+      if (!registroAM) throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de adulto mayor activo.`);
+    }
+
     // Si hay discrepancia entre lo enviado y el convenio, forzamos el id del convenio
     if (convenio.empresa_id !== parseInt(empresa_id)) {
       console.warn(`[EVENTO] Discrepancia de empresa_id detectada: El convenio ${convenio_id} pertenece a la empresa ${convenio.empresa_id}, pero se recibió ${empresa_id}. Corrigiendo automáticamente.`);
