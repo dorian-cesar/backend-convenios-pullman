@@ -26,12 +26,9 @@ exports.validar = async (req, res, next) => {
         if (esAfiliadoValido) {
             // --- ES AFILIADO ---
             
-            // 2. Buscar o Crear Pasajero en base al RUT completo
-            let [pasajero] = await Pasajero.findOrCreate({
-                where: { rut: rut },
-                defaults: {
-                    status: 'ACTIVO'
-                }
+            // 2. Buscar Pasajero (NO crear automáticamente si no existe)
+            let pasajero = await Pasajero.findOne({
+                where: { rut: rut }
             });
 
             // 3. Buscar Empresa "Caja Los Andes"
@@ -91,7 +88,9 @@ exports.validar = async (req, res, next) => {
                     }
                 }
 
-                await pasajero.save();
+                if (pasajero) {
+                    await pasajero.save();
+                }
 
                 // Buscar todos los convenios activos para mostrar descuentos
                 const hoy = new Date();
@@ -120,13 +119,17 @@ exports.validar = async (req, res, next) => {
             return res.status(200).json({
                 afiliado: true,
                 mensaje: 'Afiliado validado correctamente en Caja Los Andes.',
-                pasajero: {
+                pasajero: pasajero ? {
                     id: pasajero.id,
                     rut: pasajero.rut,
                     nombres: pasajero.nombres,
                     apellidos: pasajero.apellidos,
                     empresa_id: pasajero.empresa_id,
                     convenio_id: pasajero.convenio_id
+                } : {
+                    id: null,
+                    rut: rut,
+                    mensaje: 'Pasajero no registrado en base de datos local'
                 },
                 empresa: empresa ? empresa.nombre : 'No asignada',
                 descuentos: descuentosDisponibles,
