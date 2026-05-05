@@ -4,7 +4,8 @@ const crearCategoria = {
     body: Joi.object().keys({
         nombre: Joi.string().required().max(100),
         empresa_id: Joi.number().integer().required(),
-        descripcion: Joi.string().allow('', null).max(255)
+        descripcion: Joi.string().allow('', null).max(255),
+        status: Joi.string().valid('ACTIVO', 'INACTIVO').default('ACTIVO')
     })
 };
 
@@ -14,7 +15,8 @@ const actualizarCategoria = {
     }),
     body: Joi.object().keys({
         nombre: Joi.string().max(100),
-        descripcion: Joi.string().allow('', null).max(255)
+        descripcion: Joi.string().allow('', null).max(255),
+        status: Joi.string().valid('ACTIVO', 'INACTIVO')
     }).min(1)
 };
 
