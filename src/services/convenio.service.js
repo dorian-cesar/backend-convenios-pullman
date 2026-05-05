@@ -1,4 +1,4 @@
-const { Convenio, Empresa, ApiConsulta, ApiRegistro, Evento, Beneficiario, sequelize } = require('../models');
+const { Convenio, Empresa, ApiConsulta, ApiRegistro, Evento, Beneficiario, Categoria, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
@@ -158,6 +158,11 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
+            },
+            {
+                model: Categoria,
+                as: 'categoria',
+                attributes: ['id', 'nombre']
             }
         ],
         attributes: {
@@ -238,6 +243,11 @@ exports.listarConvenios = async (filters = {}) => {
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
+            },
+            {
+                model: Categoria,
+                as: 'categoria',
+                attributes: ['id', 'nombre']
             }
         ],
         order: [[sortField, sortOrder]],
@@ -329,6 +339,11 @@ exports.obtenerConvenio = async (id) => {
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
+            },
+            {
+                model: Categoria,
+                as: 'categoria',
+                attributes: ['id', 'nombre']
             }
         ],
         attributes: {
@@ -503,6 +518,11 @@ exports.actualizarConvenio = async (id, datos) => {
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
+            },
+            {
+                model: Categoria,
+                as: 'categoria',
+                attributes: ['id', 'nombre']
             }
         ],
         attributes: {
