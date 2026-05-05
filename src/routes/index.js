@@ -23,7 +23,7 @@ const losAndesRoutes = require('./losAndes.routes');
 const exportRoutes = require('./export.routes');
 const registroTablaClienteCorporativoRoutes = require('./registroTablaClienteCorporativo.routes');
 const clienteCorporativoTablaEmpresaRoutes = require('./clienteCorporativoTablaEmpresa.routes');
-// const categoriaRoutes = require('./categoria.routes');
+const categoriaRoutes = require('./categoria.routes');
 
 const router = Router();
 
@@ -50,6 +50,6 @@ router.use('/roles', rolesRoutes);
 router.use('/export', exportRoutes);
 router.use('/tablas-clientes-corporativos', registroTablaClienteCorporativoRoutes);
 router.use('/tablas-clientes-corporativos', clienteCorporativoTablaEmpresaRoutes);
-// router.use('/categorias', categoriaRoutes);
+router.use('/categorias', categoriaRoutes);
 
 module.exports = router;
