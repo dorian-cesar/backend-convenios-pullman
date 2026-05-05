@@ -274,6 +274,19 @@ exports.crearCompraEvento = async (data) => {
   const pagado = Number(finalMontoPagado) || 0;
   const finalMontoDescuento = Math.max(0, base - pagado);
 
+  // ── VALIDACIÓN DE INTEGRIDAD DE MONTOS ──────────────────────────────────
+  // Si monto_pagado llega en $0 pero la tarifa_base es positiva, algo salió
+  // mal en el frontend (cálculo de precio fallido, store vacío, etc.).
+  // Rechazamos el evento para evitar registrar compras gratuitas por error.
+  if (pagado === 0 && base > 0) {
+    console.error(`[EVENTO] ❌ Montos inválidos: monto_pagado=$0 con tarifa_base=$${base}. Ticket: ${numero_ticket}, PNR: ${pnr}, Pasajero: ${pasajero_id}`);
+    throw new BusinessError(
+      `monto_pagado no puede ser $0 cuando la tarifa_base es $${base.toLocaleString('es-CL')}. ` +
+      `Verifique que el precio del pasaje se calculó correctamente antes de registrar el evento.`
+    );
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
   // (REMOVED) Verificar topes de convenio: A petición del negocio ya no se valida stock/monto al comprar,
   // solo se registra el consumo posteriormente.
 
