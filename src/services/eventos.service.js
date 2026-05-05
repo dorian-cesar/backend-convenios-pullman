@@ -268,24 +268,49 @@ exports.crearCompraEvento = async (data) => {
     }
   }
 
-  // Calcular monto_descuento = tarifa_base - monto_pagado
-  // Validando que tarifa_base y monto_pagado sean números
+  // ── VALIDACIÓN DE INTEGRIDAD DE MONTOS SEGÚN CONVENIO ────────────────────
+  let finalMontoDescuento = 0;
   const base = Number(tarifa_base) || 0;
   const pagado = Number(finalMontoPagado) || 0;
-  const finalMontoDescuento = Math.max(0, base - pagado);
 
-  // ── VALIDACIÓN DE INTEGRIDAD DE MONTOS ──────────────────────────────────
-  // Si monto_pagado llega en $0 pero la tarifa_base es positiva, algo salió
-  // mal en el frontend (cálculo de precio fallido, store vacío, etc.).
-  // Rechazamos el evento para evitar registrar compras gratuitas por error.
-  if (pagado === 0 && base > 0) {
-    console.error(`[EVENTO] ❌ Montos inválidos: monto_pagado=$0 con tarifa_base=$${base}. Ticket: ${numero_ticket}, PNR: ${pnr}, Pasajero: ${pasajero_id}`);
-    throw new BusinessError(
-      `monto_pagado no puede ser $0 cuando la tarifa_base es $${base.toLocaleString('es-CL')}. ` +
-      `Verifique que el precio del pasaje se calculó correctamente antes de registrar el evento.`
-    );
+  if (convenio_id) {
+    const { Convenio } = require('../models');
+    const convenio = await Convenio.findByPk(convenio_id);
+    
+    if (convenio) {
+      const valor = Number(convenio.valor_descuento) || 0;
+      let pagadoEsperado = base;
+
+      if (convenio.tipo_descuento === 'Porcentaje') {
+        finalMontoDescuento = Math.round(base * (valor / 100));
+        pagadoEsperado = base - finalMontoDescuento;
+      } else if (convenio.tipo_descuento === 'Monto Fijo') {
+        finalMontoDescuento = valor;
+        pagadoEsperado = Math.max(0, base - valor);
+      } else if (convenio.tipo_descuento === 'Tarifa Plana') {
+        pagadoEsperado = valor;
+        finalMontoDescuento = Math.max(0, base - valor);
+      }
+
+      // Validar que el monto pagado coincida con el esperado (permitimos margen de $2 por redondeos)
+      if (Math.abs(pagado - pagadoEsperado) > 2) {
+        console.error(`[EVENTO] ❌ Discrepancia de montos. Recibido: ${pagado}, Esperado: ${pagadoEsperado}. Convenio: ${convenio.nombre}`);
+        throw new BusinessError(
+          `El monto pagado ($${pagado.toLocaleString('es-CL')}) no coincide con la tarifa esperada del convenio ($${pagadoEsperado.toLocaleString('es-CL')}). ` +
+          `Regla: ${convenio.tipo_descuento} de $${valor.toLocaleString('es-CL')}.`
+        );
+      }
+    }
+  } else {
+    // Si no hay convenio (pago público), el descuento es 0
+    finalMontoDescuento = Math.max(0, base - pagado);
   }
-  // ────────────────────────────────────────────────────────────────────────
+
+  // Guardia final para evitar monto_pagado = 0 en tarifas con costo
+  if (pagado === 0 && base > 0) {
+    throw new BusinessError(`monto_pagado no puede ser $0 cuando la tarifa_base es $${base.toLocaleString('es-CL')}.`);
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   // (REMOVED) Verificar topes de convenio: A petición del negocio ya no se valida stock/monto al comprar,
   // solo se registra el consumo posteriormente.
