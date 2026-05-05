@@ -389,11 +389,12 @@ exports.actualizarConvenio = async (id, datos) => {
         tipo_alcance, tipo_descuento, valor_descuento,
         limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
         tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets,
-        beneficio, imagenes, rutas, configuraciones
+        beneficio, imagenes, rutas, configuraciones, categoria_id
     } = datos;
 
     if (nombre) convenio.nombre = nombre;
     if (status) convenio.status = status;
+    if (categoria_id !== undefined) convenio.categoria_id = categoria_id;
 
     // Asignación de nuevos campos
     if (tipo_alcance !== undefined) convenio.tipo_alcance = tipo_alcance;
@@ -950,6 +951,11 @@ exports.buscarConveniosPorRuta = async (origen_codigo, destino_codigo) => {
                 model: ApiConsulta,
                 as: 'apiConsulta',
                 attributes: ['id', 'nombre', 'endpoint']
+            },
+            {
+                model: Categoria,
+                as: 'categoria',
+                attributes: ['id', 'nombre']
             }
         ]
     });
