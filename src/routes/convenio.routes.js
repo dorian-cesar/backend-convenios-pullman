@@ -377,6 +377,7 @@ router.get('/:id', convenioController.obtener);
  *         description: Convenio no encontrado
  */
 router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
+router.patch('/:id', validate(actualizarConvenio), convenioController.actualizar);
 
 /**
  * ==========================================
