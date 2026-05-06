@@ -3,6 +3,8 @@ class ConvenioDTO {
         this.id = convenio.id;
         this.nombre = convenio.nombre;
         this.empresa_id = convenio.empresa_id;
+        this.categoria_id = convenio.categoria_id;
+        this.categoria = convenio.categoria || null;
 
         // Extraer empresa a este nivel específico
         if (convenio.empresa) {
