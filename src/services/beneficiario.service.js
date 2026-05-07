@@ -196,6 +196,9 @@ exports.listar = async (query = {}) => {
 };
 
 exports.actualizar = async (id, data) => {
+    if (data.rut) {
+        data.rut = formatRut(data.rut);
+    }
     const beneficiario = await Beneficiario.findByPk(id, {
         include: [{ model: Convenio, as: 'convenio' }]
     });
@@ -237,6 +240,9 @@ exports.actualizar = async (id, data) => {
 };
 
 exports.actualizarParcial = async (id, data) => {
+    if (data.rut) {
+        data.rut = formatRut(data.rut);
+    }
     const beneficiario = await Beneficiario.findByPk(id);
     if (!beneficiario) return null;
 
