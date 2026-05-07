@@ -172,7 +172,28 @@ exports.crearCompraEvento = async (data) => {
     respuesta_kupos
   } = data;
 
-  const pasajero = await Pasajero.findByPk(pasajero_id);
+  let finalPasajeroId = pasajero_id;
+  let pasajero;
+
+  // Si el id es un string (posiblemente un RUT enviado por error desde el front)
+  if (typeof pasajero_id === 'string') {
+    console.log(`[EVENTO] Recibido pasajero_id como string (RUT): ${pasajero_id}. Intentando resolver...`);
+    const rutLimpio = pasajero_id.replace(/[^0-9kK]/g, ''); // Quitar puntos, guiones y espacios
+    pasajero = await Pasajero.findOne({ where: { rut: rutLimpio } });
+    
+    if (!pasajero) {
+      // Intentar buscar también con el formato original por si acaso
+      pasajero = await Pasajero.findOne({ where: { rut: pasajero_id } });
+    }
+
+    if (pasajero) {
+      finalPasajeroId = pasajero.id;
+      console.log(`[EVENTO] Pasajero resuelto por RUT: ${pasajero.rut} -> ID: ${finalPasajeroId}`);
+    }
+  } else {
+    pasajero = await Pasajero.findByPk(pasajero_id);
+  }
+
   if (!pasajero) throw new NotFoundError('Pasajero no encontrado');
 
   let finalEmpresaId = empresa_id;
@@ -233,7 +254,7 @@ exports.crearCompraEvento = async (data) => {
   const finalPorcentaje = porcentaje_descuento_aplicado !== undefined ? porcentaje_descuento_aplicado : 0;
   const finalMontoPagado = monto_pagado !== undefined ? monto_pagado : tarifa_base;
 
-  console.log(`[EVENTO] Iniciando creación de COMPRA - Pasajero: ${pasajero_id}, PNR: ${pnr}, Ticket: ${numero_ticket}`);
+  console.log(`[EVENTO] Iniciando creación de COMPRA - Pasajero: ${finalPasajeroId}, PNR: ${pnr}, Ticket: ${numero_ticket}`);
 
   let finalPnr = pnr;
   // Siempre consultar Kupos para validar el operator_pnr real y sincronizar el estado
@@ -318,7 +339,7 @@ exports.crearCompraEvento = async (data) => {
   const eventoDataToSave = {
     tipo_evento: 'COMPRA',
     tipo_pago,
-    pasajero_id,
+    pasajero_id: finalPasajeroId,
     empresa_id: finalEmpresaId,
     convenio_id,
     ciudad_origen,

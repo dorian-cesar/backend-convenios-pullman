@@ -3,7 +3,7 @@ const Joi = require('joi');
 const crearCompra = {
     body: Joi.object().keys({
         usuario_id: Joi.number().integer().optional(),
-        pasajero_id: Joi.number().integer().required(),
+        pasajero_id: Joi.alternatives().try(Joi.number().integer(), Joi.string()).required(),
         empresa_id: Joi.number().integer().required(),
         convenio_id: Joi.number().integer().allow(null).optional(),
         ciudad_origen: Joi.string().required(),
