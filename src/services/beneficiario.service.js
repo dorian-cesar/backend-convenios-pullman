@@ -1,4 +1,4 @@
-const { Beneficiario, Empresa, Convenio } = require('../models');
+const { Beneficiario, Empresa, Convenio, sequelize } = require('../models');
 const { formatRut } = require('../utils/rut.utils');
 const emailService = require('./email.service');
 const AppError = require('../exceptions/AppError');
@@ -121,7 +121,11 @@ exports.listar = async (query = {}) => {
     if (status) where.status = parseArrayParam(status);
 
     if (rut) {
-        where.rut = { [Op.like]: `%${rut}%` };
+        const cleanRutSearch = rut.replace(/[^0-9kK]/g, '');
+        where.rut = sequelize.where(
+            sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Beneficiario.rut'), '.', ''), '-', ''),
+            { [Op.like]: `%${cleanRutSearch}%` }
+        );
     }
     if (empresa_id) includeConvenioWhere.empresa_id = parseArrayParam(empresa_id);
 
