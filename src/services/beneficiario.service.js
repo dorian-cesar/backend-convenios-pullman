@@ -124,7 +124,7 @@ exports.listar = async (query = {}) => {
         const cleanRutSearch = rut.replace(/[^0-9kK]/g, '');
         where.rut = sequelize.where(
             sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Beneficiario.rut'), '.', ''), '-', ''),
-            { [Op.like]: `%${cleanRutSearch}%` }
+            { [Op.eq]: cleanRutSearch }
         );
     }
     if (empresa_id) includeConvenioWhere.empresa_id = parseArrayParam(empresa_id);
