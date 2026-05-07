@@ -140,6 +140,8 @@ exports.listar = async (query = {}) => {
             { [Op.eq]: cleanRutSearch }
         );
     }
+
+
     if (empresa_id) includeConvenioWhere.empresa_id = parseArrayParam(empresa_id);
 
     const includeConvenio = {
