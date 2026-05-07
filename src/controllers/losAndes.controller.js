@@ -44,7 +44,7 @@ exports.validar = async (req, res, next) => {
             let descuentosDisponibles = [];
 
             if (empresa) {
-                pasajero.empresa_id = empresa.id;
+                if (pasajero) pasajero.empresa_id = empresa.id;
 
                 // 4. Buscar el Convenio específico vinculado al endpoint de validación
                 const convenioApi = await Convenio.findOne({
@@ -61,7 +61,7 @@ exports.validar = async (req, res, next) => {
                 });
 
                 if (convenioApi) {
-                    pasajero.convenio_id = convenioApi.id;
+                    if (pasajero) pasajero.convenio_id = convenioApi.id;
                     
                     // Validar Vigencia
                     const vigente = await convenioService.validarVigencia(convenioApi.id);
@@ -78,7 +78,7 @@ exports.validar = async (req, res, next) => {
                     });
                     if (conveniosActivos.length > 0) {
                         const conv = conveniosActivos[0];
-                        pasajero.convenio_id = conv.id;
+                        if (pasajero) pasajero.convenio_id = conv.id;
 
                         const vigente = await convenioService.validarVigencia(conv.id);
                         if (!vigente) {
