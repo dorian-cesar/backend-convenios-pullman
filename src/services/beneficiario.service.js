@@ -111,12 +111,18 @@ exports.listar = async (query = {}) => {
         return param;
     };
 
+    const { Op } = require('sequelize');
+
     if (id) where.id = parseArrayParam(id);
-    if (correo) where.correo = parseArrayParam(correo);
+    if (correo) {
+        where.correo = { [Op.like]: `%${correo}%` };
+    }
     if (convenio_id) where.convenio_id = parseArrayParam(convenio_id);
     if (status) where.status = parseArrayParam(status);
 
-    if (rut) where.rut = formatRut(rut);
+    if (rut) {
+        where.rut = { [Op.like]: `%${rut}%` };
+    }
     if (empresa_id) includeConvenioWhere.empresa_id = parseArrayParam(empresa_id);
 
     const includeConvenio = {
@@ -187,6 +193,13 @@ exports.actualizar = async (id, data) => {
     }
 
     const oldStatus = beneficiario.status;
+    
+    // Si se envían imágenes, marcar el campo como cambiado para que Sequelize lo detecte
+    if (data.imagenes) {
+        beneficiario.set('imagenes', data.imagenes);
+        beneficiario.changed('imagenes', true);
+    }
+
     const updated = await beneficiario.update(data);
 
     // Disparar correos según cambio de estado
@@ -213,9 +226,11 @@ exports.actualizarParcial = async (id, data) => {
     // Si se envían imágenes, las mezclamos con las existentes
     if (data.imagenes) {
         const imagenesExistentes = beneficiario.imagenes || {};
-        data.imagenes = { ...imagenesExistentes, ...data.imagenes };
+        const nuevasImagenes = { ...imagenesExistentes, ...data.imagenes };
+        beneficiario.set('imagenes', nuevasImagenes);
+        beneficiario.changed('imagenes', true);
+        data.imagenes = nuevasImagenes; // Asegurar que update use el objeto mezclado
     }
-
     const updated = await beneficiario.update(data);
     return updated;
 };
