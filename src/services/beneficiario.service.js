@@ -75,16 +75,29 @@ exports.crear = async (data) => {
 
 exports.obtenerPorRut = async (rut, convenio_id = null) => {
     const formattedRUT = formatRut(rut);
-    const where = { rut: formattedRUT };
+    const cleanRUT = rut.replace(/[^0-9kK]/g, '').toUpperCase();
+    
+    let where = { rut: formattedRUT };
     if (convenio_id) {
         where.convenio_id = convenio_id;
     }
-    return await Beneficiario.findOne({
+
+    let beneficiario = await Beneficiario.findOne({
         where,
-        include: [
-            { model: Convenio, as: 'convenio' }
-        ]
+        include: [{ model: Convenio, as: 'convenio' }]
     });
+
+    // Si no se encuentra con el formato XXXXXXXX-X, intentar con el formato limpio XXXXXXXXX
+    if (!beneficiario && formattedRUT !== cleanRUT) {
+        console.log(`[Beneficiario Service] No encontrado como ${formattedRUT}, reintentando como ${cleanRUT}`);
+        where.rut = cleanRUT;
+        beneficiario = await Beneficiario.findOne({
+            where,
+            include: [{ model: Convenio, as: 'convenio' }]
+        });
+    }
+
+    return beneficiario;
 };
 
 exports.obtenerPorId = async (id) => {
