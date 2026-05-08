@@ -173,6 +173,41 @@ exports.listar = async (query = {}) => {
         include: [includeConvenio]
     });
 
+    // 1.1 Calcular conteos por estado (excluyendo el filtro de status del where para el resumen)
+    const summaryWhere = { ...where };
+    delete summaryWhere.status;
+
+    const statusCounts = await Beneficiario.findAll({
+        attributes: [
+            'status',
+            [sequelize.fn('COUNT', sequelize.col('Beneficiario.id')), 'count']
+        ],
+        where: summaryWhere,
+        include: [{
+            model: Convenio,
+            as: 'convenio',
+            attributes: [],
+            where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
+        }],
+        group: ['status'],
+        raw: true
+    });
+
+    const summary = {
+        activo: 0,
+        inactivo: 0,
+        rechazado: 0,
+        total: 0 // El total para el resumen será la suma de todos los estados para los filtros aplicados
+    };
+
+    statusCounts.forEach(sc => {
+        const val = parseInt(sc.count);
+        if (sc.status === 'ACTIVO') summary.activo = val;
+        if (sc.status === 'INACTIVO') summary.inactivo = val;
+        if (sc.status === 'RECHAZADO') summary.rechazado = val;
+        summary.total += val;
+    });
+
     // 2. Obtener solo los IDs ordenados
     const rowsIds = await Beneficiario.findAll({
         attributes: ['id'],
@@ -209,6 +244,7 @@ exports.listar = async (query = {}) => {
         total: count,
         pages: Math.ceil(count / limit),
         currentPage: parseInt(page),
+        summary,
         data: rows
     };
 };

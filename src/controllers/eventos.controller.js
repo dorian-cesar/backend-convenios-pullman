@@ -129,10 +129,13 @@ exports.listarPorRut = async (req, res, next) => {
  */
 exports.buscar = async (req, res, next) => {
   try {
-    // Capturamos todos los filtros del body (rut, pnr, numero_ticket, etc.)
+    const { rut, pnr } = req.body;
+    // Reuse listarEventos logic passing body as filters
+    // We Map body params to filter params expected by service
     const filters = {
-      ...req.body,
-      ...req.query // Permitir también paginación por query params
+      rut,
+      pnr,
+      ...req.query // Allow pagination query params too if needed
     };
 
     const result = await eventosService.listarEventos(filters);
