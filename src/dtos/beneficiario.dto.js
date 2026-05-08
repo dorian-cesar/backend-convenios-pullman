@@ -22,6 +22,7 @@ class BeneficiarioDTO {
             this.convenio_nombre = beneficiario.convenio.nombre;
             this.categoria_id = beneficiario.convenio.categoria_id;
             this.categoria_nombre = beneficiario.convenio.categoria?.nombre || "Sin Categoría";
+            this.empresa_nombre = beneficiario.convenio.empresa?.nombre || "Sin Empresa";
             this.convenio = {
                 id: beneficiario.convenio.id,
                 nombre: beneficiario.convenio.nombre,

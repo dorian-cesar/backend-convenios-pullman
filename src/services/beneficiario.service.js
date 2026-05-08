@@ -151,12 +151,17 @@ exports.listar = async (query = {}) => {
     const includeConvenio = {
         model: Convenio,
         as: 'convenio',
-        attributes: ['id', 'nombre', 'categoria_id'],
+        attributes: ['id', 'nombre', 'categoria_id', 'empresa_id'],
         where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined,
         include: [
             {
                 model: require('../models').Categoria,
                 as: 'categoria',
+                attributes: ['id', 'nombre']
+            },
+            {
+                model: require('../models').Empresa,
+                as: 'empresa',
                 attributes: ['id', 'nombre']
             }
         ]
