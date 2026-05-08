@@ -123,47 +123,58 @@ exports.listarPasajeros = async (filters = {}) => {
     where.status = status || otherFilters.status;
   }
 
-  if (id || otherFilters.id) {
-    where.id = id || otherFilters.id;
+  const andConditions = [];
+
+  // Filtro por ID (Asegurando tipo numérico)
+  const idValue = id || otherFilters.id;
+  if (idValue) {
+    andConditions.push({ id: parseInt(idValue) });
   }
 
   if (correo || otherFilters.correo) {
-    where.correo = { [Op.like]: `%${correo || otherFilters.correo}%` };
+    andConditions.push({ correo: { [Op.like]: `%${correo || otherFilters.correo}%` } });
   }
 
-  if (nombre || otherFilters.nombre) {
-    const term = nombre || otherFilters.nombre;
-    where[Op.or] = [
-      { nombres: { [Op.like]: `%${term}%` } },
-      { apellidos: { [Op.like]: `%${term}%` } }
-    ];
+  // Filtro por Nombre Completo (Más flexible)
+  const term = nombre || otherFilters.nombre;
+  if (term) {
+    andConditions.push(
+      sequelize.where(
+        sequelize.fn('CONCAT', sequelize.col('Pasajero.nombres'), ' ', sequelize.col('Pasajero.apellidos')),
+        { [Op.like]: `%${term}%` }
+      )
+    );
   }
 
   if (rut) {
     const cleanRutSearch = rut.replace(/[^0-9kK]/g, '');
-    const rutCondition = sequelize.where(
-      sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
-      { [Op.like]: `%${cleanRutSearch}%` }
+    andConditions.push(
+      sequelize.where(
+        sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
+        { [Op.like]: `%${cleanRutSearch}%` }
+      )
     );
-    
-    if (where[Op.and]) {
-      where[Op.and].push(rutCondition);
-    } else {
-      where[Op.and] = [rutCondition];
-    }
   }
 
   if (search) {
     const cleanSearch = search.replace(/[^0-9kK]/g, '');
-    where[Op.or] = [
-      sequelize.where(
-        sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
-        { [Op.like]: `%${cleanSearch || search}%` }
-      ),
-      { nombres: { [Op.like]: `%${search}%` } },
-      { apellidos: { [Op.like]: `%${search}%` } },
-      { correo: { [Op.like]: `%${search}%` } }
-    ];
+    andConditions.push({
+      [Op.or]: [
+        sequelize.where(
+          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
+          { [Op.like]: `%${cleanSearch || search}%` }
+        ),
+        sequelize.where(
+          sequelize.fn('CONCAT', sequelize.col('Pasajero.nombres'), ' ', sequelize.col('Pasajero.apellidos')),
+          { [Op.like]: `%${search}%` }
+        ),
+        { correo: { [Op.like]: `%${search}%` } }
+      ]
+    });
+  }
+
+  if (andConditions.length > 0) {
+    where[Op.and] = andConditions;
   }
 
   if (otherFilters.empresa_id) where.empresa_id = otherFilters.empresa_id;
