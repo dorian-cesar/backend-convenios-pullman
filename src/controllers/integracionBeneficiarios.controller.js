@@ -32,8 +32,17 @@ const integracionBeneficiariosController = {
                 });
             }
 
+            const { Op } = require('sequelize');
+            const cleanRUT = rut.replace(/[^0-9kK]/g, '').toUpperCase();
+            
             const beneficiario = await Beneficiario.findOne({ 
-                where: { rut: formattedRUT, convenio_id: convenio_id } 
+                where: { 
+                    [Op.or]: [
+                        { rut: formattedRUT },
+                        { rut: cleanRUT }
+                    ],
+                    convenio_id: convenio_id 
+                } 
             });
 
             if (!beneficiario) {
