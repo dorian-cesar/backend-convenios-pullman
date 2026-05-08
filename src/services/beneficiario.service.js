@@ -1,5 +1,5 @@
 const { Beneficiario, Empresa, Convenio, sequelize } = require('../models');
-const { formatRut } = require('../utils/rut.utils');
+const { formatRut, validateRut } = require('../utils/rut.utils');
 const emailService = require('./email.service');
 const AppError = require('../exceptions/AppError');
 
@@ -7,6 +7,9 @@ const AppError = require('../exceptions/AppError');
 exports.crear = async (data) => {
     console.log('[Beneficiario Service] Crear - Iniciando proceso para RUT:', data.rut);
     if (data.rut) {
+        if (!validateRut(data.rut)) {
+            throw new AppError(`El RUT ingresado (${data.rut}) es inválido matemáticamente (Dígito Verificador incorrecto).`, 400);
+        }
         data.rut = formatRut(data.rut);
     }
     
@@ -199,6 +202,9 @@ exports.listar = async (query = {}) => {
 
 exports.actualizar = async (id, data) => {
     if (data.rut) {
+        if (!validateRut(data.rut)) {
+            throw new AppError(`El RUT ingresado (${data.rut}) es inválido matemáticamente (Dígito Verificador incorrecto).`, 400);
+        }
         data.rut = formatRut(data.rut);
     }
     const beneficiario = await Beneficiario.findByPk(id, {
@@ -243,6 +249,9 @@ exports.actualizar = async (id, data) => {
 
 exports.actualizarParcial = async (id, data) => {
     if (data.rut) {
+        if (!validateRut(data.rut)) {
+            throw new AppError(`El RUT ingresado (${data.rut}) es inválido matemáticamente (Dígito Verificador incorrecto).`, 400);
+        }
         data.rut = formatRut(data.rut);
     }
     const beneficiario = await Beneficiario.findByPk(id);
