@@ -119,8 +119,6 @@ exports.listarPasajeros = async (filters = {}) => {
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
 
-  console.log('[Pasajeros Service] Listar - Filtros recibidos:', { search, rut, status, otherFilters });
-
   if (status || otherFilters.status) {
     where.status = status || otherFilters.status;
   }
