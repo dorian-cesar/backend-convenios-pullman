@@ -20,6 +20,14 @@ class BeneficiarioDTO {
         // Incluir datos del convenio si están disponibles
         if (beneficiario.convenio) {
             this.convenio_nombre = beneficiario.convenio.nombre;
+            this.categoria_id = beneficiario.convenio.categoria_id;
+            this.categoria_nombre = beneficiario.convenio.categoria?.nombre || "Sin Categoría";
+            this.convenio = {
+                id: beneficiario.convenio.id,
+                nombre: beneficiario.convenio.nombre,
+                categoria_id: beneficiario.convenio.categoria_id,
+                empresa_id: beneficiario.convenio.empresa_id
+            };
         }
 
         this.createdAt = beneficiario.createdAt;

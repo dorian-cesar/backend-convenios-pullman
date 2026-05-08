@@ -115,12 +115,36 @@ exports.crearPasajero = async (data) => {
  * Listar pasajeros
  */
 exports.listarPasajeros = async (filters = {}) => {
-  const { page, limit, sortBy, order, status, ...otherFilters } = filters;
+  const { page, limit, sortBy, order, status, search, rut, ...otherFilters } = filters;
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
 
   if (status || otherFilters.status) {
     where.status = status || otherFilters.status;
+  }
+
+  if (rut) {
+    const { sequelize } = require('../models');
+    const cleanRutSearch = rut.replace(/[^0-9kK]/g, '');
+    where.rut = sequelize.where(
+      sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
+      { [Op.like]: `%${cleanRutSearch}%` }
+    );
+  }
+
+  if (search) {
+    const { sequelize } = require('../models');
+    const cleanSearch = search.replace(/[^0-9kK]/g, '');
+    
+    where[Op.or] = [
+      sequelize.where(
+        sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
+        { [Op.like]: `%${cleanSearch || search}%` }
+      ),
+      { nombres: { [Op.like]: `%${search}%` } },
+      { apellidos: { [Op.like]: `%${search}%` } },
+      { correo: { [Op.like]: `%${search}%` } }
+    ];
   }
 
   if (otherFilters.empresa_id) {

@@ -114,7 +114,7 @@ exports.obtenerPorId = async (id) => {
 exports.listar = async (query = {}) => {
     // También volvemos a incluir id y correo que se habían perdido en el archivo local
 
-    const { limit = 10, page = 1, convenio_id, status, rut, empresa_id, id, correo } = query;
+    const { limit = 10, page = 1, convenio_id, status, rut, empresa_id, id, correo, categoria_id } = query;
     const offset = (page - 1) * limit;
     const where = {};
     const includeConvenioWhere = {};
@@ -146,12 +146,20 @@ exports.listar = async (query = {}) => {
 
 
     if (empresa_id) includeConvenioWhere.empresa_id = parseArrayParam(empresa_id);
+    if (categoria_id) includeConvenioWhere.categoria_id = parseArrayParam(categoria_id);
 
     const includeConvenio = {
         model: Convenio,
         as: 'convenio',
-        attributes: ['id', 'nombre'],
-        where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
+        attributes: ['id', 'nombre', 'categoria_id'],
+        where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined,
+        include: [
+            {
+                model: require('../models').Categoria,
+                as: 'categoria',
+                attributes: ['id', 'nombre']
+            }
+        ]
     };
 
     // 1. Contar el total de registros (sin order ni limit para no saturar memoria)
