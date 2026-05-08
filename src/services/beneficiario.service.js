@@ -173,14 +173,16 @@ exports.listar = async (query = {}) => {
         include: [includeConvenio]
     });
 
-    // 1.1 Calcular conteos por estado (excluyendo el filtro de status del where para el resumen)
+    // 1.1 Calcular conteos por estado (usando agregación condicional para máxima precisión)
     const summaryWhere = { ...where };
     delete summaryWhere.status;
 
-    const statusCounts = await Beneficiario.findAll({
+    const summaryResults = await Beneficiario.findAll({
         attributes: [
-            'status',
-            [sequelize.fn('COUNT', sequelize.col('Beneficiario.id')), 'count']
+            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN status = "ACTIVO" THEN 1 END')), 'activo'],
+            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN status = "INACTIVO" THEN 1 END')), 'inactivo'],
+            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN status = "RECHAZADO" THEN 1 END')), 'rechazado'],
+            [sequelize.fn('COUNT', sequelize.col('Beneficiario.id')), 'total']
         ],
         where: summaryWhere,
         include: [{
@@ -189,24 +191,16 @@ exports.listar = async (query = {}) => {
             attributes: [],
             where: Object.keys(includeConvenioWhere).length > 0 ? includeConvenioWhere : undefined
         }],
-        group: ['status'],
         raw: true
     });
 
+    const counts = summaryResults[0] || {};
     const summary = {
-        activo: 0,
-        inactivo: 0,
-        rechazado: 0,
-        total: 0 // El total para el resumen será la suma de todos los estados para los filtros aplicados
+        activo: parseInt(counts.activo || 0),
+        inactivo: parseInt(counts.inactivo || 0),
+        rechazado: parseInt(counts.rechazado || 0),
+        total: parseInt(counts.total || 0)
     };
-
-    statusCounts.forEach(sc => {
-        const val = parseInt(sc.count);
-        if (sc.status === 'ACTIVO') summary.activo = val;
-        if (sc.status === 'INACTIVO') summary.inactivo = val;
-        if (sc.status === 'RECHAZADO') summary.rechazado = val;
-        summary.total += val;
-    });
 
     // 2. Obtener solo los IDs ordenados
     const rowsIds = await Beneficiario.findAll({
