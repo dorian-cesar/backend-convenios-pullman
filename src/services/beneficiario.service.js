@@ -179,9 +179,9 @@ exports.listar = async (query = {}) => {
 
     const summaryResults = await Beneficiario.findAll({
         attributes: [
-            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN status = "ACTIVO" THEN 1 END')), 'activo'],
-            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN status = "INACTIVO" THEN 1 END')), 'inactivo'],
-            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN status = "RECHAZADO" THEN 1 END')), 'rechazado'],
+            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Beneficiario.status = "ACTIVO" THEN 1 END')), 'activo'],
+            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Beneficiario.status = "INACTIVO" THEN 1 END')), 'inactivo'],
+            [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Beneficiario.status = "RECHAZADO" THEN 1 END')), 'rechazado'],
             [sequelize.fn('COUNT', sequelize.col('Beneficiario.id')), 'total']
         ],
         where: summaryWhere,
