@@ -1,4 +1,4 @@
-const { Pasajero, TipoPasajero, Empresa, Convenio, Evento } = require('../models');
+const { Pasajero, TipoPasajero, Empresa, Convenio, Evento, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const BusinessError = require('../exceptions/BusinessError');
 const NotFoundError = require('../exceptions/NotFoundError');
@@ -119,21 +119,27 @@ exports.listarPasajeros = async (filters = {}) => {
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
 
+  console.log('[Pasajeros Service] Listar - Filtros recibidos:', { search, rut, status, otherFilters });
+
   if (status || otherFilters.status) {
     where.status = status || otherFilters.status;
   }
 
   if (rut) {
-    const { sequelize } = require('../models');
     const cleanRutSearch = rut.replace(/[^0-9kK]/g, '');
-    where.rut = sequelize.where(
+    const rutCondition = sequelize.where(
       sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
       { [Op.like]: `%${cleanRutSearch}%` }
     );
+    
+    if (where[Op.and]) {
+      where[Op.and].push(rutCondition);
+    } else {
+      where[Op.and] = [rutCondition];
+    }
   }
 
   if (search) {
-    const { sequelize } = require('../models');
     const cleanSearch = search.replace(/[^0-9kK]/g, '');
     
     where[Op.or] = [
