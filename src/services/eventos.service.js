@@ -492,7 +492,11 @@ exports.listarEventos = async (filters = {}) => {
   // Filtros en el modelo Pasajero (Include)
   const passengerWhere = {};
   if (otherFilters.rut) {
-    passengerWhere.rut = { [Op.like]: `%${otherFilters.rut}%` };
+    const cleanRutSearch = otherFilters.rut.replace(/[^0-9kK]/g, '');
+    passengerWhere.rut = sequelize.where(
+      sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
+      { [Op.like]: `%${cleanRutSearch}%` }
+    );
   }
   if (otherFilters.search) {
     passengerWhere[Op.or] = [
