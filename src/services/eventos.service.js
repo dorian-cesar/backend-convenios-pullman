@@ -504,14 +504,62 @@ exports.listarEventos = async (filters = {}) => {
   const sortField = sortBy || 'fecha_evento';
   const sortOrder = (order && order.toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
 
+  // 1. Calcular conteos por estado (usando agregación condicional para máxima precisión)
+  const summaryWhere = { ...where };
+  delete summaryWhere.estado;
+
+  // Filtros en el modelo Pasajero (Include para el summary)
+  const passengerSummaryWhere = {};
+  if (otherFilters.rut) passengerSummaryWhere.rut = { [Op.like]: `%${otherFilters.rut}%` };
+  if (otherFilters.correo) passengerSummaryWhere.correo = { [Op.like]: `%${otherFilters.correo}%` };
+  if (otherFilters.search || otherFilters.nombre) {
+    const term = otherFilters.search || otherFilters.nombre;
+    passengerSummaryWhere[Op.or] = [
+      { nombres: { [Op.like]: `%${term}%` } },
+      { apellidos: { [Op.like]: `%${term}%` } }
+    ];
+  }
+
+  const summaryResults = await Evento.findAll({
+    attributes: [
+      [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Evento.estado = "confirmado" THEN 1 END')), 'confirmados'],
+      [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Evento.estado = "anulado" THEN 1 END')), 'anulados'],
+      [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Evento.estado = "error_confirmacion" THEN 1 END')), 'error_confirmacion'],
+      [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Evento.estado = "expirado" THEN 1 END')), 'expirados'],
+      [sequelize.fn('COUNT', sequelize.literal('CASE WHEN (Evento.estado IS NULL OR Evento.estado = "" OR Evento.estado = "revisar") THEN 1 END')), 'revisar'],
+      [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'total']
+    ],
+    where: summaryWhere,
+    include: [{
+      model: Pasajero,
+      where: Object.keys(passengerSummaryWhere).length > 0 ? passengerSummaryWhere : undefined,
+      attributes: [],
+      required: Object.keys(passengerSummaryWhere).length > 0
+    }],
+    raw: true
+  });
+
+  const counts = summaryResults[0] || {};
+  const summary = {
+    confirmados: parseInt(counts.confirmados || 0),
+    anulados: parseInt(counts.anulados || 0),
+    error_confirmacion: parseInt(counts.error_confirmacion || 0),
+    expirados: parseInt(counts.expirados || 0),
+    revisar: parseInt(counts.revisar || 0),
+    total: parseInt(counts.total || 0)
+  };
+
+  // 2. Obtener los datos paginados
+  const passengerWhere = { ...passengerSummaryWhere };
+
   const data = await Evento.findAndCountAll({
     where,
     include: [
       { 
         model: Pasajero, 
         where: Object.keys(passengerWhere).length > 0 ? passengerWhere : null,
-        required: Object.keys(passengerWhere).length > 0, // Filtro estricto si hay búsqueda por pasajero
-        attributes: ['id', 'rut', 'nombres', 'apellidos'] 
+        required: Object.keys(passengerWhere).length > 0,
+        attributes: ['id', 'rut', 'nombres', 'apellidos', 'correo'] 
       },
       { model: Empresa, attributes: ['id', 'nombre', 'rut_empresa'] },
       { model: Convenio, attributes: ['id', 'nombre'] }
@@ -521,9 +569,7 @@ exports.listarEventos = async (filters = {}) => {
     offset
   });
 
-  // Enriquecer los arreglos confirmed_pnrs con numero_asiento y monto_pagado
   const enrichedRows = await Promise.all(data.rows.map(async (row) => {
-    // Si tiene arreglos PNRs validos, los interamos y consultamos la db para obtener los detalles extras
     if (row.confirmed_pnrs && Array.isArray(row.confirmed_pnrs) && row.confirmed_pnrs.length > 0) {
       const pnrsDetalles = await Promise.all(row.confirmed_pnrs.map(async (pnrString) => {
         const eventoPnr = await Evento.findOne({
@@ -538,7 +584,6 @@ exports.listarEventos = async (filters = {}) => {
           tarifa_base: eventoPnr ? eventoPnr.tarifa_base : null
         };
       }));
-      // Evitamos mutar directamente el model the Sequelize, extraemos los datos al objecto simple
       const rawEvento = row.toJSON();
       rawEvento.confirmed_pnrs = pnrsDetalles;
       return rawEvento;
@@ -546,10 +591,10 @@ exports.listarEventos = async (filters = {}) => {
     return row.toJSON();
   }));
 
-  // Sobrescribir rows con la data enriquecida y en crudo
   data.rows = enrichedRows;
 
-  return getPagingData(data, page, limitVal);
+  const result = getPagingData(data, page, limitVal);
+  return { ...result, summary };
 };
 
 /**

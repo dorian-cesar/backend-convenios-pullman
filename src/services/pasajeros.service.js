@@ -115,12 +115,28 @@ exports.crearPasajero = async (data) => {
  * Listar pasajeros
  */
 exports.listarPasajeros = async (filters = {}) => {
-  const { page, limit, sortBy, order, status, search, rut, ...otherFilters } = filters;
+  const { page, limit, sortBy, order, status, search, rut, id, correo, nombre, ...otherFilters } = filters;
   const { offset, limit: limitVal } = getPagination(page, limit);
   const where = {};
 
   if (status || otherFilters.status) {
     where.status = status || otherFilters.status;
+  }
+
+  if (id || otherFilters.id) {
+    where.id = id || otherFilters.id;
+  }
+
+  if (correo || otherFilters.correo) {
+    where.correo = { [Op.like]: `%${correo || otherFilters.correo}%` };
+  }
+
+  if (nombre || otherFilters.nombre) {
+    const term = nombre || otherFilters.nombre;
+    where[Op.or] = [
+      { nombres: { [Op.like]: `%${term}%` } },
+      { apellidos: { [Op.like]: `%${term}%` } }
+    ];
   }
 
   if (rut) {
@@ -139,7 +155,6 @@ exports.listarPasajeros = async (filters = {}) => {
 
   if (search) {
     const cleanSearch = search.replace(/[^0-9kK]/g, '');
-    
     where[Op.or] = [
       sequelize.where(
         sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('Pasajero.rut'), '.', ''), '-', ''),
@@ -151,21 +166,36 @@ exports.listarPasajeros = async (filters = {}) => {
     ];
   }
 
-  if (otherFilters.empresa_id) {
-    where.empresa_id = otherFilters.empresa_id;
-  }
-
-  if (otherFilters.convenio_id) {
-    where.convenio_id = otherFilters.convenio_id;
-  }
-
-  if (otherFilters.tipo_pasajero_id) {
-    where.tipo_pasajero_id = otherFilters.tipo_pasajero_id;
-  }
+  if (otherFilters.empresa_id) where.empresa_id = otherFilters.empresa_id;
+  if (otherFilters.convenio_id) where.convenio_id = otherFilters.convenio_id;
+  if (otherFilters.tipo_pasajero_id) where.tipo_pasajero_id = otherFilters.tipo_pasajero_id;
 
   const sortField = sortBy || 'id';
   const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC';
 
+  // 1. Calcular resumen (Total, Activos, Inactivos)
+  // Clonamos el where pero quitamos el filtro de status para el conteo global
+  const summaryWhere = { ...where };
+  delete summaryWhere.status;
+
+  const summaryResults = await Pasajero.findAll({
+    attributes: [
+      [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Pasajero.status = "ACTIVO" THEN 1 END')), 'activos'],
+      [sequelize.fn('COUNT', sequelize.literal('CASE WHEN Pasajero.status = "INACTIVO" THEN 1 END')), 'inactivos'],
+      [sequelize.fn('COUNT', sequelize.col('Pasajero.id')), 'total']
+    ],
+    where: summaryWhere,
+    raw: true
+  });
+
+  const counts = summaryResults[0] || {};
+  const summary = {
+    activos: parseInt(counts.activos || 0),
+    inactivos: parseInt(counts.inactivos || 0),
+    total: parseInt(counts.total || 0)
+  };
+
+  // 2. Obtener datos paginados
   const data = await Pasajero.findAndCountAll({
     where,
     include: [
@@ -178,7 +208,8 @@ exports.listarPasajeros = async (filters = {}) => {
     offset
   });
 
-  return getPagingData(data, page, limitVal);
+  const result = getPagingData(data, page, limitVal);
+  return { ...result, summary };
 };
 
 /**
