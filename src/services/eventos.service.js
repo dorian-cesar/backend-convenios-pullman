@@ -230,6 +230,8 @@ exports.crearCompraEvento = async (data) => {
     // 2. Verificación en Tablas Estáticas (FACh, Carabineros, etc.)
     const nombreLower = convenio.nombre.toLowerCase();
     const cleanRut = pasajero.rut.replace(/[^0-9kK]/g, '');
+    let validadoPorTablaEstatica = false;
+    let mensajeError = "";
     
     if (nombreLower.includes('fach')) {
       const registroFach = await Fach.findOne({ 
@@ -238,10 +240,8 @@ exports.crearCompraEvento = async (data) => {
           cleanRut
         )
       });
-      if (!registroFach || registroFach.status !== 'ACTIVO') {
-        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en FACH`);
-        throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en FACH.`);
-      }
+      if (registroFach && registroFach.status === 'ACTIVO') validadoPorTablaEstatica = true;
+      else mensajeError = `El pasajero ${pasajero.rut} no está registrado o activo en FACH.`;
     } else if (nombreLower.includes('carabinero')) {
       const registroCarab = await Carabinero.findOne({ 
         where: sequelize.where(
@@ -249,10 +249,8 @@ exports.crearCompraEvento = async (data) => {
           cleanRut
         )
       });
-      if (!registroCarab || registroCarab.status !== 'ACTIVO') {
-        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en Carabineros`);
-        throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en Carabineros.`);
-      }
+      if (registroCarab && registroCarab.status === 'ACTIVO') validadoPorTablaEstatica = true;
+      else mensajeError = `El pasajero ${pasajero.rut} no está registrado o activo en Carabineros.`;
     } else if (nombreLower.includes('estudiante') || nombreLower.includes('tne')) {
       const registroEst = await Estudiante.findOne({ 
         where: sequelize.where(
@@ -260,10 +258,8 @@ exports.crearCompraEvento = async (data) => {
           cleanRut
         )
       });
-      if (!registroEst || registroEst.status !== 'ACTIVO') {
-        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en nómina Estudiantes`);
-        throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de estudiante activo.`);
-      }
+      if (registroEst && registroEst.status === 'ACTIVO') validadoPorTablaEstatica = true;
+      else mensajeError = `El pasajero ${pasajero.rut} no cuenta con registro de estudiante activo.`;
     } else if (nombreLower.includes('adulto mayor')) {
       const registroAM = await AdultoMayor.findOne({ 
         where: sequelize.where(
@@ -271,10 +267,36 @@ exports.crearCompraEvento = async (data) => {
           cleanRut
         )
       });
-      if (!registroAM || registroAM.status !== 'ACTIVO') {
-        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en nómina Adulto Mayor`);
-        throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de adulto mayor activo.`);
+      if (registroAM && registroAM.status === 'ACTIVO') validadoPorTablaEstatica = true;
+      else mensajeError = `El pasajero ${pasajero.rut} no cuenta con registro de adulto mayor activo.`;
+    } else {
+      // Si no es un convenio estático conocido, asumimos que se valida por otras vías o es libre
+      validadoPorTablaEstatica = true;
+    }
+
+    // --- RESPALDO: Si falló la tabla estática, verificar en la tabla global de Beneficiarios ---
+    if (!validadoPorTablaEstatica) {
+      console.log(`[EVENTO] Pasajero no hallado en tabla estática, buscando en tabla Global de Beneficiarios para convenio ${convenio_id}...`);
+      const { Beneficiario } = require('../models');
+      const formattedRUT = formatRut(pasajero.rut);
+      const beneficiarioGlobal = await Beneficiario.findOne({
+        where: {
+          rut: formattedRUT,
+          convenio_id: convenio_id,
+          status: 'ACTIVO'
+        }
+      });
+
+      if (beneficiarioGlobal) {
+        console.log(`[EVENTO] ✅ Validación exitosa vía tabla Global de Beneficiarios para ${pasajero.rut}`);
+        validadoPorTablaEstatica = true;
       }
+    }
+
+    // Si después del respaldo sigue siendo falso, lanzamos el error
+    if (!validadoPorTablaEstatica && mensajeError) {
+      console.error(`[EVENTO] ❌ Rechazado: ${mensajeError}`);
+      throw new BusinessError(mensajeError);
     }
 
     // Si hay discrepancia entre lo enviado y el convenio, forzamos el id del convenio
