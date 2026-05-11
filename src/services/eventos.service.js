@@ -209,32 +209,75 @@ exports.crearCompraEvento = async (data) => {
     const registroCorp = await RegistroTablaClienteCorporativo.findOne({ where: { convenio_id } });
     if (registroCorp) {
       const ModeloNomina = definirModeloDinamico(sequelize, registroCorp.nombre_tabla);
+      const cleanRut = pasajero.rut.replace(/[^0-9kK]/g, '');
+      
       const estaEnNomina = await ModeloNomina.findOne({ 
-        where: { rut: pasajero.rut, status: 'ACTIVO' } 
+        where: { 
+          [Op.and]: [
+            sequelize.where(
+              sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+              cleanRut
+            ),
+            { status: 'ACTIVO' }
+          ]
+        } 
       });
 
       if (!estaEnNomina) {
+        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no está en nómina corporativa ${registroCorp.nombre_tabla}`);
         throw new BusinessError(`El pasajero ${pasajero.rut} no pertenece a la nómina autorizada para el convenio ${convenio.nombre}`);
       }
       console.log(`[EVENTO] Membresía corporativa validada para ${pasajero.rut}`);
     }
 
     // 2. Verificación en Tablas Estáticas (FACh, Carabineros, etc.)
-    // Nota: Buscamos por nombre de convenio o empresa si no hay registro corporativo dinámico
     const nombreLower = convenio.nombre.toLowerCase();
+    const cleanRut = pasajero.rut.replace(/[^0-9kK]/g, '');
     
     if (nombreLower.includes('fach')) {
-      const registroFach = await Fach.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
-      if (!registroFach) throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en FACH.`);
+      const registroFach = await Fach.findOne({ 
+        where: sequelize.where(
+          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+          cleanRut
+        )
+      });
+      if (!registroFach || registroFach.status !== 'ACTIVO') {
+        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en FACH`);
+        throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en FACH.`);
+      }
     } else if (nombreLower.includes('carabinero')) {
-      const registroCarab = await Carabinero.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
-      if (!registroCarab) throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en Carabineros.`);
+      const registroCarab = await Carabinero.findOne({ 
+        where: sequelize.where(
+          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+          cleanRut
+        )
+      });
+      if (!registroCarab || registroCarab.status !== 'ACTIVO') {
+        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en Carabineros`);
+        throw new BusinessError(`El pasajero ${pasajero.rut} no está registrado o activo en Carabineros.`);
+      }
     } else if (nombreLower.includes('estudiante') || nombreLower.includes('tne')) {
-      const registroEst = await Estudiante.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
-      if (!registroEst) throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de estudiante activo.`);
+      const registroEst = await Estudiante.findOne({ 
+        where: sequelize.where(
+          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+          cleanRut
+        )
+      });
+      if (!registroEst || registroEst.status !== 'ACTIVO') {
+        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en nómina Estudiantes`);
+        throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de estudiante activo.`);
+      }
     } else if (nombreLower.includes('adulto mayor')) {
-      const registroAM = await AdultoMayor.findOne({ where: { rut: pasajero.rut, status: 'ACTIVO' } });
-      if (!registroAM) throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de adulto mayor activo.`);
+      const registroAM = await AdultoMayor.findOne({ 
+        where: sequelize.where(
+          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+          cleanRut
+        )
+      });
+      if (!registroAM || registroAM.status !== 'ACTIVO') {
+        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no activo en nómina Adulto Mayor`);
+        throw new BusinessError(`El pasajero ${pasajero.rut} no cuenta con registro de adulto mayor activo.`);
+      }
     }
 
     // Si hay discrepancia entre lo enviado y el convenio, forzamos el id del convenio
@@ -313,9 +356,16 @@ exports.crearCompraEvento = async (data) => {
         finalMontoDescuento = Math.max(0, base - valor);
       }
 
-      // Validar que el monto pagado coincida con el esperado (permitimos margen de $2 por redondeos)
-      if (Math.abs(pagado - pagadoEsperado) > 2) {
-        console.error(`[EVENTO] ❌ Discrepancia de montos. Recibido: ${pagado}, Esperado: ${pagadoEsperado}. Convenio: ${convenio.nombre}`);
+      // Validar que el monto pagado coincida con el esperado (permitimos margen de $5 por redondeos de Kupos)
+      if (Math.abs(pagado - pagadoEsperado) > 5) {
+        console.error(`[EVENTO] ❌ Rechazado por Discrepancia de Montos:
+          Ticket/PNR: ${numero_ticket || pnr}
+          Convenio: ${convenio.nombre}
+          Pagado en Kupos: $${pagado}
+          Esperado en Plataforma: $${pagadoEsperado}
+          Diferencia: $${Math.abs(pagado - pagadoEsperado)}
+          Regla: ${convenio.tipo_descuento} de $${valor}`);
+          
         throw new BusinessError(
           `El monto pagado ($${pagado.toLocaleString('es-CL')}) no coincide con la tarifa esperada del convenio ($${pagadoEsperado.toLocaleString('es-CL')}). ` +
           `Regla: ${convenio.tipo_descuento} de $${valor.toLocaleString('es-CL')}.`
@@ -329,6 +379,7 @@ exports.crearCompraEvento = async (data) => {
 
   // Guardia final para evitar monto_pagado = 0 en tarifas con costo
   if (pagado === 0 && base > 0) {
+    console.error(`[EVENTO] ❌ Rechazado: monto_pagado es $0 para una tarifa base de $${base}. Ticket: ${numero_ticket || pnr}`);
     throw new BusinessError(`monto_pagado no puede ser $0 cuando la tarifa_base es $${base.toLocaleString('es-CL')}.`);
   }
   // ──────────────────────────────────────────────────────────────────────────
