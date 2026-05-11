@@ -35,12 +35,19 @@ const integracionBeneficiariosController = {
             const { Op } = require('sequelize');
             const cleanRUT = rut.replace(/[^0-9kK]/g, '').toUpperCase();
             
+            const orConditions = [
+                { rut: formattedRUT },
+                { rut: cleanRUT }
+            ];
+
+            // Si es Carabineros (ID 115), permitimos buscar solo por el cuerpo del RUT (sin DV)
+            if (parseInt(convenio_id) === 115) {
+                orConditions.push({ rut: cleanRUT.slice(0, -1) });
+            }
+
             const beneficiario = await Beneficiario.findOne({ 
                 where: { 
-                    [Op.or]: [
-                        { rut: formattedRUT },
-                        { rut: cleanRUT }
-                    ],
+                    [Op.or]: orConditions,
                     convenio_id: convenio_id 
                 } 
             });

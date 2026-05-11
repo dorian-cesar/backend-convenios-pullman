@@ -14,7 +14,7 @@ const GRANT_TYPE = process.env.grant_type || 'client_credentials';
  */
 const obtenerToken = async () => {
     try {
-        console.log(`[Araucana] Auth URL: ${AUTH_URL}`);
+        console.log(`[Araucana] Intentando obtener token - URL: ${AUTH_URL}`);
 
         const params = new URLSearchParams();
         params.append('grant_type', GRANT_TYPE);
@@ -24,26 +24,24 @@ const obtenerToken = async () => {
         const response = await axios.post(AUTH_URL, params, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
-            }
+            },
+            timeout: 5000 // Timeout para no quedar colgados
         });
 
-        // Asumimos que la respuesta trae el access_token
         if (response.data && response.data.access_token) {
             return response.data.access_token;
         } else {
-            console.error('Respuesta Auth Araucana inesperada:', response.data);
-            throw new Error('No se pudo obtener el token de acceso: respuesta sin access_token.');
+            console.error('[Araucana] Respuesta de autenticación sin access_token:', response.data);
+            return null;
         }
 
     } catch (error) {
-        console.error('Error obteniendo token Araucana:', error.message);
-        let errorMsg = 'Error de comunicación con servicio de autenticación externo.';
+        console.error('[Araucana] ❌ Error en autenticación:', error.message);
         if (error.response) {
-            console.error('Detalle error Auth status:', error.response.status);
-            console.error('Detalle error Auth data:', error.response.data);
-            errorMsg += ` Status: ${error.response.status}. Msg: ${JSON.stringify(error.response.data)}`;
+            console.error(`[Araucana] Detalle status: ${error.response.status} - Data:`, JSON.stringify(error.response.data));
         }
-        throw new BusinessError(errorMsg);
+        // Retornamos null en lugar de lanzar error para que el flujo superior lo maneje
+        return null;
     }
 };
 
@@ -60,6 +58,13 @@ exports.consultarBeneficiario = async (rutFull) => {
 
     // 2. Obtener Token
     const token = await obtenerToken();
+    if (!token) {
+        return { 
+            afiliado: false, 
+            mensaje: 'No se pudo autenticar con el servicio de La Araucana en este momento.',
+            error_detalle: 'AUTH_FAILED'
+        };
+    }
 
     // 3. Consultar API
     try {
@@ -72,19 +77,23 @@ exports.consultarBeneficiario = async (rutFull) => {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            timeout: 7000
         });
-
-        // Respuesta esperada:
-        // { "estado": 1001, "nombre": "...", "segmento": {...}, "codRespuesta": 200 }
 
         return response.data;
 
     } catch (error) {
-        console.error('Error consultando Araucana:', error.message);
+        console.error('[Araucana] ❌ Error consultando afiliado:', error.message);
         if (error.response) {
-            console.error('Detalle error Consulta:', error.response.data);
+            console.error('[Araucana] Detalle error Consulta:', error.response.data);
         }
-        throw new BusinessError('Error consultando servicio externo de Araucana.');
+        
+        // Retornamos un objeto de error amigable en lugar de lanzar una excepción fatal
+        return { 
+            afiliado: false, 
+            mensaje: 'El servicio externo de La Araucana no responde o devolvió un error.',
+            error_detalle: error.message
+        };
     }
 };

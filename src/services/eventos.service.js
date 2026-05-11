@@ -243,10 +243,12 @@ exports.crearCompraEvento = async (data) => {
       if (registroFach && registroFach.status === 'ACTIVO') validadoPorTablaEstatica = true;
       else mensajeError = `El pasajero ${pasajero.rut} no está registrado o activo en FACH.`;
     } else if (nombreLower.includes('carabinero')) {
+      // SOLO CARABINEROS: Se busca por el cuerpo del RUT (sin DV)
+      const rutSinDV = cleanRut.slice(0, -1);
       const registroCarab = await Carabinero.findOne({ 
         where: sequelize.where(
           sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
-          cleanRut
+          rutSinDV
         )
       });
       if (registroCarab && registroCarab.status === 'ACTIVO') validadoPorTablaEstatica = true;
@@ -277,11 +279,23 @@ exports.crearCompraEvento = async (data) => {
     // --- RESPALDO: Si falló la tabla estática, verificar en la tabla global de Beneficiarios ---
     if (!validadoPorTablaEstatica) {
       console.log(`[EVENTO] Pasajero no hallado en tabla estática, buscando en tabla Global de Beneficiarios para convenio ${convenio_id}...`);
+      const { Op } = require('sequelize');
       const { Beneficiario } = require('../models');
       const formattedRUT = formatRut(pasajero.rut);
+      
+      const orConditions = [
+        { rut: formattedRUT },
+        { rut: pasajero.rut }
+      ];
+
+      // Si es Carabineros (ID 115 o nombre), añadimos búsqueda por cuerpo de RUT en la global también
+      if (convenio_id === 115 || nombreLower.includes('carabinero')) {
+        orConditions.push({ rut: cleanRut.slice(0, -1) });
+      }
+
       const beneficiarioGlobal = await Beneficiario.findOne({
         where: {
-          rut: formattedRUT,
+          [Op.or]: orConditions,
           convenio_id: convenio_id,
           status: 'ACTIVO'
         }
