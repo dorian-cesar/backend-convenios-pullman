@@ -175,17 +175,14 @@ exports.crearCompraEvento = async (data) => {
   let finalPasajeroId = pasajero_id;
   let pasajero;
 
+  const { formatRut } = require('../utils/rut.utils');
+
   // Si el id es un string (posiblemente un RUT enviado por error desde el front)
   if (typeof pasajero_id === 'string') {
-    console.log(`[EVENTO] Recibido pasajero_id como string (RUT): ${pasajero_id}. Intentando resolver...`);
-    const rutLimpio = pasajero_id.replace(/[^0-9kK]/g, ''); // Quitar puntos, guiones y espacios
-    pasajero = await Pasajero.findOne({ where: { rut: rutLimpio } });
+    const rutFormateado = formatRut(pasajero_id);
+    console.log(`[EVENTO] Recibido pasajero_id como string (RUT): ${pasajero_id}. Normalizado a: ${rutFormateado}`);
+    pasajero = await Pasajero.findOne({ where: { rut: rutFormateado } });
     
-    if (!pasajero) {
-      // Intentar buscar también con el formato original por si acaso
-      pasajero = await Pasajero.findOne({ where: { rut: pasajero_id } });
-    }
-
     if (pasajero) {
       finalPasajeroId = pasajero.id;
       console.log(`[EVENTO] Pasajero resuelto por RUT: ${pasajero.rut} -> ID: ${finalPasajeroId}`);

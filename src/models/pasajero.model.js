@@ -1,4 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
+    const { formatRut } = require('../utils/rut.utils');
+
     const Pasajero = sequelize.define('Pasajero', {
         id: {
             type: DataTypes.INTEGER,
@@ -10,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             validate: {
                 is: {
-                    args: /^[0-9]+-[0-9kK]$/,
+                    args: /^[0-9]+-[0-9kKxX]$/,
                     msg: 'El RUT debe tener el formato xxxxxxxx-x (números y guion)'
                 }
             }
@@ -54,7 +56,14 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'pasajeros',
         timestamps: true,
-        paranoid: true
+        paranoid: true,
+        hooks: {
+            beforeValidate: (pasajero) => {
+                if (pasajero.rut) {
+                    pasajero.rut = formatRut(pasajero.rut);
+                }
+            }
+        }
     });
 
     return Pasajero;
