@@ -1,5 +1,6 @@
-    const { formatRut } = require('../utils/rut.utils');
+const { formatRut } = require('../utils/rut.utils');
 
+module.exports = (sequelize, DataTypes) => {
     const Beneficiario = sequelize.define('Beneficiario', {
         id: {
             type: DataTypes.INTEGER,
