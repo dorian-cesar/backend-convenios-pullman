@@ -5,6 +5,7 @@ const reembolsoService = require('../services/reembolso.service');
  */
 exports.crear = async (req, res, next) => {
     try {
+        console.log('[REEMBOLSO] Recibiendo datos para crear:', req.body);
         const data = {
             ...req.body,
             created_by: req.user ? req.user.username : 'system'
@@ -100,15 +101,88 @@ exports.obtenerPorToken = async (req, res, next) => {
 exports.actualizarPorToken = async (req, res, next) => {
     try {
         const { token } = req.params;
-        const { correo, rut, numero_cuenta, banco, tipo_cuenta } = req.body;
+        console.log('[REEMBOLSO] Datos recibidos para token:', token, req.body);
+        const { correo, rut, numero_cuenta, banco, tipo_cuenta, nombre_beneficiario } = req.body;
         const reembolso = await reembolsoService.actualizarPorToken(token, {
             correo,
             rut,
             numero_cuenta,
             banco,
-            tipo_cuenta
+            tipo_cuenta,
+            nombre_beneficiario,
+            estado: 'Completado'
         });
         res.json(reembolso);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Enviar email con el link
+ */
+exports.enviarEmailLink = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { email } = req.body;
+        const reembolso = await reembolsoService.obtenerReembolso(id);
+        
+        if (!email && !reembolso.correo) {
+            return res.status(400).json({ message: 'No se especificó un correo de destino' });
+        }
+
+        const correoDestino = email || reembolso.correo;
+        const emailService = require('../services/email.service');
+        
+        const success = await emailService.enviarCorreoReembolso(correoDestino, reembolso.pnr, reembolso.token);
+        
+        if (success) {
+            res.json({ message: 'Correo enviado exitosamente' });
+        } else {
+            res.status(500).json({ message: 'Error al enviar el correo' });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Sincronizar con Monday.com
+ */
+exports.sincronizarMonday = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const mondayService = require('../services/monday.service');
+        const reembolso = await reembolsoService.obtenerReembolso(id);
+        
+        const mondayItemId = await mondayService.crearItem(reembolso);
+        
+        res.json({ message: 'Sincronizado con Monday correctamente', mondayItemId });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Reiniciar solicitud (limpiar datos y habilitar link)
+ */
+exports.reiniciarSolicitud = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const reembolso = await reembolsoService.obtenerReembolso(id);
+        
+        await reembolso.update({
+            rut: null,
+            correo: null,
+            numero_cuenta: null,
+            banco: null,
+            tipo_cuenta: null,
+            nombre_beneficiario: null,
+            estado: 'Pending',
+            updated_by: req.user ? req.user.username : 'system'
+        });
+        
+        res.json({ message: 'Solicitud reiniciada correctamente. El enlace público está habilitado de nuevo.' });
     } catch (error) {
         next(error);
     }

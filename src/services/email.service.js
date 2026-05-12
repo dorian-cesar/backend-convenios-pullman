@@ -177,3 +177,68 @@ exports.enviarNotificacionEventoExpirado = async (evento) => {
         return false;
     }
 };
+
+/**
+ * Envía un correo con el link de completación de datos para un reembolso.
+ * @param {string} correoDestino - El correo del beneficiario.
+ * @param {string} pnr - El localizador del ticket.
+ * @param {string} token - El token para el link dinámico.
+ */
+exports.enviarCorreoReembolso = async (correoDestino, pnr, token) => {
+    if (!process.env.SENDGRID_API_KEY) {
+        logger.warn('SendGrid API Key no configurada. No se enviará el correo de reembolso.');
+        return false;
+    }
+
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'no-reply@pullman.cl';
+    // Link basado en la IP configurada o variable de entorno
+    const link = `http://172.26.10.208:3000/reembolso/completar/${token}`;
+
+    const msg = {
+        to: correoDestino,
+        from: fromEmail,
+        subject: `Solicitud de Reembolso Ticket: ${pnr}`,
+        html: `
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #f0f0f0; border-radius: 12px; background-color: #ffffff;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #1e293b; margin: 0; font-size: 24px;">Gestión de Devoluciones</h1>
+                    <p style="color: #64748b; margin-top: 5px;">Pullman Bus</p>
+                </div>
+                
+                <h2 style="color: #0f172a; font-size: 18px;">Estimado/a,</h2>
+                <p style="color: #475569; line-height: 1.6;">
+                    Se ha iniciado una solicitud de devolución para tu ticket con PNR <strong>${pnr}</strong>.
+                </p>
+                <p style="color: #475569; line-height: 1.6;">
+                    Para procesar la transferencia de los fondos, necesitamos que completes tus datos bancarios en el siguiente enlace:
+                </p>
+                
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="${link}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; transition: background-color 0.2s;">
+                        Completar Mis Datos
+                    </a>
+                </div>
+                
+                <p style="color: #64748b; font-size: 13px; line-height: 1.5; background-color: #f8fafc; padding: 15px; border-radius: 8px;">
+                    <strong>Nota:</strong> Si el botón no funciona, puedes copiar y pegar este enlace en tu navegador:<br>
+                    <a href="${link}" style="color: #2563eb; word-break: break-all;">${link}</a>
+                </p>
+                
+                <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 30px 0;">
+                <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+                    Este es un correo automático, por favor no respondas.<br>
+                    &copy; ${new Date().getFullYear()} Pullman Bus. Todos los derechos reservados.
+                </p>
+            </div>
+        `,
+    };
+
+    try {
+        await sgMail.send(msg);
+        logger.info(`Correo de reembolso enviado a ${correoDestino}`);
+        return true;
+    } catch (error) {
+        logger.error(`Error al enviar correo de reembolso a ${correoDestino}:`, error);
+        return false;
+    }
+};

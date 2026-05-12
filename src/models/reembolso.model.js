@@ -32,31 +32,19 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
-        monto: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        correo: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        rut: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        numero_cuenta: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        banco: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        tipo_cuenta: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        estado: {
+        monto: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        correo: { type: DataTypes.STRING, allowNull: true },
+        rut: { type: DataTypes.STRING, allowNull: true },
+        numero_cuenta: { type: DataTypes.STRING, allowNull: true },
+        banco: { type: DataTypes.STRING, allowNull: true },
+        tipo_cuenta: { type: DataTypes.STRING, allowNull: true },
+        nombre_beneficiario: { type: DataTypes.STRING, allowNull: true },
+        nombre_pasajero: { type: DataTypes.STRING, allowNull: true },
+        origen: { type: DataTypes.STRING, allowNull: true },
+        destino: { type: DataTypes.STRING, allowNull: true },
+        fecha_salida: { type: DataTypes.STRING, allowNull: true },
+        canal_venta: { type: DataTypes.STRING, allowNull: true },
+        estado: { 
             type: DataTypes.STRING,
             allowNull: true,
             defaultValue: 'Pending'
