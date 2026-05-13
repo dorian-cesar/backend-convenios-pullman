@@ -120,6 +120,47 @@ class MondayService {
             return null;
         }
     }
+
+    /**
+     * Buscar un item por PNR en el tablero
+     * @param {string} pnr El PNR a buscar
+     */
+    async buscarItemPorPNR(pnr) {
+        if (!this.apiKey || !this.boardId || !pnr) return null;
+
+        const query = `
+            query ($boardId: ID!, $columnId: String!, $value: [String]!) {
+                items_page_by_column_values (limit: 1, board_id: $boardId, columns: [{column_id: $columnId, column_values: $value}]) {
+                    items {
+                        id
+                    }
+                }
+            }
+        `;
+
+        try {
+            const response = await axios.post(this.apiUrl, {
+                query,
+                variables: {
+                    boardId: this.boardId,
+                    columnId: "text_mm0hc2f7", // ID de columna PNR
+                    value: [pnr]
+                }
+            }, {
+                headers: {
+                    'Authorization': this.apiKey,
+                    'Content-Type': 'application/json',
+                    'API-Version': '2023-10'
+                }
+            });
+
+            const item = response.data.data?.items_page_by_column_values?.items?.[0];
+            return item?.id || null;
+        } catch (error) {
+            console.error('[MONDAY] Error al buscar item por PNR:', error.message);
+            return null;
+        }
+    }
 }
 
 module.exports = new MondayService();

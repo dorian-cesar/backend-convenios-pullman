@@ -179,12 +179,22 @@ exports.sincronizarMonday = async (req, res, next) => {
         const mondayService = require('../services/monday.service');
         const reembolso = await reembolsoService.obtenerReembolso(id);
         
-        const mondayItemId = await mondayService.crearItem(reembolso);
+        // 1. Intentar buscar si ya existe por PNR
+        let mondayItemId = await mondayService.buscarItemPorPNR(reembolso.pnr);
+        let message = 'Sincronizado con Monday correctamente';
+
+        if (!mondayItemId) {
+            // 2. Si no existe, crearlo
+            mondayItemId = await mondayService.crearItem(reembolso);
+            message = 'Item creado en Monday correctamente';
+        } else {
+            message = 'Item ya existía en Monday, ID vinculado';
+        }
         
-        // Guardar el ID de Monday en nuestra base de datos
+        // 3. Guardar/Actualizar el ID de Monday en nuestra base de datos
         await reembolso.update({ monday_item_id: String(mondayItemId) });
         
-        res.json({ message: 'Sincronizado con Monday correctamente', mondayItemId });
+        res.json({ message, mondayItemId });
     } catch (error) {
         next(error);
     }
@@ -224,29 +234,48 @@ exports.sincronizarEstados = async (req, res, next) => {
         const mondayService = require('../services/monday.service');
         const { Op } = require('sequelize');
 
-        // Revisar todos los registros con ID de Monday que aún no estén pagados
+        // Buscar reembolsos que NO estén pagados
         const reembolsos = await Reembolso.findAll({
             where: {
-                monday_item_id: { [Op.ne]: null },
                 estado: { [Op.notIn]: ['Pagado'] }
             }
         });
 
         let actualizados = 0;
+        let vinculados = 0;
+
         for (const reembolso of reembolsos) {
-            const estadoMonday = await mondayService.obtenerEstadoItem(reembolso.monday_item_id);
-            
-            // Si en Monday dice "Listo", marcamos como "Pagado"
-            if (estadoMonday === 'Listo') {
-                await reembolso.update({ estado: 'Pagado' });
-                actualizados++;
+            let itemId = reembolso.monday_item_id;
+
+            // Si no tiene ID de Monday, intentar buscarlo por PNR
+            if (!itemId && reembolso.pnr) {
+                console.log(`[SYNC] Buscando ID en Monday para PNR: ${reembolso.pnr}`);
+                itemId = await mondayService.buscarItemPorPNR(reembolso.pnr);
+                
+                if (itemId) {
+                    await reembolso.update({ monday_item_id: String(itemId) });
+                    vinculados++;
+                    console.log(`[SYNC] Vinculado PNR ${reembolso.pnr} con Monday ID: ${itemId}`);
+                }
+            }
+
+            // Si ahora tenemos ID (o ya lo teníamos), consultar estado
+            if (itemId) {
+                const estadoMonday = await mondayService.obtenerEstadoItem(itemId);
+                
+                // Si en Monday dice "Listo", marcamos como "Pagado"
+                if (estadoMonday === 'Listo') {
+                    await reembolso.update({ estado: 'Pagado' });
+                    actualizados++;
+                }
             }
         }
 
         res.json({ 
-            message: `Sincronización finalizada. ${actualizados} registros actualizados.`,
+            message: `Sincronización finalizada. ${actualizados} estados actualizados, ${vinculados} IDs vinculados.`,
             total_procesados: reembolsos.length,
-            actualizados 
+            actualizados,
+            vinculados
         });
     } catch (error) {
         next(error);
