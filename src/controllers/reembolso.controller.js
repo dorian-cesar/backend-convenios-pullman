@@ -8,7 +8,7 @@ exports.crear = async (req, res, next) => {
         console.log('[REEMBOLSO] Recibiendo datos para crear:', req.body);
         const data = {
             ...req.body,
-            created_by: req.user ? req.user.username : 'system'
+            created_by: req.user ? (req.user.nombre || req.user.correo || req.user.id) : 'system'
         };
         const reembolso = await reembolsoService.crearReembolso(data);
 

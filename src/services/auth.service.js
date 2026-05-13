@@ -46,6 +46,7 @@ exports.login = async ({ correo, password }) => {
     {
       id: usuario.id,
       correo: usuario.correo,
+      nombre: usuario.nombre,
       rol: rolNombre
     },
     JWT_SECRET,
@@ -95,6 +96,7 @@ exports.register = async ({ correo, password, nombre, rut, telefono }) => {
     {
       id: usuario.id,
       correo: usuario.correo,
+      nombre: usuario.nombre,
       rol: rolUsuario.nombre
     },
     JWT_SECRET,
