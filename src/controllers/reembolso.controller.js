@@ -11,6 +11,19 @@ exports.crear = async (req, res, next) => {
             created_by: req.user ? req.user.username : 'system'
         };
         const reembolso = await reembolsoService.crearReembolso(data);
+
+        // Enviar automáticamente a Monday y guardar el ID
+        try {
+            const mondayService = require('../services/monday.service');
+            const mondayItemId = await mondayService.crearItem(reembolso);
+            if (mondayItemId) {
+                await reembolso.update({ monday_item_id: String(mondayItemId) });
+                console.log(`[MONDAY] Item creado con ID: ${mondayItemId}`);
+            }
+        } catch (mondayError) {
+            console.error('[MONDAY] Error al crear item (no bloquea la creación):', mondayError.message);
+        }
+
         res.status(201).json(reembolso);
     } catch (error) {
         next(error);
@@ -103,6 +116,8 @@ exports.actualizarPorToken = async (req, res, next) => {
         const { token } = req.params;
         console.log('[REEMBOLSO] Datos recibidos para token:', token, req.body);
         const { correo, rut, numero_cuenta, banco, tipo_cuenta, nombre_beneficiario } = req.body;
+        // El pasajero completó sus datos bancarios → estado 'DatosBancarios'
+        // 'Completado' solo se asigna cuando Monday marca como 'Listo'
         const reembolso = await reembolsoService.actualizarPorToken(token, {
             correo,
             rut,
@@ -110,7 +125,7 @@ exports.actualizarPorToken = async (req, res, next) => {
             banco,
             tipo_cuenta,
             nombre_beneficiario,
-            estado: 'Completado'
+            estado: 'DatosBancarios'
         });
 
         // Notificar a administradores
@@ -209,11 +224,11 @@ exports.sincronizarEstados = async (req, res, next) => {
         const mondayService = require('../services/monday.service');
         const { Op } = require('sequelize');
 
-        // Buscar reembolsos que tengan ID de Monday y no estén completados
+        // Buscar reembolsos que tengan ID de Monday y no estén completados (Pending o DatosBancarios)
         const reembolsos = await Reembolso.findAll({
             where: {
                 monday_item_id: { [Op.ne]: null },
-                estado: { [Op.ne]: 'Completado' }
+                estado: { [Op.in]: ['Pending', 'DatosBancarios'] }
             }
         });
 
