@@ -41,7 +41,12 @@ class MondayService {
             "text_mm0hc2f7": data.pnr, // Nro Reserva
             "text_mkybrjrx": data.origen, // Origen
             "text_mkybzxs5": data.destino, // Destino
-            "date_mkyb96c3": data.fecha_salida ? data.fecha_salida.split('T')[0] : null, // Fecha de Salida (YYYY-MM-DD)
+            // Formatear fecha a YYYY-MM-DD de forma segura (asume DD-MM-YYYY o YYYY-MM-DD)
+            "date_mkyb96c3": data.fecha_salida ? (
+                data.fecha_salida.includes('-') && data.fecha_salida.split('-')[0].length === 2 
+                    ? data.fecha_salida.split('-').reverse().join('-') 
+                    : data.fecha_salida.split('T')[0]
+            ) : null, // Fecha de Salida
             "numeric_mkyb79nh": data.numero_asiento, // Asiento
             "numeric_mkybttcy": data.monto, // Monto
             "text_mkybh4k9": data.banco, // Banco
@@ -73,9 +78,42 @@ class MondayService {
             }
 
             return response.data.data.create_item.id;
+    }
+    
+    /**
+     * Obtener el estado de un item en Monday
+     * @param {string} itemId ID del elemento en Monday
+     */
+    async obtenerEstadoItem(itemId) {
+        if (!this.apiKey || !itemId) return null;
+
+        const query = `
+            query ($itemId: [ID!]) {
+                items (ids: $itemId) {
+                    column_values (ids: ["color_mkyb1dma"]) {
+                        text
+                    }
+                }
+            }
+        `;
+
+        try {
+            const response = await axios.post(this.apiUrl, {
+                query,
+                variables: { itemId: [itemId] }
+            }, {
+                headers: {
+                    'Authorization': this.apiKey,
+                    'Content-Type': 'application/json',
+                    'API-Version': '2023-10'
+                }
+            });
+
+            const item = response.data.data?.items?.[0];
+            return item?.column_values?.[0]?.text || null;
         } catch (error) {
-            console.error('[MONDAY] Error de conexión:', error.response?.data || error.message);
-            throw error;
+            console.error('[MONDAY] Error al obtener estado:', error.message);
+            return null;
         }
     }
 }

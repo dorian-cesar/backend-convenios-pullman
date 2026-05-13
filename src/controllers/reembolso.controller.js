@@ -166,6 +166,9 @@ exports.sincronizarMonday = async (req, res, next) => {
         
         const mondayItemId = await mondayService.crearItem(reembolso);
         
+        // Guardar el ID de Monday en nuestra base de datos
+        await reembolso.update({ monday_item_id: String(mondayItemId) });
+        
         res.json({ message: 'Sincronizado con Monday correctamente', mondayItemId });
     } catch (error) {
         next(error);
@@ -192,6 +195,44 @@ exports.reiniciarSolicitud = async (req, res, next) => {
         });
         
         res.json({ message: 'Solicitud reiniciada correctamente. El enlace público está habilitado de nuevo.' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Sincronizar estados desde Monday
+ */
+exports.sincronizarEstados = async (req, res, next) => {
+    try {
+        const { Reembolso } = require('../models');
+        const mondayService = require('../services/monday.service');
+        const { Op } = require('sequelize');
+
+        // Buscar reembolsos que tengan ID de Monday y no estén completados
+        const reembolsos = await Reembolso.findAll({
+            where: {
+                monday_item_id: { [Op.ne]: null },
+                estado: { [Op.ne]: 'Completado' }
+            }
+        });
+
+        let actualizados = 0;
+        for (const reembolso of reembolsos) {
+            const estadoMonday = await mondayService.obtenerEstadoItem(reembolso.monday_item_id);
+            
+            // Si en Monday dice "Listo", nosotros lo marcamos como "Completado"
+            if (estadoMonday === 'Listo') {
+                await reembolso.update({ estado: 'Completado' });
+                actualizados++;
+            }
+        }
+
+        res.json({ 
+            message: `Sincronización finalizada. ${actualizados} registros actualizados.`,
+            total_procesados: reembolsos.length,
+            actualizados 
+        });
     } catch (error) {
         next(error);
     }

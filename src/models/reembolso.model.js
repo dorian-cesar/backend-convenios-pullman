@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         destino: { type: DataTypes.STRING, allowNull: true },
         fecha_salida: { type: DataTypes.STRING, allowNull: true },
         canal_venta: { type: DataTypes.STRING, allowNull: true },
+        monday_item_id: { type: DataTypes.STRING, allowNull: true },
         estado: { 
             type: DataTypes.STRING,
             allowNull: true,
