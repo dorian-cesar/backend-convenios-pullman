@@ -78,6 +78,10 @@ class MondayService {
             }
 
             return response.data.data.create_item.id;
+        } catch (error) {
+            console.error('[MONDAY] Error al crear item:', error.message);
+            throw error;
+        }
     }
     
     /**
