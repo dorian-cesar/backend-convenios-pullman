@@ -242,3 +242,43 @@ exports.enviarCorreoReembolso = async (correoDestino, pnr, token) => {
         return false;
     }
 };
+
+/**
+ * Notifica a los administradores que un cliente completó sus datos.
+ */
+exports.enviarNotificacionAdminReembolso = async (reembolso) => {
+    if (!process.env.SENDGRID_API_KEY) return false;
+
+    const admins = ['myaraure@wit.la', 'mlima@wit.la'];
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'no-reply@pullman.cl';
+
+    const msg = {
+        to: admins,
+        from: fromEmail,
+        subject: `[NUEVO] Datos Recibidos - Reembolso PNR: ${reembolso.pnr}`,
+        html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #2563eb;">Nueva Información de Reembolso Recibida</h2>
+                <p>El cliente ha completado sus datos para la siguiente solicitud:</p>
+                <ul style="list-style: none; padding: 0;">
+                    <li><strong>PNR:</strong> ${reembolso.pnr}</li>
+                    <li><strong>Beneficiario:</strong> ${reembolso.nombre_beneficiario}</li>
+                    <li><strong>Monto:</strong> $${reembolso.monto}</li>
+                    <li><strong>Categoría:</strong> ${reembolso.categoria}</li>
+                </ul>
+                <p>Ya puedes revisar y sincronizar esta solicitud en el Dashboard de Administración.</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="font-size: 12px; color: #666;">Sistema de Gestión de Convenios - Pullman Bus</p>
+            </div>
+        `,
+    };
+
+    try {
+        await sgMail.send(msg);
+        logger.info(`Notificación administrativa enviada a: ${admins.join(', ')}`);
+        return true;
+    } catch (error) {
+        logger.error(`Error al enviar notificación administrativa:`, error);
+        return false;
+    }
+};

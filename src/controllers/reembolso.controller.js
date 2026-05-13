@@ -112,6 +112,15 @@ exports.actualizarPorToken = async (req, res, next) => {
             nombre_beneficiario,
             estado: 'Completado'
         });
+
+        // Notificar a administradores
+        try {
+            const emailService = require('../services/email.service');
+            await emailService.enviarNotificacionAdminReembolso(reembolso);
+        } catch (emailError) {
+            console.error('[REEMBOLSO] Error al notificar a admins:', emailError);
+        }
+
         res.json(reembolso);
     } catch (error) {
         next(error);
