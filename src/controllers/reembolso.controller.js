@@ -206,7 +206,7 @@ exports.reiniciarSolicitud = async (req, res, next) => {
             tipo_cuenta: null,
             nombre_beneficiario: null,
             estado: 'Pending',
-            updated_by: req.user ? req.user.username : 'system'
+            updated_by: req.user ? (req.user.nombre || req.user.correo || req.user.id) : 'system'
         });
         
         res.json({ message: 'Solicitud reiniciada correctamente. El enlace público está habilitado de nuevo.' });
@@ -224,11 +224,11 @@ exports.sincronizarEstados = async (req, res, next) => {
         const mondayService = require('../services/monday.service');
         const { Op } = require('sequelize');
 
-        // Buscar reembolsos que tengan ID de Monday y no estén completados (Pending o DatosBancarios)
+        // Revisar todos los registros con ID de Monday que aún no estén pagados
         const reembolsos = await Reembolso.findAll({
             where: {
                 monday_item_id: { [Op.ne]: null },
-                estado: { [Op.in]: ['Pending', 'DatosBancarios'] }
+                estado: { [Op.notIn]: ['Pagado'] }
             }
         });
 
@@ -236,9 +236,9 @@ exports.sincronizarEstados = async (req, res, next) => {
         for (const reembolso of reembolsos) {
             const estadoMonday = await mondayService.obtenerEstadoItem(reembolso.monday_item_id);
             
-            // Si en Monday dice "Listo", nosotros lo marcamos como "Completado"
+            // Si en Monday dice "Listo", marcamos como "Pagado"
             if (estadoMonday === 'Listo') {
-                await reembolso.update({ estado: 'Completado' });
+                await reembolso.update({ estado: 'Pagado' });
                 actualizados++;
             }
         }
