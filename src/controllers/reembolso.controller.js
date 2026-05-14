@@ -284,6 +284,11 @@ exports.sincronizarEstados = async (req, res, next) => {
                     } else if (labelsRechazado.includes(estadoUpper)) {
                         await reembolso.update({ estado: 'Rechazado' });
                         actualizados++;
+                    } else if (reembolso.estado === 'DatosBancarios') {
+                        // Si ya está en Monday pero no está Pagado/Rechazado, 
+                        // lo movemos a 'Completado' para indicar que ya se envió
+                        await reembolso.update({ estado: 'Completado' });
+                        actualizados++;
                     }
                 }
             }
