@@ -39,8 +39,14 @@ exports.listarReembolsos = async (filters) => {
         ];
     }
 
+    const { Reembolso, Usuario } = require('../models');
     const { count, rows } = await Reembolso.findAndCountAll({
         where,
+        include: [{
+            model: Usuario,
+            as: 'usuario_creador',
+            attributes: ['nombre', 'correo']
+        }],
         order: [[sortBy, order]],
         limit: parseInt(limit),
         offset: parseInt(offset)

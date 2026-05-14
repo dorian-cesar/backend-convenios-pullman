@@ -109,6 +109,9 @@ RegistroTablaClienteCorporativo.belongsTo(Convenio, { foreignKey: 'convenio_id',
 RegistroTablaClienteCorporativo.belongsTo(ApiConsulta, { foreignKey: 'api_consulta_id', as: 'apiConsulta' });
 
 
+// REEMBOLSO Relations
+Reembolso.belongsTo(Usuario, { foreignKey: 'created_by', targetKey: 'id', as: 'usuario_creador' });
+
 module.exports = {
   sequelize,
   Usuario,
