@@ -263,10 +263,20 @@ exports.sincronizarEstados = async (req, res, next) => {
             if (itemId) {
                 const estadoMonday = await mondayService.obtenerEstadoItem(itemId);
                 
-                // Si en Monday dice "Listo", marcamos como "Pagado"
-                if (estadoMonday === 'Listo') {
-                    await reembolso.update({ estado: 'Pagado' });
-                    actualizados++;
+                // Mapeo flexible de estados (Mayúsculas para comparar)
+                const labelsPagado = ['LISTO', 'PAGADO', 'FINALIZADO', 'COMPLETADO', 'DONE', 'PAGO REALIZADO'];
+                const labelsRechazado = ['RECHAZADO', 'CANCELADO', 'ERROR'];
+
+                if (estadoMonday) {
+                    const estadoUpper = estadoMonday.toUpperCase();
+                    
+                    if (labelsPagado.includes(estadoUpper)) {
+                        await reembolso.update({ estado: 'Pagado' });
+                        actualizados++;
+                    } else if (labelsRechazado.includes(estadoUpper)) {
+                        await reembolso.update({ estado: 'Rechazado' });
+                        actualizados++;
+                    }
                 }
             }
         }
