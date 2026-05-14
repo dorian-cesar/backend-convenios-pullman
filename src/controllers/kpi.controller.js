@@ -6,8 +6,10 @@ const ALLOWED_GRANULARITIES = ['diario', 'semanal', 'mensual', 'trimestral', 'se
 const getParamsWithScope = (req) => {
     const params = { ...req.query };
 
-    // Si el usuario no es SUPER_USUARIO, forzamos su empresa_id
-    if (req.user && req.user.rol !== 'SUPER_USUARIO') {
+    // Solo SISTEMA y SUPER_USUARIO pueden ver todas las empresas.
+    // Los demás roles (como USUARIO) ven solo la suya.
+    const rol = req.user?.rol?.toUpperCase();
+    if (rol !== 'SUPER_USUARIO' && rol !== 'SISTEMA') {
         params.empresa_id = req.user.empresa_id;
     }
 

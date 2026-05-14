@@ -11,12 +11,12 @@ const router = express.Router();
  */
 
 // Rutas administrativas (protegidas)
+router.post('/sync-status', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.sincronizarEstados);
+router.post('/reiniciar/:id', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.reiniciarSolicitud);
 router.post('/', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.crear);
 router.get('/', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.listar);
 router.put('/:id', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.actualizar);
 router.post('/:id/sync-monday', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.sincronizarMonday);
-router.post('/sync-status', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.sincronizarEstados);
-router.post('/reiniciar/:id', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.reiniciarSolicitud);
 router.post('/:id/send-email', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.enviarEmailLink);
 router.delete('/:id', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.eliminar);
 

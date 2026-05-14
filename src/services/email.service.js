@@ -191,8 +191,9 @@ exports.enviarCorreoReembolso = async (correoDestino, pnr, token) => {
     }
 
     const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'no-reply@pullman.cl';
-    // Link basado en la IP configurada o variable de entorno
-    const link = `http://172.26.10.208:3000/reembolso/completar/${token}`;
+    // Link basado en la URL del frontend configurada
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const link = `${frontendUrl}/reembolso/completar/${token}`;
 
     const msg = {
         to: correoDestino,

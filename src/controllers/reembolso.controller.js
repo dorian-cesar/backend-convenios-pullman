@@ -8,7 +8,7 @@ exports.crear = async (req, res, next) => {
         console.log('[REEMBOLSO] Recibiendo datos para crear:', req.body);
         const data = {
             ...req.body,
-            created_by: req.user ? (req.user.nombre || req.user.correo || req.user.id) : 'system'
+            created_by: req.user ? (req.user.nombre || req.user.correo || String(req.user.id)) : 'system'
         };
         const reembolso = await reembolsoService.crearReembolso(data);
 
@@ -63,7 +63,7 @@ exports.actualizar = async (req, res, next) => {
         const { id } = req.params;
         const data = {
             ...req.body,
-            updated_by: req.user ? req.user.username : 'system'
+            updated_by: req.user ? (req.user.nombre || req.user.correo || String(req.user.id)) : 'system'
         };
         const reembolso = await reembolsoService.actualizarReembolso(id, data);
         res.json(reembolso);
@@ -216,7 +216,7 @@ exports.reiniciarSolicitud = async (req, res, next) => {
             tipo_cuenta: null,
             nombre_beneficiario: null,
             estado: 'Pending',
-            updated_by: req.user ? (req.user.nombre || req.user.correo || req.user.id) : 'system'
+            updated_by: req.user ? (req.user.nombre || req.user.correo || String(req.user.id)) : 'system'
         });
         
         res.json({ message: 'Solicitud reiniciada correctamente. El enlace público está habilitado de nuevo.' });
