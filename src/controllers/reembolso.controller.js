@@ -234,10 +234,18 @@ exports.sincronizarEstados = async (req, res, next) => {
         const mondayService = require('../services/monday.service');
         const { Op } = require('sequelize');
 
-        // Buscar reembolsos que NO estén pagados
+        // Buscar reembolsos que tengan datos bancarios o ya estén vinculados, y que NO estén pagados
         const reembolsos = await Reembolso.findAll({
             where: {
-                estado: { [Op.notIn]: ['Pagado'] }
+                [Op.and]: [
+                    { estado: { [Op.notIn]: ['Pagado', 'Rechazado'] } },
+                    {
+                        [Op.or]: [
+                            { estado: 'DatosBancarios' },
+                            { monday_item_id: { [Op.ne]: null } }
+                        ]
+                    }
+                ]
             }
         });
 
