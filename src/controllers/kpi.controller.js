@@ -1,7 +1,7 @@
 const kpiService = require('../services/kpi.service');
 const BusinessError = require('../exceptions/BusinessError');
 
-const ALLOWED_GRANULARITIES = ['diario', 'semanal', 'mensual', 'trimestral', 'semestral', 'anual', 'quinquenal'];
+const ALLOWED_GRANULARITIES = ['diario', 'semanal', 'mensual', 'trimestral', 'semestral', 'anual', 'bienal', 'trienal', 'cuatrienal', 'quinquenal'];
 
 const getParamsWithScope = (req) => {
     const params = { ...req.query };

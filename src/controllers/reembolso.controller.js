@@ -192,7 +192,10 @@ exports.sincronizarMonday = async (req, res, next) => {
         }
         
         // 3. Guardar/Actualizar el ID de Monday en nuestra base de datos
-        await reembolso.update({ monday_item_id: String(mondayItemId) });
+        await reembolso.update({ 
+            monday_item_id: String(mondayItemId),
+            estado: 'Completado'
+        });
         
         res.json({ message, mondayItemId });
     } catch (error) {
@@ -234,17 +237,12 @@ exports.sincronizarEstados = async (req, res, next) => {
         const mondayService = require('../services/monday.service');
         const { Op } = require('sequelize');
 
-        // Buscar reembolsos que tengan datos bancarios o ya estén vinculados, y que NO estén pagados
+        // Buscar reembolsos que ya estén vinculados y que NO estén pagados
         const reembolsos = await Reembolso.findAll({
             where: {
                 [Op.and]: [
                     { estado: { [Op.notIn]: ['Pagado', 'Rechazado'] } },
-                    {
-                        [Op.or]: [
-                            { estado: 'DatosBancarios' },
-                            { monday_item_id: { [Op.ne]: null } }
-                        ]
-                    }
+                    { monday_item_id: { [Op.ne]: null } }
                 ]
             }
         });

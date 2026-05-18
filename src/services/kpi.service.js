@@ -1,59 +1,35 @@
 const { Evento, Pasajero, Convenio, TipoPasajero, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const BusinessError = require('../exceptions/BusinessError');
 
-/**
- * KPI Service
- * Handles aggregation of Event data for KPIs.
- */
-
-// Helper to get SQL grouping logic based on granularity
 const getGranularitySQL = (granularidad, campoFecha = 'fecha_evento') => {
     switch (granularidad) {
         case 'diario':
             return {
-                group: `DATE(${campoFecha})`,
-                select: `DATE(${campoFecha})`
+                group: `DATE(${campoFecha}), HOUR(${campoFecha})`,
+                select: `DATE_FORMAT(${campoFecha}, '%H:00')`
             };
         case 'semanal':
-            // Format: 2026-W05
-            return {
-                group: `YEAR(${campoFecha}), WEEK(${campoFecha}, 1)`,
-                select: `CONCAT(YEAR(${campoFecha}), '-W', LPAD(WEEK(${campoFecha}, 1), 2, '0'))`
-            };
         case 'mensual':
-            // Format: 2026-01
             return {
-                group: `YEAR(${campoFecha}), MONTH(${campoFecha})`,
-                select: `DATE_FORMAT(${campoFecha}, '%Y-%m')`
+                group: `DATE(${campoFecha})`,
+                select: `DATE_FORMAT(${campoFecha}, '%d/%m')`
             };
         case 'trimestral':
-            // Format: 2026-Q1
-            return {
-                group: `YEAR(${campoFecha}), QUARTER(${campoFecha})`,
-                select: `CONCAT(YEAR(${campoFecha}), '-Q', QUARTER(${campoFecha}))`
-            };
         case 'semestral':
-            // Format: 2026-S1
-            return {
-                group: `YEAR(${campoFecha}), IF(MONTH(${campoFecha}) <= 6, 1, 2)`,
-                select: `CONCAT(YEAR(${campoFecha}), '-S', IF(MONTH(${campoFecha}) <= 6, 1, 2))`
-            };
         case 'anual':
-            // Format: 2026
+            return {
+                group: `YEAR(${campoFecha}), MONTH(${campoFecha})`,
+                select: `DATE_FORMAT(${campoFecha}, '%b %Y')`
+            };
+        case 'bienal':
+        case 'trienal':
+        case 'cuatrienal':
+        case 'quinquenal':
             return {
                 group: `YEAR(${campoFecha})`,
                 select: `CAST(YEAR(${campoFecha}) AS CHAR)`
             };
-        case 'quinquenal':
-            // Format: 2025-2029
-            // Logic: FLOOR(YEAR / 5) * 5
-            return {
-                group: `FLOOR(YEAR(${campoFecha}) / 5)`,
-                select: `CONCAT(FLOOR(YEAR(${campoFecha}) / 5) * 5, '-', (FLOOR(YEAR(${campoFecha}) / 5) * 5) + 4)`
-            };
         default:
-            // Default to monthly if invalid or unspecified
             return {
                 group: `YEAR(${campoFecha}), MONTH(${campoFecha})`,
                 select: `DATE_FORMAT(${campoFecha}, '%Y-%m')`
@@ -61,173 +37,125 @@ const getGranularitySQL = (granularidad, campoFecha = 'fecha_evento') => {
     }
 };
 
-const buildBaseWhere = (filters) => {
-    const { empresa_id, fecha_inicio, fecha_fin } = filters;
+const buildBaseWhere = (params) => {
+    const { empresa_id, convenio_id, fecha_inicio, fecha_fin } = params;
     const where = {};
 
     if (empresa_id) {
         where.empresa_id = empresa_id;
     }
 
-    if (fecha_inicio || fecha_fin) {
-        where.fecha_evento = {};
-        if (fecha_inicio) where.fecha_evento[Op.gte] = new Date(fecha_inicio);
-        if (fecha_fin) where.fecha_evento[Op.lte] = new Date(fecha_fin + 'T23:59:59');
+    if (convenio_id) {
+        where.convenio_id = convenio_id;
     }
+
+    if (fecha_inicio || fecha_fin) {
+        where.createdAt = {};
+        if (fecha_inicio) where.createdAt[Op.gte] = new Date(fecha_inicio);
+        if (fecha_fin) where.createdAt[Op.lte] = new Date(`${fecha_fin}T23:59:59`);
+    }
+
     return where;
 };
 
 exports.getResumenKpis = async (params) => {
-    const {
+    const { 
         granularidad = 'mensual',
         page = 1,
-        limit = 12,
-        sortBy = 'periodo',
-        order = 'ASC'
+        limit = 1000
     } = params;
 
     const where = buildBaseWhere(params);
-    const granSQL = getGranularitySQL(granularidad, 'fecha_evento');
+    // Usamos createdAt para máxima precisión nativa y evitar errores de formato
+    const campoFechaSQL = "`createdAt`";
+    const granSQL = getGranularitySQL(granularidad, campoFechaSQL);
 
     const attributes = [
         [sequelize.literal(granSQL.select), 'periodo'],
+        [sequelize.fn('MIN', sequelize.col('createdAt')), 'fecha_ref'],
         // KPI 1: Total Ventas
-        [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN monto_pagado ELSE 0 END)`), 'total_ventas'],
+        [sequelize.literal(`SUM(CASE WHEN \`tipo_evento\` = 'COMPRA' THEN \`monto_pagado\` ELSE 0 END)`), 'total_ventas'],
         // KPI 2: Total Devoluciones
-        [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'DEVOLUCION' THEN monto_devolucion ELSE 0 END)`), 'total_devoluciones'],
-        // KPI 3: Total Descuentos
-        [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN (tarifa_base * (COALESCE(porcentaje_descuento_aplicado, 0) / 100)) ELSE 0 END)`), 'total_descuento'],
-        // KPI 4: Total Pasajeros
-        [sequelize.literal(`COUNT(DISTINCT CASE WHEN tipo_evento = 'COMPRA' THEN pasajero_id END)`), 'total_pasajeros']
+        [sequelize.literal(`SUM(CASE WHEN \`tipo_evento\` = 'DEVOLUCION' THEN \`monto_devolucion\` ELSE 0 END)`), 'total_devoluciones'],
+        // KPI 3: Total Descuentos (Usamos la columna directa monto_descuento)
+        [sequelize.literal(`SUM(CASE WHEN \`tipo_evento\` = 'COMPRA' THEN COALESCE(\`monto_descuento\`, 0) ELSE 0 END)`), 'total_descuento'],
+        // KPI 4: Total Pasajes (Conteo de cada ticket individual)
+        [sequelize.literal(`COUNT(CASE WHEN \`tipo_evento\` = 'COMPRA' THEN 1 END)`), 'total_pasajeros']
     ];
 
     const offset = (page - 1) * limit;
 
-    const rows = await Evento.findAll({
-        attributes: attributes,
-        where: where,
+    const data = await Evento.findAll({
+        attributes,
+        where,
         group: [sequelize.literal(granSQL.group)],
-        order: [[sequelize.literal(sortBy === 'periodo' ? 'periodo' : sortBy), order.toUpperCase()]],
-        offset: parseInt(offset),
-        limit: parseInt(limit),
+        order: [[sequelize.literal(granSQL.group), 'ASC']],
+        limit: Number(limit),
+        offset: Number(offset),
         raw: true
     });
-
-    const countQuery = await Evento.findAll({
-        attributes: [[sequelize.literal(granSQL.select), 'periodo']],
-        where: where,
-        group: [sequelize.literal(granSQL.group)],
-        raw: true
-    });
-
-    const totalItems = countQuery.length;
-    const totalPages = Math.ceil(totalItems / limit);
 
     return {
-        totalItems,
-        totalPages,
-        currentPage: parseInt(page),
-        rows
+        totalItems: data.length,
+        totalPages: Math.ceil(data.length / limit),
+        currentPage: Number(page),
+        rows: data
     };
 };
 
-/**
- * KPI: Pasajes por Convenio
- */
 exports.getPorConvenio = async (params) => {
     const where = buildBaseWhere(params);
-    // Allow both COMPRA and DEVOLUCION to calculate net values
-    where.tipo_evento = { [Op.in]: ['COMPRA', 'DEVOLUCION'] };
 
-    const rows = await Evento.findAll({
+    return await Evento.findAll({
         attributes: [
             'convenio_id',
-            [sequelize.col('Convenio.nombre'), 'convenio_nombre'],
-            // Net Quantity: Compras - Devoluciones
-            [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN 1 WHEN tipo_evento = 'DEVOLUCION' THEN -1 ELSE 0 END)`), 'cantidad_pasajes'],
-            // Net Total Without Discount: Sum(tarifa_base of Compras) - Sum(tarifa_base of Devoluciones)
-            [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN tarifa_base WHEN tipo_evento = 'DEVOLUCION' THEN -tarifa_base ELSE 0 END)`), 'total_sin_descuento'],
-            // Net Total Paid (Real Money): Sum(monto_pagado of Compras) - Sum(monto_devolucion? No, logic says refund uses monto_devolucion)
-            // But usually we just want Sale Amount.
-            // Let's stick to user request: "monto total sin el descuento... y cantidad de pasajes"
-            // I'll keep total_monto as executed money for reference if needed, but user asked specifically for 'sin descuento'.
-            [sequelize.literal(`SUM(CASE WHEN tipo_evento = 'COMPRA' THEN monto_pagado WHEN tipo_evento = 'DEVOLUCION' THEN -monto_devolucion ELSE 0 END)`), 'total_ventas_reales']
+            [sequelize.literal('COALESCE(`Convenio`.`nombre`, \'Sin Convenio\')'), 'convenio_nombre'],
+            [sequelize.literal('COUNT(CASE WHEN `tipo_evento` = \'COMPRA\' THEN 1 END)'), 'cantidad_pasajes'],
+            [sequelize.literal('SUM(CASE WHEN `tipo_evento` = \'COMPRA\' THEN `tarifa_base` ELSE 0 END)'), 'total_sin_descuento'],
+            [sequelize.literal('SUM(CASE WHEN `tipo_evento` = \'COMPRA\' THEN `monto_pagado` ELSE 0 END)'), 'total_ventas_reales']
         ],
+        where,
         include: [{
             model: Convenio,
             attributes: [],
-            required: false // Left join to include events without convenio? No, this is grouped by convenio.
-            // If convenio_id is null, it will be grouping key null.
+            required: false
         }],
-        where: where,
         group: ['convenio_id', 'Convenio.nombre'],
-        order: [[sequelize.literal('cantidad_pasajes'), 'DESC']],
         raw: true
     });
-
-    return rows;
 };
 
-/**
- * KPI: Pasajes por Código de Descuento
- */
 exports.getPorCodigo = async (params) => {
     const where = buildBaseWhere(params);
-    where.tipo_evento = 'COMPRA';
-
-    // Agrupar por el campo codigo de la tabla Convenio
-    const rows = await Evento.findAll({
+    // Asumiendo que existe una relación o campo codigo_descuento
+    return await Evento.findAll({
         attributes: [
-            [sequelize.col('Convenio.codigo'), 'codigo_nombre'],
-            [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'cantidad_pasajes'],
-            [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total_monto']
+            'codigo_autorizacion',
+            [sequelize.fn('COUNT', sequelize.col('id')), 'cantidad'],
+            [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total']
         ],
-        include: [{
-            model: Convenio,
-            attributes: [],
-            required: true,
-            where: {
-                codigo: { [Op.ne]: null }
-            }
-        }],
-        where: where,
-        group: [sequelize.col('Convenio.codigo')],
-        order: [[sequelize.literal('cantidad_pasajes'), 'DESC']],
+        where,
+        group: ['codigo_autorizacion'],
         raw: true
     });
-
-    return rows;
 };
 
-/**
- * KPI: Pasajes por Categoría (Nuevo "Por Tipo de Pasajero" basado en Convenios)
- */
 exports.getPorTipoPasajero = async (params) => {
     const where = buildBaseWhere(params);
-    where.tipo_evento = 'COMPRA';
-
-    // Agrupar por el el modelo TipoPasajero a través de la relación Evento -> Pasajero -> TipoPasajero
-    const rows = await Evento.findAll({
+    return await Evento.findAll({
         attributes: [
-            [sequelize.col('Pasajero->tipoPasajero.nombre'), 'tipo_pasajero_nombre'],
-            [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'cantidad_pasajes'],
-            [sequelize.fn('SUM', sequelize.col('monto_pagado')), 'total_monto']
+            [sequelize.literal('COALESCE(`TipoPasajero`.`nombre`, \'General\')'), 'tipo'],
+            [sequelize.fn('COUNT', sequelize.col('Evento.id')), 'cantidad']
         ],
+        where,
         include: [{
             model: Pasajero,
-            attributes: [],
-            required: true,
             include: [{
                 model: TipoPasajero,
-                as: 'tipoPasajero', // Alias definido en index.js
                 attributes: []
             }]
         }],
-        where: where,
-        group: [sequelize.col('Pasajero->tipoPasajero.nombre')],
-        order: [[sequelize.literal('cantidad_pasajes'), 'DESC']],
+        group: ['TipoPasajero.nombre'],
         raw: true
     });
-
-    return rows;
 };
