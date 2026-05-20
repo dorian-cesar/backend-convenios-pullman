@@ -493,6 +493,9 @@ exports.actualizarConvenio = async (id, datos) => {
     } else {
         if (status) {
             convenio.status = status;
+        } else if (fInicio && convenio.status === 'INACTIVO') {
+            // Si estaba inactivo y la fecha_inicio ya llegó o fue actualizada al presente/pasado, se activa automáticamente
+            convenio.status = 'ACTIVO';
         }
     }
 
@@ -693,14 +696,29 @@ exports.validarVigencia = async (convenioId) => {
     const convenio = await Convenio.findByPk(convenioId);
     if (!convenio) return false;
 
-    if (convenio.status === 'INACTIVO') return false;
+    const hoy = new Date();
+
+    // Si está INACTIVO pero ya comenzó su vigencia y no ha expirado, lo auto-activamos
+    if (convenio.status === 'INACTIVO') {
+        if (convenio.fecha_inicio) {
+            const inicio = new Date(convenio.fecha_inicio);
+            const termino = convenio.fecha_termino ? new Date(convenio.fecha_termino) : null;
+            if (termino) termino.setHours(23, 59, 59, 999);
+
+            const esVigente = hoy >= inicio && (!termino || hoy <= termino);
+            if (esVigente) {
+                convenio.status = 'ACTIVO';
+                await convenio.save();
+                return true;
+            }
+        }
+        return false;
+    }
 
     // Verificar fecha término
     if (convenio.fecha_termino) {
         const fechaTermino = new Date(convenio.fecha_termino);
         fechaTermino.setHours(23, 59, 59, 999);
-
-        const hoy = new Date();
 
         if (hoy > fechaTermino) {
             convenio.status = 'INACTIVO';
@@ -713,7 +731,6 @@ exports.validarVigencia = async (convenioId) => {
     // Verificar fecha inicio
     if (convenio.fecha_inicio) {
         const fechaInicio = new Date(convenio.fecha_inicio);
-        const hoy = new Date();
         if (hoy < fechaInicio) {
             convenio.status = 'INACTIVO';
             await convenio.save();
@@ -810,12 +827,13 @@ exports.verificarDisponibilidadPorId = async (id) => {
  */
 exports.desactivarConveniosVencidos = async () => {
     const hoy = new Date();
-    const result = { total: 0, details: [] };
+    const result = { total: 0, totalDesactivados: 0, totalActivados: 0, details: [] };
 
     const inicioHoy = new Date();
     inicioHoy.setHours(0, 0, 0, 0);
 
-    const convenios = await Convenio.findAll({
+    // 1. Desactivar convenios activos que estén vencidos o en el futuro
+    const conveniosParaDesactivar = await Convenio.findAll({
         where: {
             status: 'ACTIVO',
             [Op.or]: [
@@ -825,7 +843,7 @@ exports.desactivarConveniosVencidos = async () => {
         }
     });
 
-    for (const convenio of convenios) {
+    for (const convenio of conveniosParaDesactivar) {
         let reason = '';
         if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) reason = 'Futuro';
 
@@ -838,9 +856,36 @@ exports.desactivarConveniosVencidos = async () => {
         if (reason) {
             convenio.status = 'INACTIVO';
             await convenio.save();
-            result.total++;
+            result.totalDesactivados++;
         }
     }
+
+    // 2. Activar convenios inactivos que ya deberían estar activos (fecha_inicio <= hoy y no vencido)
+    const conveniosParaActivar = await Convenio.findAll({
+        where: {
+            status: 'INACTIVO',
+            fecha_inicio: { 
+                [Op.ne]: null,
+                [Op.lte]: hoy 
+            },
+            [Op.and]: [
+                {
+                    [Op.or]: [
+                        { fecha_termino: null },
+                        { fecha_termino: { [Op.gte]: inicioHoy } }
+                    ]
+                }
+            ]
+        }
+    });
+
+    for (const convenio of conveniosParaActivar) {
+        convenio.status = 'ACTIVO';
+        await convenio.save();
+        result.totalActivados++;
+    }
+
+    result.total = result.totalDesactivados + result.totalActivados;
     return result;
 };
 
