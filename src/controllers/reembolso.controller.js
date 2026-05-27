@@ -61,8 +61,24 @@ exports.obtener = async (req, res, next) => {
 exports.actualizar = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const bodyData = { ...req.body };
+
+        // Si todos los campos requeridos para la transferencia están presentes en el body o en el registro actual,
+        // cambiamos automáticamente el estado a 'DatosBancarios' (si estaba en 'Pending') para habilitar la sincronización.
+        const current = await reembolsoService.obtenerReembolso(id);
+        const rut = bodyData.rut || current.rut;
+        const correo = bodyData.correo || current.correo;
+        const banco = bodyData.banco || current.banco;
+        const numero_cuenta = bodyData.numero_cuenta || current.numero_cuenta;
+        const tipo_cuenta = bodyData.tipo_cuenta || current.tipo_cuenta;
+        const nombre_beneficiario = bodyData.nombre_beneficiario || current.nombre_beneficiario;
+
+        if (current.estado === 'Pending' && rut && correo && banco && numero_cuenta && tipo_cuenta && nombre_beneficiario) {
+            bodyData.estado = 'DatosBancarios';
+        }
+
         const data = {
-            ...req.body,
+            ...bodyData,
             updated_by: req.user ? (req.user.nombre || req.user.correo || String(req.user.id)) : 'system'
         };
         const reembolso = await reembolsoService.actualizarReembolso(id, data);
@@ -186,6 +202,11 @@ exports.sincronizarMonday = async (req, res, next) => {
         if (!mondayItemId) {
             // 2. Si no existe, crearlo
             mondayItemId = await mondayService.crearItem(reembolso);
+            if (!mondayItemId) {
+                return res.status(400).json({ 
+                    message: 'No se puede sincronizar con Monday. Complete todos los datos bancarios y del beneficiario primero.' 
+                });
+            }
             message = 'Item creado en Monday correctamente';
         } else {
             message = 'Item ya existía en Monday, ID vinculado';
