@@ -41,18 +41,14 @@ class MondayService {
         `;
 
         // Determinar el valor de Tipo Devolución (tipo_cuenta)
-        // Monday espera que el label coincida con las opciones del dropdown/status
+        // Monday solo acepta: "Débito" o "Crédito en Cuotas"
         let tipoDevolucionLabel = "Débito"; // default
         if (data.tipo_cuenta) {
             const tcUpper = data.tipo_cuenta.toUpperCase();
-            if (tcUpper.includes('AHORRO')) {
-                tipoDevolucionLabel = 'Ahorro';
-            } else if (tcUpper.includes('CORRIENTE')) {
-                tipoDevolucionLabel = 'Corriente';
-            } else if (tcUpper.includes('VISTA') || tcUpper.includes('RUT')) {
-                tipoDevolucionLabel = 'Vista';
+            if (tcUpper.includes('CREDITO') || tcUpper.includes('CRÉDITO') || tcUpper.includes('CUOTAS')) {
+                tipoDevolucionLabel = 'Crédito en Cuotas';
             } else {
-                tipoDevolucionLabel = data.tipo_cuenta;
+                tipoDevolucionLabel = 'Débito';
             }
         }
 
