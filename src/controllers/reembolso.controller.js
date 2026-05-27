@@ -1,13 +1,27 @@
 const reembolsoService = require('../services/reembolso.service');
 
+const formatearTipoCuenta = (tipo_cuenta) => {
+    if (!tipo_cuenta) return tipo_cuenta;
+    const tcUpper = tipo_cuenta.toUpperCase();
+    if (tcUpper.includes('VISTA')) return 'Cuenta Vista';
+    if (tcUpper.includes('RUT')) return 'Cuenta Rut';
+    if (tcUpper.includes('CORRIENTE')) return 'Corriente';
+    if (tcUpper.includes('AHORRO')) return 'Cuenta Ahorro';
+    return tipo_cuenta.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+};
+
 /**
  * Crear reembolso
  */
 exports.crear = async (req, res, next) => {
     try {
         console.log('[REEMBOLSO] Recibiendo datos para crear:', req.body);
+        const bodyData = { ...req.body };
+        if (bodyData.tipo_cuenta) {
+            bodyData.tipo_cuenta = formatearTipoCuenta(bodyData.tipo_cuenta);
+        }
         const data = {
-            ...req.body,
+            ...bodyData,
             created_by: req.user ? (req.user.nombre || req.user.correo || String(req.user.id)) : 'system'
         };
         const reembolso = await reembolsoService.crearReembolso(data);
@@ -70,6 +84,9 @@ exports.actualizar = async (req, res, next) => {
         const correo = bodyData.correo || current.correo;
         const banco = bodyData.banco || current.banco;
         const numero_cuenta = bodyData.numero_cuenta || current.numero_cuenta;
+        if (bodyData.tipo_cuenta) {
+            bodyData.tipo_cuenta = formatearTipoCuenta(bodyData.tipo_cuenta);
+        }
         const tipo_cuenta = bodyData.tipo_cuenta || current.tipo_cuenta;
         const nombre_beneficiario = bodyData.nombre_beneficiario || current.nombre_beneficiario;
 
@@ -132,14 +149,14 @@ exports.actualizarPorToken = async (req, res, next) => {
         const { token } = req.params;
         console.log('[REEMBOLSO] Datos recibidos para token:', token, req.body);
         const { correo, rut, numero_cuenta, banco, tipo_cuenta, nombre_beneficiario } = req.body;
-        // El pasajero completó sus datos bancarios → estado 'DatosBancarios'
+        const formattedTipoCuenta = formatearTipoCuenta(tipo_cuenta);
         // 'Completado' solo se asigna cuando Monday marca como 'Listo'
         const reembolso = await reembolsoService.actualizarPorToken(token, {
             correo,
             rut,
             numero_cuenta,
             banco,
-            tipo_cuenta,
+            tipo_cuenta: formattedTipoCuenta,
             nombre_beneficiario,
             estado: 'DatosBancarios'
         });
