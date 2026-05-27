@@ -68,8 +68,8 @@ class MondayService {
             "numeric_mkyb79nh": data.numero_asiento, // Asiento
             "numeric_mkybttcy": data.monto, // Monto
             "text_mkybh4k9": data.banco, // Banco
+            "text_mm3fnxw9": data.tipo_cuenta, // Tipo de Cuenta
             "text_mm071egp": data.numero_cuenta, // Nro de Cuenta
-            "text_mkyhjj5x": data.nombre_beneficiario, // Usamos campo extra para el nombre del que recibe
             "dropdown_mm20ws39": { "labels": ["Convenios"] }, // Canal de Venta (Debe ser un array de labels)
             "color_mkybj85y": { "label": tipoDevolucionLabel } // Tipo Devolución (Mapeado a tipo_cuenta)
         };
