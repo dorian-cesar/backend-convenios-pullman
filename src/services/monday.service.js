@@ -52,24 +52,39 @@ class MondayService {
             }
         }
 
+        // Definir valores con fallbacks seguros para evitar que Monday falle por nulos o formatos vacíos
+        const rutVal = data.rut || "Sin RUT";
+        const emailVal = data.correo || "viajes@pullmanbus.cl";
+        const pnrVal = data.pnr || "S/PNR";
+        const origenVal = data.origen || "Sin Origen";
+        const destinoVal = data.destino || "Sin Destino";
+        
+        let fechaSalidaFormatted = new Date().toISOString().split('T')[0];
+        if (data.fecha_salida) {
+            fechaSalidaFormatted = data.fecha_salida.includes('-') && data.fecha_salida.split('-')[0].length === 2 
+                ? data.fecha_salida.split('-').reverse().join('-') 
+                : data.fecha_salida.split('T')[0];
+        }
+
+        const asientoVal = data.numero_asiento ? Number(data.numero_asiento) : 0;
+        const montoVal = data.monto ? Number(data.monto) : 0;
+        const bancoVal = data.banco || "Sin Especificar";
+        const tipoCuentaVal = data.tipo_cuenta || "CUENTA VISTA";
+        const nroCuentaVal = data.numero_cuenta || "Sin Cuenta";
+
         // Mapeo de columnas con IDs REALES del tablero
         const columnValues = {
-            "text_mkybpcy2": data.rut, // Rut
-            "email5u69zpnc": { "email": data.correo, "text": data.correo }, // E-mail
-            "text_mm0hc2f7": data.pnr, // Nro Reserva
-            "text_mkybrjrx": data.origen, // Origen
-            "text_mkybzxs5": data.destino, // Destino
-            // Formatear fecha a YYYY-MM-DD de forma segura (asume DD-MM-YYYY o YYYY-MM-DD)
-            "date_mkyb96c3": data.fecha_salida ? (
-                data.fecha_salida.includes('-') && data.fecha_salida.split('-')[0].length === 2 
-                    ? data.fecha_salida.split('-').reverse().join('-') 
-                    : data.fecha_salida.split('T')[0]
-            ) : null, // Fecha de Salida
-            "numeric_mkyb79nh": data.numero_asiento, // Asiento
-            "numeric_mkybttcy": data.monto, // Monto
-            "text_mkybh4k9": data.banco, // Banco
-            "text_mm3fnxw9": data.tipo_cuenta, // Tipo de Cuenta
-            "text_mm071egp": data.numero_cuenta, // Nro de Cuenta
+            "text_mkybpcy2": rutVal, // Rut
+            "email5u69zpnc": { "email": emailVal, "text": emailVal }, // E-mail
+            "text_mm0hc2f7": pnrVal, // Nro Reserva
+            "text_mkybrjrx": origenVal, // Origen
+            "text_mkybzxs5": destinoVal, // Destino
+            "date_mkyb96c3": fechaSalidaFormatted, // Fecha de Salida
+            "numeric_mkyb79nh": asientoVal, // Asiento
+            "numeric_mkybttcy": montoVal, // Monto
+            "text_mkybh4k9": bancoVal, // Banco
+            "text_mm3fnxw9": tipoCuentaVal, // Tipo de Cuenta
+            "text_mm071egp": nroCuentaVal, // Nro de Cuenta
             "dropdown_mm20ws39": { "labels": ["Convenios"] }, // Canal de Venta (Debe ser un array de labels)
             "color_mkybj85y": { "label": tipoDevolucionLabel } // Tipo Devolución (Mapeado a tipo_cuenta)
         };
