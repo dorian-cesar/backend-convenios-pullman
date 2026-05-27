@@ -22,6 +22,7 @@ const Beneficiario = require('./beneficiario.model')(sequelize, Sequelize.DataTy
 const RegistroTablaClienteCorporativo = require('./registroTablaClienteCorporativo.model')(sequelize, Sequelize.DataTypes);
 const Categoria = require('./categoria.model')(sequelize, Sequelize.DataTypes);
 const Reembolso = require('./reembolso.model')(sequelize, Sequelize.DataTypes);
+const InvalidacionLog = require('./invalidacionLog.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -133,5 +134,6 @@ module.exports = {
   Beneficiario,
   RegistroTablaClienteCorporativo,
   Categoria,
-  Reembolso
+  Reembolso,
+  InvalidacionLog
 };

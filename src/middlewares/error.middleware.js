@@ -4,6 +4,39 @@ const AppError = require('../exceptions/AppError');
 const ValidationAppError = require('../exceptions/ValidationError');
 
 module.exports = (err, req, res, next) => {
+  // Guardar log de invalidación si ocurre en endpoints de eventos o reembolsos al haber fallado alguna regla o validación
+  const isEventPath = req.path && (req.path.includes('/eventos') || req.path.includes('/reembolsos'));
+  if (isEventPath) {
+    try {
+      const { InvalidacionLog } = require('../models');
+      const payload = req.body || {};
+      
+      // Intentar extraer RUT, PNR y Ticket para indexado y filtrado rápido
+      let rut = payload.rut || payload.pasajero_rut;
+      if (!rut && typeof payload.pasajero_id === 'string') {
+        rut = payload.pasajero_id;
+      }
+      const pnr = payload.pnr;
+      const numero_ticket = payload.numero_ticket || payload.ticket;
+      
+      const user_identifier = req.user ? (req.user.nombre || req.user.correo || String(req.user.id)) : 'system/api';
+
+      InvalidacionLog.create({
+        endpoint: req.originalUrl || req.path,
+        metodo: req.method,
+        rut: rut || null,
+        pnr: pnr || null,
+        numero_ticket: numero_ticket || null,
+        error_mensaje: err.message || String(err),
+        payload: payload,
+        ip: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+        user_identifier: user_identifier
+      }).catch(logErr => console.error('[LOGGER] Error al escribir log de invalidación en DB:', logErr.message));
+
+    } catch (logErr) {
+      console.error('[LOGGER] Error al preparar inserción de log:', logErr.message);
+    }
+  }
   // Convert sequelize validation/unique errors into ValidationAppError
   if (err instanceof ValidationError || err instanceof UniqueConstraintError) {
     const validationErr = new ValidationAppError(
