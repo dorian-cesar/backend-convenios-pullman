@@ -20,6 +20,12 @@ class MondayService {
             return null;
         }
 
+        // Validar que los campos críticos del reembolso no estén vacíos o incompletos
+        if (!data.rut || !data.correo || !data.banco || !data.numero_cuenta || !data.tipo_cuenta || !data.nombre_beneficiario) {
+            console.warn(`[MONDAY] No se puede crear el item para PNR ${data.pnr || 'N/A'} porque faltan datos requeridos (RUT, Correo, Banco, Cuenta, Tipo de Cuenta o Beneficiario).`);
+            return null;
+        }
+
         // Mapeo de columnas (Ajustar según IDs reales de Monday si es necesario)
         // Por ahora usamos nombres descriptivos que Monday suele mapear o permite vía GraphQL
         const query = `
@@ -33,6 +39,22 @@ class MondayService {
                 }
             }
         `;
+
+        // Determinar el valor de Tipo Devolución (tipo_cuenta)
+        // Monday espera que el label coincida con las opciones del dropdown/status
+        let tipoDevolucionLabel = "Débito"; // default
+        if (data.tipo_cuenta) {
+            const tcUpper = data.tipo_cuenta.toUpperCase();
+            if (tcUpper.includes('AHORRO')) {
+                tipoDevolucionLabel = 'Ahorro';
+            } else if (tcUpper.includes('CORRIENTE')) {
+                tipoDevolucionLabel = 'Corriente';
+            } else if (tcUpper.includes('VISTA') || tcUpper.includes('RUT')) {
+                tipoDevolucionLabel = 'Vista';
+            } else {
+                tipoDevolucionLabel = data.tipo_cuenta;
+            }
+        }
 
         // Mapeo de columnas con IDs REALES del tablero
         const columnValues = {
@@ -53,7 +75,7 @@ class MondayService {
             "text_mm071egp": data.numero_cuenta, // Nro de Cuenta
             "text_mkyhjj5x": data.nombre_beneficiario, // Usamos campo extra para el nombre del que recibe
             "dropdown_mm20ws39": { "labels": ["Convenios"] }, // Canal de Venta (Debe ser un array de labels)
-            "color_mkybj85y": { "label": "Débito" } // Tipo Devolución (Ajustar según necesidad)
+            "color_mkybj85y": { "label": tipoDevolucionLabel } // Tipo Devolución (Mapeado a tipo_cuenta)
         };
 
         try {
