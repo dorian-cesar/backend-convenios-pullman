@@ -69,7 +69,23 @@ class MondayService {
         const asientoVal = data.numero_asiento ? Number(data.numero_asiento) : 0;
         const montoVal = data.monto ? Number(data.monto) : 0;
         const bancoVal = data.banco || "Sin Especificar";
-        const tipoCuentaVal = data.tipo_cuenta || "CUENTA VISTA";
+        
+        let tipoCuentaVal = "Cuenta Vista"; // default
+        if (data.tipo_cuenta) {
+            const tcUpper = data.tipo_cuenta.toUpperCase();
+            if (tcUpper.includes('VISTA')) {
+                tipoCuentaVal = 'Cuenta Vista';
+            } else if (tcUpper.includes('RUT')) {
+                tipoCuentaVal = 'Cuenta Rut';
+            } else if (tcUpper.includes('CORRIENTE')) {
+                tipoCuentaVal = 'Corriente';
+            } else if (tcUpper.includes('AHORRO')) {
+                tipoCuentaVal = 'Cuenta Ahorro';
+            } else {
+                tipoCuentaVal = data.tipo_cuenta.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+            }
+        }
+        
         const nroCuentaVal = data.numero_cuenta || "Sin Cuenta";
 
         // Mapeo de columnas con IDs REALES del tablero
