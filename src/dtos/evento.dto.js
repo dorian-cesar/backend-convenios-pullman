@@ -28,6 +28,7 @@ class EventoDTO {
         this.token = evento.token;
         this.estado = evento.estado;
         this.confirmed_pnrs = evento.confirmed_pnrs;
+        this.invitado = evento.invitado;
 
 
         if (evento.Pasajero) {
