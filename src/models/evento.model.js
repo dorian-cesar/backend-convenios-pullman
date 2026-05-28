@@ -135,6 +135,12 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             comment: 'Guarda la respuesta íntegra del servidor externo (Kupos)'
         },
+        invitado: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            defaultValue: false,
+            comment: 'true = familiar/acompañante (no es beneficiario directo del convenio), false = beneficiario directo'
+        },
         // Campos de Auditoría
         created_by: {
             type: DataTypes.STRING,

@@ -195,12 +195,21 @@ exports.crearCompraEvento = async (data) => {
 
   let finalEmpresaId = empresa_id;
 
+  // Flag para determinar si el pasajero es beneficiario directo o invitado/familiar.
+  // Se declara fuera del if para que sea accesible al guardar el evento.
+  let esBeneficiarioDirecto = true; // Por defecto true (sin convenio = no es invitado)
+
   if (convenio_id) {
     const convenio = await Convenio.findByPk(convenio_id);
     if (!convenio) throw new NotFoundError('Convenio no encontrado');
     
-    // VALIDACIÓN DE SEGURIDAD: Verificar si el convenio requiere membresía/nómina
-    console.log(`[EVENTO] Validando membresía para convenio: ${convenio.nombre} (ID: ${convenio_id})`);
+    // VALIDACIÓN INFORMATIVA: Verificar si el pasajero es beneficiario directo del convenio.
+    // NOTA: Los familiares/amigos de un beneficiario pueden comprar pasajes con el convenio
+    // sin estar en ninguna nómina. El convenio se hereda SOLO en el boleto, no en la persona.
+    // Por lo tanto, esta validación es INFORMATIVA (log), NO bloqueante.
+    console.log(`[EVENTO] Verificando membresía para convenio: ${convenio.nombre} (ID: ${convenio_id})`);
+
+    esBeneficiarioDirecto = false;
 
     // 1. Verificación en Tablas Corporativas Dinámicas
     const registroCorp = await RegistroTablaClienteCorporativo.findOne({ where: { convenio_id } });
@@ -220,75 +229,82 @@ exports.crearCompraEvento = async (data) => {
         } 
       });
 
-      if (!estaEnNomina) {
-        console.error(`[EVENTO] ❌ Rechazado: Pasajero ${pasajero.rut} no está en nómina corporativa ${registroCorp.nombre_tabla}`);
-        throw new BusinessError(`El pasajero ${pasajero.rut} no pertenece a la nómina autorizada para el convenio ${convenio.nombre}`);
+      if (estaEnNomina) {
+        esBeneficiarioDirecto = true;
+        console.log(`[EVENTO] ✅ Membresía corporativa validada para ${pasajero.rut}`);
+      } else {
+        console.log(`[EVENTO] ℹ️ Pasajero ${pasajero.rut} no está en nómina corporativa ${registroCorp.nombre_tabla} - se permite como familiar/acompañante`);
       }
-      console.log(`[EVENTO] Membresía corporativa validada para ${pasajero.rut}`);
     }
 
-    // 2. Verificación en Tablas Estáticas (FACh, Carabineros, etc.)
-    const nombreLower = convenio.nombre.toLowerCase();
-    const cleanRut = pasajero.rut.replace(/[^0-9kK]/g, '');
-    let validadoPorTablaEstatica = false;
-    let mensajeError = "";
-    
-    if (nombreLower.includes('fach')) {
-      const registroFach = await Fach.findOne({ 
-        where: sequelize.where(
-          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
-          cleanRut
-        )
-      });
-      if (registroFach && registroFach.status === 'ACTIVO') validadoPorTablaEstatica = true;
-      else mensajeError = `El pasajero ${pasajero.rut} no está registrado o activo en FACH.`;
-    } else if (nombreLower.includes('carabinero')) {
-      // SOLO CARABINEROS: Se busca por el cuerpo del RUT (sin DV)
-      const rutSinDV = cleanRut.slice(0, -1);
-      const registroCarab = await Carabinero.findOne({ 
-        where: sequelize.where(
-          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
-          rutSinDV
-        )
-      });
-      if (registroCarab && registroCarab.status === 'ACTIVO') validadoPorTablaEstatica = true;
-      else mensajeError = `El pasajero ${pasajero.rut} no está registrado o activo en Carabineros.`;
-    } else if (nombreLower.includes('estudiante') || nombreLower.includes('tne')) {
-      const registroEst = await Estudiante.findOne({ 
-        where: sequelize.where(
-          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
-          cleanRut
-        )
-      });
-      if (registroEst && registroEst.status === 'ACTIVO') validadoPorTablaEstatica = true;
-      else mensajeError = `El pasajero ${pasajero.rut} no cuenta con registro de estudiante activo.`;
-    } else if (nombreLower.includes('adulto mayor')) {
-      const registroAM = await AdultoMayor.findOne({ 
-        where: sequelize.where(
-          sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
-          cleanRut
-        )
-      });
-      if (registroAM && registroAM.status === 'ACTIVO') validadoPorTablaEstatica = true;
-      else mensajeError = `El pasajero ${pasajero.rut} no cuenta con registro de adulto mayor activo.`;
-    } else {
-      // Si no es un convenio estático conocido, asumimos que se valida por otras vías o es libre
-      validadoPorTablaEstatica = true;
+    // 2. Verificación en Tablas Estáticas (FACh, Carabineros, etc.) - Solo si aún no fue validado
+    if (!esBeneficiarioDirecto) {
+      const nombreLower = convenio.nombre.toLowerCase();
+      const cleanRut = pasajero.rut.replace(/[^0-9kK]/g, '');
+      
+      if (nombreLower.includes('fach')) {
+        const registroFach = await Fach.findOne({ 
+          where: sequelize.where(
+            sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+            cleanRut
+          )
+        });
+        if (registroFach && registroFach.status === 'ACTIVO') {
+          esBeneficiarioDirecto = true;
+          console.log(`[EVENTO] ✅ Pasajero ${pasajero.rut} validado en tabla FACH`);
+        }
+      } else if (nombreLower.includes('carabinero')) {
+        const rutSinDV = cleanRut.slice(0, -1);
+        const registroCarab = await Carabinero.findOne({ 
+          where: sequelize.where(
+            sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+            rutSinDV
+          )
+        });
+        if (registroCarab && registroCarab.status === 'ACTIVO') {
+          esBeneficiarioDirecto = true;
+          console.log(`[EVENTO] ✅ Pasajero ${pasajero.rut} validado en tabla Carabineros`);
+        }
+      } else if (nombreLower.includes('estudiante') || nombreLower.includes('tne')) {
+        const registroEst = await Estudiante.findOne({ 
+          where: sequelize.where(
+            sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+            cleanRut
+          )
+        });
+        if (registroEst && registroEst.status === 'ACTIVO') {
+          esBeneficiarioDirecto = true;
+          console.log(`[EVENTO] ✅ Pasajero ${pasajero.rut} validado en tabla Estudiantes`);
+        }
+      } else if (nombreLower.includes('adulto mayor')) {
+        const registroAM = await AdultoMayor.findOne({ 
+          where: sequelize.where(
+            sequelize.fn('REPLACE', sequelize.fn('REPLACE', sequelize.col('rut'), '.', ''), '-', ''),
+            cleanRut
+          )
+        });
+        if (registroAM && registroAM.status === 'ACTIVO') {
+          esBeneficiarioDirecto = true;
+          console.log(`[EVENTO] ✅ Pasajero ${pasajero.rut} validado en tabla Adulto Mayor`);
+        }
+      } else {
+        // Si no es un convenio estático conocido, asumimos que se valida por otras vías o es libre
+        esBeneficiarioDirecto = true;
+      }
     }
 
-    // --- RESPALDO: Si falló la tabla estática, verificar en la tabla global de Beneficiarios ---
-    if (!validadoPorTablaEstatica) {
-      console.log(`[EVENTO] Pasajero no hallado en tabla estática, buscando en tabla Global de Beneficiarios para convenio ${convenio_id}...`);
-      const { Op } = require('sequelize');
+    // 3. Respaldo: Verificar en la tabla global de Beneficiarios
+    if (!esBeneficiarioDirecto) {
       const { Beneficiario } = require('../models');
       const formattedRUT = formatRut(pasajero.rut);
+      const nombreLower = convenio.nombre.toLowerCase();
+      const cleanRut = pasajero.rut.replace(/[^0-9kK]/g, '');
       
       const orConditions = [
         { rut: formattedRUT },
         { rut: pasajero.rut }
       ];
 
-      // Si es Carabineros (ID 115 o nombre), añadimos búsqueda por cuerpo de RUT en la global también
       if (convenio_id === 115 || nombreLower.includes('carabinero')) {
         orConditions.push({ rut: cleanRut.slice(0, -1) });
       }
@@ -302,15 +318,14 @@ exports.crearCompraEvento = async (data) => {
       });
 
       if (beneficiarioGlobal) {
+        esBeneficiarioDirecto = true;
         console.log(`[EVENTO] ✅ Validación exitosa vía tabla Global de Beneficiarios para ${pasajero.rut}`);
-        validadoPorTablaEstatica = true;
       }
     }
 
-    // Si después del respaldo sigue siendo falso, lanzamos el error
-    if (!validadoPorTablaEstatica && mensajeError) {
-      console.error(`[EVENTO] ❌ Rechazado: ${mensajeError}`);
-      throw new BusinessError(mensajeError);
+    // Log final informativo - NUNCA bloqueamos la creación del evento
+    if (!esBeneficiarioDirecto) {
+      console.log(`[EVENTO] ℹ️ Pasajero ${pasajero.rut} NO es beneficiario directo del convenio ${convenio.nombre} (ID: ${convenio_id}). Se permite como familiar/acompañante. El convenio se hereda en el boleto.`);
     }
 
     // Si hay discrepancia entre lo enviado y el convenio, forzamos el id del convenio
@@ -443,6 +458,7 @@ exports.crearCompraEvento = async (data) => {
     token,
     estado: finalEstado,
     respuesta_kupos,
+    invitado: !esBeneficiarioDirecto,
     fecha_evento: new Date().toISOString()
   };
 
