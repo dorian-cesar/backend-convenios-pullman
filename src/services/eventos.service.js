@@ -176,6 +176,23 @@ exports.crearCompraEvento = async (data) => {
   let pasajero;
 
   const { formatRut } = require('../utils/rut.utils');
+  const { Evento } = require('../models');
+
+  // Idempotencia: Si el frontend reintenta enviar un boleto que ya guardamos con éxito,
+  // devolvemos el existente inmediatamente para que el frontend marque la sincronización como exitosa.
+  if (pnr) {
+    const existe = await Evento.findOne({ where: { pnr } });
+    if (existe) {
+      console.log(`[EVENTO] El PNR ${pnr} ya existe. Retornando evento existente (Idempotencia).`);
+      return existe;
+    }
+  } else if (numero_ticket) {
+    const existe = await Evento.findOne({ where: { numero_ticket } });
+    if (existe) {
+      console.log(`[EVENTO] El Ticket ${numero_ticket} ya existe. Retornando evento existente (Idempotencia).`);
+      return existe;
+    }
+  }
 
   // Si el id es un string (posiblemente un RUT enviado por error desde el front)
   if (typeof pasajero_id === 'string') {
