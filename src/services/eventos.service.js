@@ -487,10 +487,10 @@ exports.crearCompraEvento = async (data) => {
   const evento = await Evento.create(eventoDataToSave);
   console.log(`[EVENTO] COMPRA guardada exitosamente - ID: ${evento.id}, PNR final: ${finalPnr}`);
 
-  // Notificación para eventos expirados
-  if (evento.estado === 'expirado') {
-    emailService.enviarNotificacionEventoExpirado(evento).catch(err => {
-      console.error('[EVENTO] Error enviando notificación de evento expirado:', err.message);
+  // Notificación para eventos expirados o con error_confirmacion
+  if (evento.estado === 'expirado' || evento.estado === 'error_confirmacion') {
+    emailService.enviarNotificacionEventoFallido(evento).catch(err => {
+      console.error(`[EVENTO] Error enviando notificación de evento fallido (${evento.estado}):`, err.message);
     });
   }
 
