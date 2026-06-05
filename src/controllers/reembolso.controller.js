@@ -17,6 +17,9 @@ exports.crear = async (req, res, next) => {
     try {
         console.log('[REEMBOLSO] Recibiendo datos para crear:', req.body);
         const bodyData = { ...req.body };
+        if (bodyData.numero_cuenta && !/^\d+$/.test(bodyData.numero_cuenta)) {
+            return res.status(400).json({ message: 'El número de cuenta solo debe contener números' });
+        }
         if (bodyData.tipo_cuenta) {
             bodyData.tipo_cuenta = formatearTipoCuenta(bodyData.tipo_cuenta);
         }
@@ -77,6 +80,10 @@ exports.actualizar = async (req, res, next) => {
         const { id } = req.params;
         const bodyData = { ...req.body };
 
+        if (bodyData.numero_cuenta && !/^\d+$/.test(bodyData.numero_cuenta)) {
+            return res.status(400).json({ message: 'El número de cuenta solo debe contener números' });
+        }
+
         // Si todos los campos requeridos para la transferencia están presentes en el body o en el registro actual,
         // cambiamos automáticamente el estado a 'DatosBancarios' (si estaba en 'Pending') para habilitar la sincronización.
         const current = await reembolsoService.obtenerReembolso(id);
@@ -126,15 +133,15 @@ exports.obtenerPorToken = async (req, res, next) => {
         const { token } = req.params;
         const reembolso = await reembolsoService.obtenerPorToken(token);
         if (!reembolso) return res.status(404).json({ message: 'Solicitud no hallada' });
-        
+
         // Si ya tiene RUT o cuenta, significa que ya fue completada
         if (reembolso.rut && reembolso.numero_cuenta) {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 message: 'Esta solicitud ya ha sido completada anteriormente.',
-                completed: true 
+                completed: true
             });
         }
-        
+
         res.json(reembolso);
     } catch (error) {
         next(error);
@@ -149,6 +156,11 @@ exports.actualizarPorToken = async (req, res, next) => {
         const { token } = req.params;
         console.log('[REEMBOLSO] Datos recibidos para token:', token, req.body);
         const { correo, rut, numero_cuenta, banco, tipo_cuenta, nombre_beneficiario } = req.body;
+        
+        if (numero_cuenta && !/^\d+$/.test(numero_cuenta)) {
+            return res.status(400).json({ message: 'El número de cuenta solo debe contener números' });
+        }
+
         const formattedTipoCuenta = formatearTipoCuenta(tipo_cuenta);
         // 'Completado' solo se asigna cuando Monday marca como 'Listo'
         const reembolso = await reembolsoService.actualizarPorToken(token, {
@@ -183,16 +195,16 @@ exports.enviarEmailLink = async (req, res, next) => {
         const { id } = req.params;
         const { email } = req.body;
         const reembolso = await reembolsoService.obtenerReembolso(id);
-        
+
         if (!email && !reembolso.correo) {
             return res.status(400).json({ message: 'No se especificó un correo de destino' });
         }
 
         const correoDestino = email || reembolso.correo;
         const emailService = require('../services/email.service');
-        
+
         const success = await emailService.enviarCorreoReembolso(correoDestino, reembolso.pnr, reembolso.token);
-        
+
         if (success) {
             res.json({ message: 'Correo enviado exitosamente' });
         } else {
@@ -211,7 +223,7 @@ exports.sincronizarMonday = async (req, res, next) => {
         const { id } = req.params;
         const mondayService = require('../services/monday.service');
         const reembolso = await reembolsoService.obtenerReembolso(id);
-        
+
         // 1. Intentar buscar si ya existe por PNR
         let mondayItemId = await mondayService.buscarItemPorPNR(reembolso.pnr);
         let message = 'Sincronizado con Monday correctamente';
@@ -220,21 +232,21 @@ exports.sincronizarMonday = async (req, res, next) => {
             // 2. Si no existe, crearlo
             mondayItemId = await mondayService.crearItem(reembolso);
             if (!mondayItemId) {
-                return res.status(400).json({ 
-                    message: 'No se puede sincronizar con Monday. Complete todos los datos bancarios y del beneficiario primero.' 
+                return res.status(400).json({
+                    message: 'No se puede sincronizar con Monday. Complete todos los datos bancarios y del beneficiario primero.'
                 });
             }
             message = 'Item creado en Monday correctamente';
         } else {
             message = 'Item ya existía en Monday, ID vinculado';
         }
-        
+
         // 3. Guardar/Actualizar el ID de Monday en nuestra base de datos
-        await reembolso.update({ 
+        await reembolso.update({
             monday_item_id: String(mondayItemId),
             estado: 'Completado'
         });
-        
+
         res.json({ message, mondayItemId });
     } catch (error) {
         next(error);
@@ -248,7 +260,7 @@ exports.reiniciarSolicitud = async (req, res, next) => {
     try {
         const { id } = req.params;
         const reembolso = await reembolsoService.obtenerReembolso(id);
-        
+
         await reembolso.update({
             rut: null,
             correo: null,
@@ -259,7 +271,7 @@ exports.reiniciarSolicitud = async (req, res, next) => {
             estado: 'Pending',
             updated_by: req.user ? (req.user.nombre || req.user.correo || String(req.user.id)) : 'system'
         });
-        
+
         res.json({ message: 'Solicitud reiniciada correctamente. El enlace público está habilitado de nuevo.' });
     } catch (error) {
         next(error);
@@ -295,7 +307,7 @@ exports.sincronizarEstados = async (req, res, next) => {
             if (!itemId && reembolso.pnr) {
                 console.log(`[SYNC] Buscando ID en Monday para PNR: ${reembolso.pnr}`);
                 itemId = await mondayService.buscarItemPorPNR(reembolso.pnr);
-                
+
                 if (itemId) {
                     await reembolso.update({ monday_item_id: String(itemId) });
                     vinculados++;
@@ -306,14 +318,14 @@ exports.sincronizarEstados = async (req, res, next) => {
             // Si ahora tenemos ID (o ya lo teníamos), consultar estado
             if (itemId) {
                 const estadoMonday = await mondayService.obtenerEstadoItem(itemId);
-                
+
                 // Mapeo flexible de estados (Mayúsculas para comparar)
                 const labelsPagado = ['LISTO', 'PAGADO', 'FINALIZADO', 'COMPLETADO', 'DONE', 'PAGO REALIZADO'];
                 const labelsRechazado = ['RECHAZADO', 'CANCELADO', 'ERROR'];
 
                 if (estadoMonday) {
                     const estadoUpper = estadoMonday.toUpperCase();
-                    
+
                     if (labelsPagado.includes(estadoUpper)) {
                         await reembolso.update({ estado: 'Pagado' });
                         actualizados++;
@@ -330,7 +342,7 @@ exports.sincronizarEstados = async (req, res, next) => {
             }
         }
 
-        res.json({ 
+        res.json({
             message: `Sincronización finalizada. ${actualizados} estados actualizados, ${vinculados} IDs vinculados.`,
             total_procesados: reembolsos.length,
             actualizados,

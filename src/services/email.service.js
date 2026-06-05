@@ -126,12 +126,12 @@ exports.enviarCorreoRechazo = async (correoDestino, nombre, razonRechazo, nombre
 };
 
 /**
- * Envía un correo de notificación técnica cuando se genera un evento con estado 'expirado'.
+ * Envía un correo de notificación técnica cuando se genera un evento con estado 'expirado' o 'error_confirmacion'.
  * @param {Object} evento - El objeto del evento creado.
  */
-exports.enviarNotificacionEventoExpirado = async (evento) => {
+exports.enviarNotificacionEventoFallido = async (evento) => {
     if (!process.env.SENDGRID_API_KEY) {
-        logger.warn('SendGrid API Key no configurada. No se enviará la notificación de evento expirado.');
+        logger.warn('SendGrid API Key no configurada. No se enviará la notificación de evento fallido.');
         return false;
     }
 
@@ -143,14 +143,20 @@ exports.enviarNotificacionEventoExpirado = async (evento) => {
 
     const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'no-reply@pullman.cl';
 
+    const estadoFormateado = evento.estado === 'error_confirmacion' ? 'ERROR DE CONFIRMACIÓN' : evento.estado.toUpperCase();
+    const isErrorConf = evento.estado === 'error_confirmacion';
+    const colorBorde = isErrorConf ? '#dc3545' : '#ffcc00';
+    const colorBg = isErrorConf ? '#f8d7da' : '#fffbef';
+    const colorTexto = isErrorConf ? '#721c24' : '#856404';
+
     const msg = {
         to: toEmails,
         from: fromEmail,
-        subject: `⚠️ Alerta: Evento Expirado detectado - Ticket ${evento.numero_ticket || 'N/A'}`,
+        subject: `⚠️ Alerta: Evento ${estadoFormateado} detectado - Ticket ${evento.numero_ticket || 'N/A'}`,
         html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ffcc00; border-radius: 5px; background-color: #fffbef;">
-                <h2 style="color: #856404;">Notificación de Evento Expirado</h2>
-                <p>Se ha registrado un evento con estado <strong>EXPIRADO</strong> en el sistema.</p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid ${colorBorde}; border-radius: 5px; background-color: ${colorBg};">
+                <h2 style="color: ${colorTexto};">Notificación de Evento ${estadoFormateado}</h2>
+                <p>Se ha registrado un evento con estado <strong>${estadoFormateado}</strong> en el sistema.</p>
                 <hr>
                 <p><strong>Detalles del Evento:</strong></p>
                 <ul style="list-style: none; padding: 0;">
@@ -170,10 +176,10 @@ exports.enviarNotificacionEventoExpirado = async (evento) => {
 
     try {
         await sgMail.send(msg);
-        logger.info(`Notificación de evento expirado enviada a: ${toEmails.join(', ')}`);
+        logger.info(`Notificación de evento ${evento.estado} enviada a: ${toEmails.join(', ')}`);
         return true;
     } catch (error) {
-        logger.error(`Error al enviar notificación de evento expirado:`, error);
+        logger.error(`Error al enviar notificación de evento ${evento.estado}:`, error);
         return false;
     }
 };
