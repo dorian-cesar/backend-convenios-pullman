@@ -169,7 +169,8 @@ exports.crearCompraEvento = async (data) => {
     estado,
     tipo_pago,
     confirmed_pnrs,
-    respuesta_kupos
+    respuesta_kupos,
+    fecha_compra
   } = data;
 
   let finalPasajeroId = pasajero_id;
@@ -476,7 +477,8 @@ exports.crearCompraEvento = async (data) => {
     estado: finalEstado,
     respuesta_kupos,
     invitado: !esBeneficiarioDirecto,
-    fecha_evento: new Date().toISOString()
+    fecha_evento: new Date().toISOString(),
+    fecha_compra
   };
 
   // Solo guardamos el array si tipo_pago es credito y viene el arreglo en la peticion
