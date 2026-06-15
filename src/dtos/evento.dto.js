@@ -23,7 +23,7 @@ class EventoDTO {
         this.monto_devolucion = evento.monto_devolucion;
         this.is_deleted = evento.is_deleted;
         this.fecha_evento = evento.fecha_evento;
-        this.fecha_compra = evento.createdAt; // Alias para createdAt
+        this.fecha_compra = evento.fecha_compra;
         this.codigo_autorizacion = evento.codigo_autorizacion;
         this.token = evento.token;
         this.estado = evento.estado;

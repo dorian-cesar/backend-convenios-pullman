@@ -25,7 +25,8 @@ const crearCompra = {
         estado: Joi.string().allow(null, '').optional(),
         tipo_pago: Joi.string().allow(null, '').optional(),
         confirmed_pnrs: Joi.array().items(Joi.string()).optional(),
-        respuesta_kupos: Joi.any().optional()
+        respuesta_kupos: Joi.any().optional(),
+        fecha_compra: Joi.string().allow(null, '').optional()
     })
 };
 
