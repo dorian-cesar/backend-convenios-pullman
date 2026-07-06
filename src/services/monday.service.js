@@ -202,6 +202,7 @@ class MondayService {
         const nroCuentaVal = data.numero_cuenta || "Sin Cuenta";
 
         const columnValues = {
+            "name": data.nombre_beneficiario || data.nombre_pasajero || `Reembolso ${data.pnr}`,
             "text_mkybpcy2": rutVal,
             "email5u69zpnc": { "email": emailVal, "text": emailVal },
             "text_mm0hc2f7": pnrVal,

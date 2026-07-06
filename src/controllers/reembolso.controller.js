@@ -224,8 +224,8 @@ exports.sincronizarMonday = async (req, res, next) => {
         const mondayService = require('../services/monday.service');
         const reembolso = await reembolsoService.obtenerReembolso(id);
 
-        // 1. Intentar buscar si ya existe por PNR
-        let mondayItemId = await mondayService.buscarItemPorPNR(reembolso.pnr);
+        // 1. Intentar usar el ID guardado, o buscar por PNR si no está guardado
+        let mondayItemId = reembolso.monday_item_id || await mondayService.buscarItemPorPNR(reembolso.pnr);
         let message = 'Sincronizado con Monday correctamente';
 
         if (!mondayItemId) {
