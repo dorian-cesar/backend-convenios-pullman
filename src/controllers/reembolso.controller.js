@@ -238,7 +238,14 @@ exports.sincronizarMonday = async (req, res, next) => {
             }
             message = 'Item creado en Monday correctamente';
         } else {
-            message = 'Item ya existía en Monday, ID vinculado';
+            // Si ya existe y estamos re-sincronizando (ej: cambiaron info), actualizamos el registro de Monday
+            try {
+                await mondayService.actualizarItem(mondayItemId, reembolso);
+                message = 'Item actualizado en Monday con la nueva información';
+            } catch (updateError) {
+                console.error('[MONDAY] Error al actualizar item existente:', updateError.message);
+                message = 'Item ya existía en Monday, ID vinculado (error al actualizar)';
+            }
         }
 
         // 3. Guardar/Actualizar el ID de Monday en nuestra base de datos
@@ -350,5 +357,75 @@ exports.sincronizarEstados = async (req, res, next) => {
         });
     } catch (error) {
         next(error);
+    }
+};
+
+/**
+ * Endpoint para recibir Webhooks de Monday.com
+ * Se activa cuando cambia una columna de estado en el tablero.
+ */
+exports.webhookMonday = async (req, res, next) => {
+    try {
+        // 1. Verificación de Challenge (requerido por Monday al configurar el webhook)
+        if (req.body.challenge) {
+            console.log('[MONDAY WEBHOOK] Challenge recibido y respondido');
+            return res.status(200).send(req.body);
+        }
+
+        // 2. Procesamiento del Evento
+        const { event } = req.body;
+        if (!event || !event.pulseId) {
+            return res.status(200).json({ message: 'No event data' });
+        }
+
+        const mondayItemId = String(event.pulseId);
+        let nuevoEstado = null;
+
+        // Extraer el nuevo valor del estado desde el payload de Monday
+        if (event.value && event.value.label && event.value.label.text) {
+            nuevoEstado = event.value.label.text;
+        }
+
+        if (!nuevoEstado) {
+            console.log(`[MONDAY WEBHOOK] No se encontró el texto del estado en el evento para item: ${mondayItemId}`);
+            return res.status(200).json({ message: 'No status text found' });
+        }
+
+        const { Reembolso } = require('../models');
+        const reembolso = await Reembolso.findOne({ where: { monday_item_id: mondayItemId } });
+
+        if (!reembolso) {
+            console.log(`[MONDAY WEBHOOK] Reembolso no encontrado para item ID: ${mondayItemId}`);
+            return res.status(200).json({ message: 'Reembolso no encontrado localmente' });
+        }
+
+        const estadoUpper = nuevoEstado.toUpperCase();
+        
+        // Mapeo flexible de estados (Mayúsculas para comparar) igual que en sincronizarEstados
+        const labelsPagado = ['LISTO', 'PAGADO', 'FINALIZADO', 'COMPLETADO', 'DONE', 'PAGO REALIZADO'];
+        const labelsRechazado = ['RECHAZADO', 'CANCELADO', 'ERROR'];
+
+        let estadoAActualizar = null;
+
+        if (labelsPagado.includes(estadoUpper)) {
+            estadoAActualizar = 'Pagado';
+        } else if (labelsRechazado.includes(estadoUpper)) {
+            estadoAActualizar = 'Rechazado';
+        } else if (['DatosBancarios', 'En Proceso'].includes(reembolso.estado)) {
+            estadoAActualizar = 'Completado';
+        }
+
+        if (estadoAActualizar && reembolso.estado !== estadoAActualizar) {
+            await reembolso.update({ estado: estadoAActualizar });
+            console.log(`[MONDAY WEBHOOK] Reembolso ID ${reembolso.id} actualizado a '${estadoAActualizar}' por webhook de Monday`);
+        }
+
+        // Responder HTTP 200 rápido para que Monday marque la notificación como exitosa
+        return res.status(200).json({ message: 'Webhook procesado' });
+
+    } catch (error) {
+        console.error('[MONDAY WEBHOOK] Error procesando webhook:', error.message);
+        // Devolvemos 200 de todos modos para que Monday no suspenda el webhook por fallos
+        return res.status(200).json({ error: 'Error interno procesando webhook' });
     }
 };

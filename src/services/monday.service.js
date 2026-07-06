@@ -134,6 +134,117 @@ class MondayService {
     }
     
     /**
+     * Actualizar un item existente en el tablero de Monday
+     * @param {string} itemId ID del elemento en Monday
+     * @param {Object} data Datos del reembolso actualizados
+     */
+    async actualizarItem(itemId, data) {
+        if (!this.apiKey || !this.boardId || !itemId) {
+            console.warn('[MONDAY] API Key, Board ID o Item ID no configurados para actualizar');
+            return null;
+        }
+
+        const query = `
+            mutation ($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
+                change_multiple_column_values (
+                    board_id: $boardId, 
+                    item_id: $itemId, 
+                    column_values: $columnValues
+                ) {
+                    id
+                }
+            }
+        `;
+
+        let tipoDevolucionLabel = "Débito"; // default
+        if (data.tipo_cuenta) {
+            const tcUpper = data.tipo_cuenta.toUpperCase();
+            if (tcUpper.includes('CREDITO') || tcUpper.includes('CRÉDITO') || tcUpper.includes('CUOTAS')) {
+                tipoDevolucionLabel = 'Crédito en Cuotas';
+            } else {
+                tipoDevolucionLabel = 'Débito';
+            }
+        }
+
+        const rutVal = data.rut || "Sin RUT";
+        const emailVal = data.correo || "viajes@pullmanbus.cl";
+        const pnrVal = data.pnr || "S/PNR";
+        const origenVal = data.origen || "Sin Origen";
+        const destinoVal = data.destino || "Sin Destino";
+        
+        let fechaSalidaFormatted = new Date().toISOString().split('T')[0];
+        if (data.fecha_salida) {
+            fechaSalidaFormatted = data.fecha_salida.includes('-') && data.fecha_salida.split('-')[0].length === 2 
+                ? data.fecha_salida.split('-').reverse().join('-') 
+                : data.fecha_salida.split('T')[0];
+        }
+
+        const asientoVal = data.numero_asiento ? Number(data.numero_asiento) : 0;
+        const montoVal = data.monto ? Number(data.monto) : 0;
+        const bancoVal = data.banco || "Sin Especificar";
+        
+        let tipoCuentaVal = "Cuenta Vista"; // default
+        if (data.tipo_cuenta) {
+            const tcUpper = data.tipo_cuenta.toUpperCase();
+            if (tcUpper.includes('VISTA')) {
+                tipoCuentaVal = 'Cuenta Vista';
+            } else if (tcUpper.includes('RUT')) {
+                tipoCuentaVal = 'Cuenta Rut';
+            } else if (tcUpper.includes('CORRIENTE')) {
+                tipoCuentaVal = 'Corriente';
+            } else if (tcUpper.includes('AHORRO')) {
+                tipoCuentaVal = 'Cuenta Ahorro';
+            } else {
+                tipoCuentaVal = data.tipo_cuenta.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+            }
+        }
+        
+        const nroCuentaVal = data.numero_cuenta || "Sin Cuenta";
+
+        const columnValues = {
+            "text_mkybpcy2": rutVal,
+            "email5u69zpnc": { "email": emailVal, "text": emailVal },
+            "text_mm0hc2f7": pnrVal,
+            "text_mkybrjrx": origenVal,
+            "text_mkybzxs5": destinoVal,
+            "date_mkyb96c3": fechaSalidaFormatted,
+            "numeric_mkyb79nh": asientoVal,
+            "numeric_mkybttcy": montoVal,
+            "text_mkybh4k9": bancoVal,
+            "text_mm3fnxw9": tipoCuentaVal,
+            "text_mm071egp": nroCuentaVal,
+            "color_mkybj85y": { "label": tipoDevolucionLabel }
+        };
+
+        try {
+            const response = await axios.post(this.apiUrl, {
+                query,
+                variables: {
+                    boardId: this.boardId,
+                    itemId: itemId,
+                    columnValues: JSON.stringify(columnValues)
+                }
+            }, {
+                headers: {
+                    'Authorization': this.apiKey,
+                    'Content-Type': 'application/json',
+                    'API-Version': '2023-10'
+                }
+            });
+
+            if (response.data.errors) {
+                console.error('[MONDAY] Errores en la mutación al actualizar:', response.data.errors);
+                throw new Error('Error al actualizar item en Monday');
+            }
+
+            return response.data.data.change_multiple_column_values.id;
+        } catch (error) {
+            console.error('[MONDAY] Error al actualizar item:', error.message);
+            throw error;
+        }
+    }
+    
+    /**
      * Obtener el estado de un item en Monday
      * @param {string} itemId ID del elemento en Monday
      */

@@ -20,8 +20,9 @@ router.post('/:id/sync-monday', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reemb
 router.post('/:id/send-email', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.enviarEmailLink);
 router.delete('/:id', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.eliminar);
 
-// Rutas públicas (por token dinámico)
+// Rutas públicas (por token dinámico o webhooks de terceros)
 router.get('/ping', (req, res) => res.send('pong'));
+router.post('/webhook-monday', reembolsoController.webhookMonday);
 router.get('/public/:token', reembolsoController.obtenerPorToken);
 router.put('/public/:token', reembolsoController.actualizarPorToken);
 
