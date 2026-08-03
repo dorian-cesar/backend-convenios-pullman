@@ -59,3 +59,23 @@ exports.descargarTodosLosEventos = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Descarga masiva de TODOS los reembolsos en formato CSV.
+ */
+exports.descargarTodosLosReembolsos = async (req, res, next) => {
+    try {
+        const csvContent = await exportService.exportarTodosLosReembolsos();
+
+        const fileName = `todos_los_reembolsos_${new Date().toISOString().split('T')[0]}.csv`;
+
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+
+        return res.status(200).send(csvContent);
+
+    } catch (error) {
+        console.error('Error al generar exportación de reembolsos:', error);
+        next(error);
+    }
+};

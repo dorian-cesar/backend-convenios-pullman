@@ -1,4 +1,4 @@
-const { Beneficiario, Carabinero, Fach, Convenio, Empresa, Evento, Pasajero } = require('../models');
+const { Beneficiario, Carabinero, Fach, Convenio, Empresa, Evento, Pasajero, Reembolso } = require('../models');
 
 /**
  * Genera un archivo CSV con todos los beneficiarios activos.
@@ -190,3 +190,66 @@ exports.exportarTodosLosEventos = async () => {
     const csvContent = '\ufeff' + [encabezados, ...filas].join('\n');
     return csvContent;
 };
+
+/**
+ * Genera un archivo CSV con TODOS los reembolsos registrados.
+ */
+exports.exportarTodosLosReembolsos = async () => {
+    const reembolsos = await Reembolso.findAll({
+        order: [['createdAt', 'DESC']]
+    });
+
+    const encabezados = [
+        'ID',
+        'Token',
+        'PNR',
+        'Categoria',
+        'Numero_Asiento',
+        'Operador',
+        'Fecha_Cancelacion',
+        'Monto',
+        'Correo',
+        'RUT',
+        'Numero_Cuenta',
+        'Banco',
+        'Tipo_Cuenta',
+        'Nombre_Beneficiario',
+        'Nombre_Pasajero',
+        'Origen',
+        'Destino',
+        'Fecha_Salida',
+        'Canal_Venta',
+        'Estado',
+        'Fecha_Creacion'
+    ].join(';');
+
+    const filas = reembolsos.map(r => {
+        return [
+            r.id,
+            `"${r.token}"`,
+            `"${r.pnr}"`,
+            `"${r.categoria}"`,
+            `"${r.numero_asiento || ''}"`,
+            `"${r.operador || ''}"`,
+            `"${r.fecha_cancelacion || ''}"`,
+            r.monto,
+            `"${r.correo || ''}"`,
+            `"${r.rut || ''}"`,
+            `"${r.numero_cuenta || ''}"`,
+            `"${r.banco || ''}"`,
+            `"${r.tipo_cuenta || ''}"`,
+            `"${r.nombre_beneficiario || ''}"`,
+            `"${r.nombre_pasajero || ''}"`,
+            `"${r.origen || ''}"`,
+            `"${r.destino || ''}"`,
+            `"${r.fecha_salida || ''}"`,
+            `"${r.canal_venta || ''}"`,
+            `"${r.estado || ''}"`,
+            r.createdAt ? r.createdAt.toISOString().split('T')[0] : 'N/A'
+        ].join(';');
+    });
+
+    const csvContent = '\ufeff' + [encabezados, ...filas].join('\n');
+    return csvContent;
+};
+
