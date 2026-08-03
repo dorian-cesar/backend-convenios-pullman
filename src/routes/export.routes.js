@@ -64,4 +64,24 @@ router.get('/convenios', authMiddleware, exportController.descargarTodosLosConve
  */
 router.get('/eventos', authMiddleware, exportController.descargarTodosLosEventos);
 
+/**
+ * @openapi
+ * /api/export/reembolsos:
+ *   get:
+ *     summary: Descargar lista de todos los reembolsos
+ *     description: Retorna un archivo CSV con la totalidad de los registros de la tabla reembolsos.
+ *     tags: [Exportaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Archivo CSV de reembolsos generado exitosamente.
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
+router.get('/reembolsos', authMiddleware, exportController.descargarTodosLosReembolsos);
+
 module.exports = router;
