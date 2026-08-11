@@ -20,7 +20,8 @@ exports.listarReembolsos = async (filters) => {
         search,
         estado,
         pnr,
-        rut
+        rut,
+        categoria
     } = filters;
 
     const offset = (page - 1) * limit;
@@ -29,6 +30,7 @@ exports.listarReembolsos = async (filters) => {
     if (estado) where.estado = estado;
     if (pnr) where.pnr = { [Op.like]: `%${pnr}%` };
     if (rut) where.rut = { [Op.like]: `%${rut}%` };
+    if (categoria) where.categoria = categoria;
     
     if (search) {
         where[Op.or] = [
