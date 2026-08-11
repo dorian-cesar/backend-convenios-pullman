@@ -429,3 +429,15 @@ exports.webhookMonday = async (req, res, next) => {
         return res.status(200).json({ error: 'Error interno procesando webhook' });
     }
 };
+
+/**
+ * Obtener lista de gestores únicos
+ */
+exports.obtenerGestores = async (req, res, next) => {
+    try {
+        const gestores = await reembolsoService.obtenerGestoresUnicos();
+        res.json(gestores);
+    } catch (error) {
+        next(error);
+    }
+};

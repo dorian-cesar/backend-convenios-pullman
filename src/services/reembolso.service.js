@@ -104,3 +104,15 @@ exports.actualizarPorToken = async (token, data) => {
     if (!reembolso) throw new Error('Solicitud no encontrada');
     return await reembolso.update(data);
 };
+
+/**
+ * Obtener gestores únicos
+ */
+exports.obtenerGestoresUnicos = async () => {
+    const gestores = await Reembolso.findAll({
+        attributes: ['created_by'],
+        group: ['created_by'],
+        where: { created_by: { [Op.ne]: null } }
+    });
+    return gestores.map(g => g.created_by).filter(Boolean);
+};

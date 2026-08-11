@@ -15,6 +15,7 @@ router.post('/sync-status', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolso
 router.post('/reiniciar/:id', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.reiniciarSolicitud);
 router.post('/', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.crear);
 router.get('/', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.listar);
+router.get('/gestores', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.obtenerGestores);
 router.put('/:id', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.actualizar);
 router.post('/:id/sync-monday', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.sincronizarMonday);
 router.post('/:id/send-email', auth, roles(['SUPER_USUARIO', 'SISTEMA']), reembolsoController.enviarEmailLink);
