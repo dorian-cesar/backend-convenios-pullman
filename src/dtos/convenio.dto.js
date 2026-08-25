@@ -33,6 +33,23 @@ class ConvenioDTO {
         this.tope_monto_descuento = convenio.tope_monto_descuento;
         this.tope_cantidad_tickets = convenio.tope_cantidad_tickets;
 
+        // --- Nuevos campos de inscripción ---
+        this.inscripcion_activa = !!convenio.inscripcion_activa;
+        this.fecha_inicio_inscripcion = convenio.fecha_inicio_inscripcion || null;
+        this.fecha_fin_inscripcion = convenio.fecha_fin_inscripcion || null;
+
+        const ahora = new Date();
+        let isOpen = this.inscripcion_activa;
+
+        if (isOpen && this.fecha_inicio_inscripcion && ahora < new Date(this.fecha_inicio_inscripcion)) {
+            isOpen = false;
+        }
+        if (isOpen && this.fecha_fin_inscripcion && ahora > new Date(this.fecha_fin_inscripcion)) {
+            isOpen = false;
+        }
+        this.inscription = isOpen;
+        // ------------------------------------
+
         // Nuevos campos directos
         this.tipo_alcance = convenio.tipo_alcance || 'Global';
         this.tipo_descuento = convenio.tipo_descuento || 'Porcentaje';

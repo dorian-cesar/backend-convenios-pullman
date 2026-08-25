@@ -22,11 +22,29 @@ exports.crear = async (data) => {
         data.imagenes = null;
     }
 
-    // Automatización: Obtener empresa_id desde el convenio si no viene en el payload
-    if (!data.empresa_id && data.convenio_id) {
-        console.log('[Beneficiario Service] Buscando empresa para convenio:', data.convenio_id);
+    // Automatización: Obtener empresa_id desde el convenio si no viene en el payload y Validar Fechas/Estado de Inscripción
+    if (data.convenio_id) {
+        console.log('[Beneficiario Service] Buscando convenio para validar inscripción:', data.convenio_id);
         const convenio = await Convenio.findByPk(data.convenio_id);
-        if (convenio) {
+        if (!convenio) {
+            throw new AppError('El convenio especificado no existe', 404);
+        }
+
+        // 1. Validar el switch manual
+        if (convenio.inscripcion_activa === false) {
+            throw new AppError('El periodo de inscripción para este beneficio se encuentra cerrado actualmente.', 400);
+        }
+
+        // 2. Validar fechas de inscripción
+        const ahora = new Date();
+        if (convenio.fecha_inicio_inscripcion && ahora < new Date(convenio.fecha_inicio_inscripcion)) {
+            throw new AppError('El periodo de inscripción para este convenio aún no ha comenzado.', 400);
+        }
+        if (convenio.fecha_fin_inscripcion && ahora > new Date(convenio.fecha_fin_inscripcion)) {
+            throw new AppError('El periodo de inscripción para este convenio ha finalizado.', 400);
+        }
+
+        if (!data.empresa_id) {
             data.empresa_id = convenio.empresa_id;
         }
     }
