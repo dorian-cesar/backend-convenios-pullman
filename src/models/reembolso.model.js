@@ -52,11 +52,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         // Auditoría
         created_by: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: true
         },
         updated_by: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: true
         }
     }, {

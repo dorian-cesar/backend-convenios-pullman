@@ -104,6 +104,19 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false,
             allowNull: true
         },
+        inscripcion_activa: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            comment: 'Switch manual para habilitar/deshabilitar inscripcion publica'
+        },
+        fecha_inicio_inscripcion: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        fecha_fin_inscripcion: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
         imagenes: {
             type: DataTypes.JSON, // Array of strings
             allowNull: true
