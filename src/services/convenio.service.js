@@ -7,7 +7,7 @@ const { getPagination, getPagingData } = require('../utils/pagination.utils');
 /**
  * Crear convenio
  */
-exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, tipo_alcance, tipo_descuento, valor_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes, rutas, configuraciones }) => {
+exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets, porcentaje_descuento, tipo_alcance, tipo_descuento, valor_descuento, codigo, limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino, beneficio, imagenes, rutas, configuraciones, inscripcion_activa, fecha_inicio_inscripcion, fecha_fin_inscripcion }) => {
     if (!nombre || !empresa_id) {
         throw new BusinessError('Nombre y empresa_id son obligatorios');
     }
@@ -130,6 +130,9 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
         limitar_por_monto: limitar_por_monto || false,
         fecha_inicio,
         fecha_termino,
+        fecha_inicio_inscripcion,
+        fecha_fin_inscripcion,
+        inscripcion_activa: inscripcion_activa || false,
         status: statusInicial,
         beneficio: beneficio || false,
         imagenes: imagenes || [],
@@ -389,7 +392,8 @@ exports.actualizarConvenio = async (id, datos) => {
         tipo_alcance, tipo_descuento, valor_descuento,
         limitar_por_stock, limitar_por_monto, fecha_inicio, fecha_termino,
         tipo, api_consulta_id, tope_monto_descuento, tope_cantidad_tickets,
-        beneficio, imagenes, rutas, configuraciones, categoria_id
+        beneficio, imagenes, rutas, configuraciones, categoria_id,
+        inscripcion_activa, fecha_inicio_inscripcion, fecha_fin_inscripcion
     } = datos;
 
     if (nombre) convenio.nombre = nombre;
@@ -397,6 +401,10 @@ exports.actualizarConvenio = async (id, datos) => {
     if (categoria_id !== undefined) convenio.categoria_id = categoria_id;
 
     // Asignación de nuevos campos
+    if (inscripcion_activa !== undefined) convenio.inscripcion_activa = inscripcion_activa;
+    if (fecha_inicio_inscripcion !== undefined) convenio.fecha_inicio_inscripcion = fecha_inicio_inscripcion;
+    if (fecha_fin_inscripcion !== undefined) convenio.fecha_fin_inscripcion = fecha_fin_inscripcion;
+    
     if (tipo_alcance !== undefined) convenio.tipo_alcance = tipo_alcance;
     if (tipo_descuento !== undefined) convenio.tipo_descuento = tipo_descuento;
     if (valor_descuento !== undefined) convenio.valor_descuento = valor_descuento;
