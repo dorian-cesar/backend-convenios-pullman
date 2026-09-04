@@ -27,6 +27,8 @@ const clienteCorporativoTablaEmpresaRoutes = require('./clienteCorporativoTablaE
 const categoriaRoutes = require('./categoria.routes');
 const reembolsoRoutes = require('./reembolso.routes');
 const invalidacionesRoutes = require('./invalidaciones.routes');
+const bannerRoutes = require('./banner.routes');
+const configuracionRoutes = require('./configuracion.routes');
 
 const router = Router();
 
@@ -57,5 +59,7 @@ router.use('/tablas-clientes-corporativos', clienteCorporativoTablaEmpresaRoutes
 router.use('/categorias', categoriaRoutes);
 router.use('/reembolsos', reembolsoRoutes);
 router.use('/invalidaciones', invalidacionesRoutes);
+router.use('/banners', bannerRoutes);
+router.use('/configuraciones', configuracionRoutes);
 
 module.exports = router;

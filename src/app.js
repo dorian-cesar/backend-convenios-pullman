@@ -27,6 +27,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 
 // Rutas
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
 if (process.env.SHOW_SWAGGER === 'true' || process.env.NODE_ENV === 'development') {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }

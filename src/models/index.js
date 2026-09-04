@@ -23,6 +23,8 @@ const RegistroTablaClienteCorporativo = require('./registroTablaClienteCorporati
 const Categoria = require('./categoria.model')(sequelize, Sequelize.DataTypes);
 const Reembolso = require('./reembolso.model')(sequelize, Sequelize.DataTypes);
 const InvalidacionLog = require('./invalidacionLog.model')(sequelize, Sequelize.DataTypes);
+const Banner = require('./banner.model')(sequelize, Sequelize.DataTypes);
+const Configuracion = require('./configuracion.model')(sequelize, Sequelize.DataTypes);
 
 /**
  * -----------------------------------------
@@ -135,5 +137,7 @@ module.exports = {
   RegistroTablaClienteCorporativo,
   Categoria,
   Reembolso,
-  InvalidacionLog
+  InvalidacionLog,
+  Banner,
+  Configuracion
 };
