@@ -42,7 +42,7 @@ exports.listar = async (req, res, next) => {
         });
 
         // Add dynamic image info (size, resolution, extension)
-        const sizeOf = require('image-size');
+        const { imageSize } = require('image-size');
         const enrichedBanners = banners.map(b => {
             const bannerData = b.toJSON();
             const filePath = path.join(__dirname, '../../public', bannerData.image_url);
@@ -53,7 +53,7 @@ exports.listar = async (req, res, next) => {
                     bannerData.size = `${sizeKB} KB`;
                     
                     try {
-                        const dimensions = sizeOf(filePath);
+                        const dimensions = imageSize(filePath);
                         bannerData.resolution = `${dimensions.width}x${dimensions.height}`;
                     } catch (dimErr) {
                         console.error('Error reading dimensions for', filePath, dimErr);
