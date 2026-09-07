@@ -53,7 +53,8 @@ exports.listar = async (req, res, next) => {
                     bannerData.size = `${sizeKB} KB`;
                     
                     try {
-                        const dimensions = imageSize(filePath);
+                        const buffer = fs.readFileSync(filePath);
+                        const dimensions = imageSize(buffer);
                         bannerData.resolution = `${dimensions.width}x${dimensions.height}`;
                     } catch (dimErr) {
                         console.error('Error reading dimensions for', filePath, dimErr);
