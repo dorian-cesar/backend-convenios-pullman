@@ -68,7 +68,7 @@ exports.listar = async (req, res, next) => {
                 }
             } catch (err) {
                 console.error('General error reading banner stats for', filePath, err);
-                bannerData.size = 'Error';
+                bannerData.size = err.message || 'Error';
                 bannerData.resolution = 'Error';
                 bannerData.extension = 'Error';
             }
