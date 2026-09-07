@@ -52,8 +52,13 @@ exports.listar = async (req, res, next) => {
                     const sizeKB = (stats.size / 1024).toFixed(2);
                     bannerData.size = `${sizeKB} KB`;
                     
-                    const dimensions = sizeOf(filePath);
-                    bannerData.resolution = `${dimensions.width}x${dimensions.height}`;
+                    try {
+                        const dimensions = sizeOf(filePath);
+                        bannerData.resolution = `${dimensions.width}x${dimensions.height}`;
+                    } catch (dimErr) {
+                        console.error('Error reading dimensions for', filePath, dimErr);
+                        bannerData.resolution = 'Desconocida';
+                    }
                     
                     bannerData.extension = path.extname(filePath).toUpperCase().replace('.', '');
                 } else {
@@ -62,6 +67,7 @@ exports.listar = async (req, res, next) => {
                     bannerData.extension = 'N/A';
                 }
             } catch (err) {
+                console.error('General error reading banner stats for', filePath, err);
                 bannerData.size = 'Error';
                 bannerData.resolution = 'Error';
                 bannerData.extension = 'Error';
