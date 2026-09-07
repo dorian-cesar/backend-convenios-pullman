@@ -40,7 +40,36 @@ exports.listar = async (req, res, next) => {
                 ['createdAt', 'DESC']
             ]
         });
-        res.json(banners);
+
+        // Add dynamic image info (size, resolution, extension)
+        const sizeOf = require('image-size');
+        const enrichedBanners = banners.map(b => {
+            const bannerData = b.toJSON();
+            const filePath = path.join(__dirname, '../../public', bannerData.image_url);
+            try {
+                if (fs.existsSync(filePath)) {
+                    const stats = fs.statSync(filePath);
+                    const sizeKB = (stats.size / 1024).toFixed(2);
+                    bannerData.size = `${sizeKB} KB`;
+                    
+                    const dimensions = sizeOf(filePath);
+                    bannerData.resolution = `${dimensions.width}x${dimensions.height}`;
+                    
+                    bannerData.extension = path.extname(filePath).toUpperCase().replace('.', '');
+                } else {
+                    bannerData.size = 'N/A';
+                    bannerData.resolution = 'N/A';
+                    bannerData.extension = 'N/A';
+                }
+            } catch (err) {
+                bannerData.size = 'Error';
+                bannerData.resolution = 'Error';
+                bannerData.extension = 'Error';
+            }
+            return bannerData;
+        });
+
+        res.json(enrichedBanners);
     } catch (error) {
         next(error);
     }
