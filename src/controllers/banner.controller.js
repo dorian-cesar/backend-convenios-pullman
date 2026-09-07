@@ -57,7 +57,7 @@ exports.listar = async (req, res, next) => {
                         bannerData.resolution = `${dimensions.width}x${dimensions.height}`;
                     } catch (dimErr) {
                         console.error('Error reading dimensions for', filePath, dimErr);
-                        bannerData.resolution = 'Desconocida';
+                        bannerData.resolution = dimErr.message || 'Desconocida';
                     }
                     
                     bannerData.extension = path.extname(filePath).toUpperCase().replace('.', '');
