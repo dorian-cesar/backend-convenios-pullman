@@ -145,6 +145,12 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false,
             comment: 'true = familiar/acompañante (no es beneficiario directo del convenio), false = beneficiario directo'
         },
+        origen_compra: {
+            type: DataTypes.ENUM('WEB', 'TOTEM', 'OTRO'),
+            allowNull: true,
+            defaultValue: 'WEB',
+            comment: 'Identifica desde dónde se originó la compra'
+        },
         // Campos de Auditoría
         created_by: {
             type: DataTypes.STRING,
