@@ -29,6 +29,7 @@ class EventoDTO {
         this.estado = evento.estado;
         this.confirmed_pnrs = evento.confirmed_pnrs;
         this.invitado = evento.invitado;
+        this.origen_compra = evento.origen_compra;
 
 
         if (evento.Pasajero) {
