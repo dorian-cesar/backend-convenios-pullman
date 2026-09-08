@@ -781,7 +781,7 @@ exports.verificarDisponibilidadPorId = async (id) => {
 /**
  * Desactivar convenios vencidos (Batch Job)
  */
-exports.desactivarConveniosVencidos = async () => {
+exports.sincronizarEstadosConvenios = async () => {
     const hoy = new Date();
     const result = { total: 0, totalDesactivados: 0, totalActivados: 0, details: [] };
 
@@ -800,6 +800,26 @@ exports.desactivarConveniosVencidos = async () => {
         convenio.status = 'INACTIVO';
         await convenio.save();
         result.totalDesactivados++;
+        result.details.push(`Desactivado: Convenio ${convenio.id}`);
+    }
+
+    // 2. Activar convenios inactivos que ya empezaron (fecha_inicio <= inicioHoy) y no han vencido
+    const conveniosParaActivar = await Convenio.findAll({
+        where: {
+            status: 'INACTIVO',
+            fecha_inicio: { [Op.lte]: hoy },
+            [Op.or]: [
+                { fecha_termino: { [Op.gte]: inicioHoy } },
+                { fecha_termino: null }
+            ]
+        }
+    });
+
+    for (const convenio of conveniosParaActivar) {
+        convenio.status = 'ACTIVO';
+        await convenio.save();
+        result.totalActivados++;
+        result.details.push(`Activado: Convenio ${convenio.id}`);
     }
 
     result.total = result.totalDesactivados + result.totalActivados;

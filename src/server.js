@@ -37,11 +37,9 @@ async function startServer() {
     const convenioService = require('./services/convenio.service');
     setInterval(async () => {
       try {
-        logger.info('⏰ Ejecutando limpieza de convenios vencidos...');
-        const result = await convenioService.desactivarConveniosVencidos();
-        if (result.total > 0) {
-          logger.info(`✅ Cleaned ${result.total} expired conventions.`);
-        }
+        logger.info('Iniciando tarea de limpieza y sincronización de convenios...');
+        const result = await convenioService.sincronizarEstadosConvenios();
+        logger.info(`Sincronización completada. Desactivados: ${result.totalDesactivados}, Activados: ${result.totalActivados}`);
       } catch (err) {
         logger.error('❌ Error en job de limpieza:', err);
       }
