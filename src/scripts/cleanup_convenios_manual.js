@@ -14,11 +14,13 @@ async function runCleanup() {
         await sequelize.sync({ alter: true });
         console.log('Schema synced.');
 
-        console.log('Running cleanup of expired conventions...');
-        const result = await convenioService.desactivarConveniosVencidos();
+        console.log('Running synchronization of convention statuses...');
+        const result = await convenioService.sincronizarEstadosConvenios();
 
-        console.log('Cleanup finished.');
-        console.log(`Total conventions deactivated: ${result.total}`);
+        console.log('Synchronization finished.');
+        console.log(`Total conventions deactivated: ${result.totalDesactivados}`);
+        console.log(`Total conventions activated: ${result.totalActivados}`);
+        console.log(`Details:`, result.details);
 
         process.exit(0);
     } catch (error) {
