@@ -117,10 +117,8 @@ const validarCodigoConvenio = {
         codigo: Joi.string().required(),
     }),
     body: Joi.object().keys({
-        convenio_id: Joi.number().integer(),
-        id: Joi.number().integer()
-    }).or('convenio_id', 'id').messages({
-        'object.missing': 'Debe proporcionar "convenio_id" o "id" en el cuerpo de la petición.'
+        convenio_id: Joi.number().integer().optional(),
+        id: Joi.number().integer().optional()
     })
 };
 

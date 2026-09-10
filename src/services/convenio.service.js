@@ -70,6 +70,15 @@ exports.crearConvenio = async ({ nombre, empresa_id, tipo, endpoint, api_consult
     // Lógica de Estado Inicial
     let statusInicial = 'ACTIVO';
 
+    if (finalCodigo && statusInicial === 'ACTIVO') {
+        const existente = await Convenio.findOne({
+            where: { codigo: finalCodigo, status: 'ACTIVO' }
+        });
+        if (existente) {
+            throw new BusinessError(`Ya existe un convenio activo con el código "${finalCodigo}". No se puede tener dos convenios activos con el mismo código.`);
+        }
+    }
+
     // Lógica de compatibilidad hacia atrás Fase 3
     let finalValorDescuento = valor_descuento;
     let finalTipoDescuento = tipo_descuento || 'Porcentaje';
@@ -413,9 +422,22 @@ exports.actualizarConvenio = async (id, datos) => {
     if (codigo !== undefined) convenio.codigo = finalTipo === 'API_EXTERNA' ? null : codigo;
     if (limitar_por_stock !== undefined) convenio.limitar_por_stock = limitar_por_stock;
     if (limitar_por_monto !== undefined) convenio.limitar_por_monto = limitar_por_monto;
-    // Asignación de rutas y configuraciones (si vienen en el payload, se guardan)
     if (rutas !== undefined) convenio.rutas = rutas;
     if (configuraciones !== undefined) convenio.configuraciones = configuraciones;
+
+    // Validación de código duplicado activo
+    if (convenio.status === 'ACTIVO' && convenio.codigo) {
+        const existente = await Convenio.findOne({
+            where: {
+                codigo: convenio.codigo,
+                status: 'ACTIVO',
+                id: { [Op.ne]: convenio.id }
+            }
+        });
+        if (existente) {
+            throw new BusinessError(`Ya existe otro convenio activo con el código "${convenio.codigo}". No se puede tener dos convenios activos con el mismo código.`);
+        }
+    }
 
     // Lógica específica por alcance
     const alcanceFinal = tipo_alcance !== undefined ? tipo_alcance : convenio.tipo_alcance;
@@ -621,11 +643,16 @@ exports.validarPorCodigo = async (codigo) => {
 };
 
 /**
- * Validar si un código específico pertenece a un convenio por su ID
+ * Validar si un código específico pertenece a un convenio (por ID opcional)
  */
 exports.validarCodigoPorConvenio = async (convenioId, codigo) => {
-    const convenio = await Convenio.findOne({
-        where: { id: convenioId, codigo, status: 'ACTIVO' },
+    const whereClause = { codigo, status: 'ACTIVO' };
+    if (convenioId) {
+        whereClause.id = convenioId;
+    }
+
+    const convenios = await Convenio.findAll({
+        where: whereClause,
         include: [{
             model: Empresa,
             as: 'empresa',
@@ -633,10 +660,17 @@ exports.validarCodigoPorConvenio = async (convenioId, codigo) => {
         }]
     });
 
-    if (!convenio) {
-        throw new BusinessError('El código ingresado no pertenece a este convenio, o se encuentra inactivo');
+    if (convenios.length === 0) {
+        throw new BusinessError(convenioId 
+            ? 'El código ingresado no pertenece a este convenio, o se encuentra inactivo'
+            : 'El código ingresado no existe o se encuentra inactivo');
     }
 
+    if (convenios.length > 1 && !convenioId) {
+        throw new BusinessError('El código ingresado pertenece a más de un convenio activo. Por favor contacte soporte.');
+    }
+
+    const convenio = convenios[0];
     const hoy = new Date();
 
     if (convenio.fecha_inicio && new Date(convenio.fecha_inicio) > hoy) {
