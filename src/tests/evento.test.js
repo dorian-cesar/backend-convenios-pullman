@@ -69,8 +69,10 @@ describe('Eventos API', () => {
                     ciudad_origen: 'Santiago',
                     ciudad_destino: 'Valparaíso',
                     fecha_viaje: '2026-02-15',
+                    hora_salida: '10:00',
                     tarifa_base: 10000,
-                    numero_asiento: 'A1'
+                    numero_asiento: 'A1',
+                    origen_compra: 'B2B_WEB'
                 });
 
             if (res.statusCode !== 201) console.log('DEBUG EVENTO:', res.body);

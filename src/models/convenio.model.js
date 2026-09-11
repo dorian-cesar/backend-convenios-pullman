@@ -159,7 +159,7 @@ module.exports = (sequelize, DataTypes) => {
                     // Opcional: podrías lanzar error si quieres que SIEMPRE sea obligatorio, 
                     // pero por ahora solo eliminamos la prohibición de que sea nulo.
                 }
-                if ((this.tipo_descuento === 'Porcentaje' || this.tipo_descuento === 'Monto Fijo') && this.valor_descuento === null) {
+                if (this.status === 'ACTIVO' && (this.tipo_descuento === 'Porcentaje' || this.tipo_descuento === 'Monto Fijo') && this.valor_descuento === null) {
                     throw new Error(`El valor_descuento es obligatorio cuando el tipo_descuento es ${this.tipo_descuento}`);
                 }
             }

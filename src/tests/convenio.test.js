@@ -24,7 +24,7 @@ describe('Convenios API', () => {
         const { ApiKey } = require('../models');
         await ApiKey.findOrCreate({
             where: { key: 'TEST_API_KEY_123' },
-            defaults: { name: 'Test Key', description: 'Llave de Test', status: 'ACTIVO' }
+            defaults: { name: 'Test Key', status: 'ACTIVO' }
         });
 
         // Limpiar datos previos
@@ -100,6 +100,36 @@ describe('Convenios API', () => {
             if (res.statusCode !== 200) console.log('DEBUG CONVENIO PUT ERROR:', res.body);
             expect(res.statusCode).toBe(200);
             expect(res.body.nombre).toBe('Convenio Actualizado');
+        });
+    });
+
+    describe('GET /api/convenios/codigo/:codigo', () => {
+        it('debería encontrar un convenio por su código global', async () => {
+            // Crear un convenio con código
+            const convenioCodigo = await Convenio.create({ 
+                nombre: 'Convenio Con Codigo', 
+                empresa_id: empresaId,
+                codigo: 'SUPERDESC123',
+                status: 'ACTIVO',
+                tipo_consulta: 'CODIGO_DESCUENTO'
+            });
+
+            const res = await request(app)
+                .get(`/api/convenios/codigo/SUPERDESC123`)
+                .set('x-api-key', 'TEST_API_KEY_123');
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.nombre).toBe('Convenio Con Codigo');
+            expect(res.body.codigo).toBe('SUPERDESC123');
+        });
+
+        it('debería retornar 404 si el código no existe', async () => {
+            const res = await request(app)
+                .get(`/api/convenios/codigo/NO_EXISTE_ESTE_CODIGO`)
+                .set('x-api-key', 'TEST_API_KEY_123');
+
+            expect(res.statusCode).toBe(404);
+            expect(res.body.message).toContain('No se encontró un convenio activo');
         });
     });
 });
