@@ -425,18 +425,16 @@ exports.crearCompraEvento = async (data) => {
 
       // Validar que el monto pagado coincida con el esperado (permitimos margen de $5 por redondeos de Kupos)
       if (Math.abs(pagado - pagadoEsperado) > 5) {
-        console.error(`[EVENTO] ❌ Rechazado por Discrepancia de Montos:
+        console.warn(`[EVENTO] ⚠️ Discrepancia de Montos (Se acepta el valor pagado real):
           Ticket/PNR: ${numero_ticket || pnr}
           Convenio: ${convenio.nombre}
-          Pagado en Kupos: $${pagado}
-          Esperado en Plataforma: $${pagadoEsperado}
+          Pagado Real: $${pagado}
+          Esperado por regla: $${pagadoEsperado}
           Diferencia: $${Math.abs(pagado - pagadoEsperado)}
-          Regla: ${convenio.tipo_descuento} de $${valor}`);
+          Regla local: ${convenio.tipo_descuento} de $${valor}`);
           
-        throw new BusinessError(
-          `El monto pagado ($${pagado.toLocaleString('es-CL')}) no coincide con la tarifa esperada del convenio ($${pagadoEsperado.toLocaleString('es-CL')}). ` +
-          `Regla: ${convenio.tipo_descuento} de $${valor.toLocaleString('es-CL')}.`
-        );
+        // Ajustar el descuento matemáticamente a lo que realmente se cobró
+        finalMontoDescuento = Math.max(0, base - pagado);
       }
     }
   } else {
