@@ -62,6 +62,18 @@ exports.listarDisponibles = async (req, res, next) => {
 };
 
 /**
+ * Listar convenios destacados para la portada
+ */
+exports.listarDestacados = async (req, res, next) => {
+    try {
+        const result = await convenioService.listarDestacados();
+        res.json(ConvenioDTO.fromArray(result));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Obtener convenio por ID
  */
 exports.obtener = async (req, res, next) => {
@@ -81,10 +93,17 @@ exports.actualizar = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { tipo_consulta, tipo, api_url_id, api_consulta_id, ...rest } = req.body;
+        
+        let logo_destacado = rest.logo_destacado;
+        if (req.file) {
+            logo_destacado = `/uploads/banners/${req.file.filename}`;
+        }
+
         const data = {
             ...rest,
             tipo: tipo_consulta || tipo || rest.tipo,
-            api_consulta_id: api_url_id || api_consulta_id || rest.api_consulta_id
+            api_consulta_id: api_url_id || api_consulta_id || rest.api_consulta_id,
+            ...(logo_destacado !== undefined && { logo_destacado })
         };
         const convenio = await convenioService.actualizarConvenio(id, data);
         res.json(new ConvenioDTO(convenio));

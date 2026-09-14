@@ -1,57 +1,50 @@
 const { Configuracion } = require('../models');
 
-exports.obtenerParametros = async (req, res, next) => {
+/**
+ * Obtener una configuración por su clave
+ */
+exports.obtener = async (req, res, next) => {
     try {
-        const parametros = await Configuracion.findAll({
-            where: {
-                clave: ['HERO_LISTA_A_COUNT', 'HERO_LISTA_B_COUNT']
+        const { clave } = req.params;
+        const config = await Configuracion.findOne({ where: { clave } });
+        
+        if (!config) {
+            // Si no existe, podemos retornar un valor por defecto o 404.
+            // Para LIMITE_DESTACADOS por defecto será 4
+            if (clave === 'LIMITE_DESTACADOS') {
+                return res.json({ clave, valor: '4' });
             }
-        });
-
-        // Valores por defecto
-        const defaultValues = {
-            HERO_LISTA_A_COUNT: '4',
-            HERO_LISTA_B_COUNT: '4'
-        };
-
-        const result = { ...defaultValues };
-        parametros.forEach(p => {
-            result[p.clave] = p.valor;
-        });
-
-        res.json(result);
+            return res.status(404).json({ message: 'Configuración no encontrada' });
+        }
+        
+        res.json(config);
     } catch (error) {
         next(error);
     }
 };
 
-exports.actualizarParametros = async (req, res, next) => {
+/**
+ * Crear o actualizar una configuración
+ */
+exports.guardar = async (req, res, next) => {
     try {
-        const { countA, countB } = req.body;
+        const { clave } = req.params;
+        const { valor } = req.body;
 
-        if (countA !== undefined) {
-            let confA = await Configuracion.findOne({ where: { clave: 'HERO_LISTA_A_COUNT' } });
-            if (confA) {
-                confA.valor = String(countA);
-                confA.updated_by = req.user ? req.user.id : null;
-                await confA.save();
-            } else {
-                await Configuracion.create({ clave: 'HERO_LISTA_A_COUNT', valor: String(countA), created_by: req.user ? req.user.id : null });
-            }
+        if (valor === undefined || valor === null) {
+            return res.status(400).json({ message: 'El campo valor es requerido' });
         }
 
-        if (countB !== undefined) {
-            let confB = await Configuracion.findOne({ where: { clave: 'HERO_LISTA_B_COUNT' } });
-            if (confB) {
-                confB.valor = String(countB);
-                confB.updated_by = req.user ? req.user.id : null;
-                await confB.save();
-            } else {
-                await Configuracion.create({ clave: 'HERO_LISTA_B_COUNT', valor: String(countB), created_by: req.user ? req.user.id : null });
-            }
+        let config = await Configuracion.findOne({ where: { clave } });
+        
+        if (config) {
+            config.valor = String(valor);
+            await config.save();
+        } else {
+            config = await Configuracion.create({ clave, valor: String(valor) });
         }
-
-        res.json({ message: 'Parámetros actualizados correctamente' });
+        
+        res.json(config);
     } catch (error) {
         next(error);
     }

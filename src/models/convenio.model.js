@@ -135,6 +135,27 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             defaultValue: 'ACTIVO'
         },
+        is_destacado: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            comment: 'Indica si el convenio se muestra en la portada del frontend'
+        },
+        descripcion_destacado: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            comment: 'Texto promocional para la tarjeta de destacados'
+        },
+        logo_destacado: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            comment: 'URL del logo para la tarjeta de destacados'
+        },
+        orden_destacado: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+            comment: 'Orden de aparición en la portada'
+        },
         // Campos de Auditoría
         created_by: {
             type: DataTypes.STRING,
