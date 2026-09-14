@@ -2,12 +2,16 @@ const { Router } = require('express');
 const convenioController = require('../controllers/convenio.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
+const upload = require('../middlewares/upload.middleware');
 const { crearConvenio, actualizarConvenio, validarCodigoConvenio, agregarRutasMassivas } = require('../validations/convenio.validation');
 
 const router = Router();
 
 // Endpoint público para listar convenios
 router.get('/', convenioController.listar);
+
+// Endpoint público para convenios destacados
+router.get('/destacados', convenioController.listarDestacados);
 
 /**
  * @openapi
@@ -376,8 +380,8 @@ router.get('/:id', convenioController.obtener);
  *       404:
  *         description: Convenio no encontrado
  */
-router.put('/:id', validate(actualizarConvenio), convenioController.actualizar);
-router.patch('/:id', validate(actualizarConvenio), convenioController.actualizar);
+router.put('/:id', upload.single('logo_destacado'), validate(actualizarConvenio), convenioController.actualizar);
+router.patch('/:id', upload.single('logo_destacado'), validate(actualizarConvenio), convenioController.actualizar);
 
 /**
  * ==========================================

@@ -1061,3 +1061,23 @@ exports.eliminarRutaDeConvenio = async (convenioId, origen_codigo, destino_codig
     await convenio.update({ rutas: rutasFiltradas });
     return true;
 };
+
+/**
+ * Listar convenios destacados para la portada
+ */
+exports.listarDestacados = async () => {
+    return await Convenio.findAll({
+        where: {
+            status: 'ACTIVO',
+            is_destacado: true
+        },
+        include: [
+            {
+                model: Empresa,
+                as: 'empresa',
+                where: { status: 'ACTIVO' }
+            }
+        ],
+        order: [['orden_destacado', 'ASC'], ['id', 'ASC']]
+    });
+};
