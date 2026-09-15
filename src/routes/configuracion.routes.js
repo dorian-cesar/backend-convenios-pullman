@@ -4,11 +4,14 @@ const authMiddleware = require('../middlewares/auth.middleware');
 
 const router = Router();
 
-// Endpoint público para obtener la configuración (ej. límite de destacados)
-router.get('/:clave', configuracionController.obtener);
+// Endpoints globales (deben ir antes de los paramétricos /:clave)
+router.get('/', configuracionController.obtenerTodas);
 
-// Endpoints protegidos para guardar configuración
 router.use(authMiddleware);
+router.put('/', configuracionController.guardarMultiples);
+
+// Endpoints paramétricos
+router.get('/:clave', configuracionController.obtener);
 router.put('/:clave', configuracionController.guardar);
 
 module.exports = router;
