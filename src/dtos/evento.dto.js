@@ -19,6 +19,8 @@ class EventoDTO {
         this.terminal_destino = evento.terminal_destino;
         this.tarifa_base = evento.tarifa_base;
         this.porcentaje_descuento_aplicado = evento.porcentaje_descuento_aplicado;
+        this.monto_descuento = evento.monto_descuento;
+        this.cargo_servicio = evento.cargo_servicio;
         this.monto_pagado = evento.monto_pagado;
         this.monto_devolucion = evento.monto_devolucion;
         this.is_deleted = evento.is_deleted;
