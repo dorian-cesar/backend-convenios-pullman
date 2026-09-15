@@ -471,6 +471,7 @@ exports.crearCompraEvento = async (data) => {
     porcentaje_descuento_aplicado: finalPorcentaje,
     monto_pagado: finalMontoPagado,
     monto_descuento: finalMontoDescuento,
+    cargo_servicio: data.cargo_servicio || 0,
     codigo_autorizacion,
     token,
     estado: finalEstado,

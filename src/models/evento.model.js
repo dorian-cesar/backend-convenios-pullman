@@ -106,6 +106,12 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
 
+        cargo_servicio: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0
+        },
+
         // Sof delete lógico manejado por paranoid
 
         fecha_evento: {
