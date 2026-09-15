@@ -10,13 +10,12 @@ async function recoverEvents() {
         // Buscar logs de invalidación recientes por "Error de Validación"
         const logs = await db.InvalidacionLog.findAll({
             where: {
-                error_mensaje: 'Error de Validación',
-                // fecha: { [Op.gte]: new Date('2026-09-09') } // últimos días
+                error_mensaje: { [Op.like]: "%Unknown column 'is_destacado'%" }
             },
             raw: true
         });
 
-        console.log(`Se encontraron ${logs.length} registros en InvalidacionLog con 'Error de Validación'.`);
+        console.log(`Se encontraron ${logs.length} registros en InvalidacionLog con 'is_destacado'.`);
 
         let recoveredCount = 0;
         let alreadyExistsCount = 0;
