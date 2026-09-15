@@ -99,3 +99,23 @@ exports.guardarMultiples = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Subir una imagen general de configuración
+ */
+exports.subirImagen = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No se ha subido ningún archivo' });
+        }
+        
+        const path = `/uploads/${req.file.filename}`;
+        
+        res.json({ 
+            message: 'Archivo subido exitosamente',
+            path: path
+        });
+    } catch (error) {
+        next(error);
+    }
+};
